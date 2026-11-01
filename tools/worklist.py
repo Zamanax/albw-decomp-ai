@@ -208,8 +208,8 @@ def register(addr, src=None, flags=None, as_json=False):
         ext = rstate.get("ext", ".c") if rstate else ".c"
     else:
         ext = os.path.splitext(src)[1] or ".c"
-    if flags is None:
-        flags = rstate["best"]["flags"] if rstate else DEFAULT_FLAGS
+    if flags is None:  # refine's winning flags belong to refine's source, not to a hand-written --src
+        flags = rstate["best"]["flags"] if rstate and src == os.path.join(sd, "best.c") else DEFAULT_FLAGS
     if not os.path.exists(src):
         sys.exit("no source to register: %s (run refine.py first or pass --src)" % src)
 
@@ -338,7 +338,8 @@ def main():
     ap.add_argument("--budget", type=int, default=60)
     ap.add_argument("--region")
     ap.add_argument("--src")
-    ap.add_argument("--flags", help="override flags (default: refine state / fn.py defaults)")
+    ap.add_argument("--flags", help="override flags (default: refine's winning flags for refine's best.c, "
+                                    "fn.py defaults for --src)")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
     if a.cmd == "next":
