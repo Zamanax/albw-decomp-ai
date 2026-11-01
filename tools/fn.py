@@ -409,6 +409,12 @@ def named_address(name):
     return a if in_text(a) or in_ro(a) or in_data(a) else None
 
 
+def address_named(name):
+    """Plain identifier of an address-named symbol (g_104918; mangled names by their identifier), else None."""
+    ident = _identifier(name)
+    return ident if ident and _ADDR_TAIL.search(ident) else None
+
+
 def reloc_identity(s, rows):
     """Compare each matched relocated word's real target with the address its symbol name claims.
     Returns (verified, unverifiable, [(offset, name, claimed, actual)])."""

@@ -19,9 +19,11 @@ description: "Use this skill for the standard ALBW decomp matching loop: continu
      functions.json), e.g. `git add src/work8/auto/func_<addr>.c
      functions.json && git commit -m "Match <addr> (honest, N/N): ..."`.
      **REFUSED: relocation identity** → the source calls or references
-     the wrong address (typical for twin starts: the twin's externs are
-     kept). Rename each `!!` extern to the address the original targets,
-     then `python tools/worklist.py register 0xADDR --src <fixed file>`.
+     the wrong address. refine already renames a twin's address-named
+     externs to the original's targets (`retarget` line), so this is the
+     rare case it could not fix (one name used for two targets): rename
+     each `!!` extern to the address the original targets, then
+     `python tools/worklist.py register 0xADDR --src <fixed file>`.
    - **DEFER / BUDGET** → the function is already recorded in
      `worklist.py report`; do not thrash it. Go back to step 1.
 4. Repeat. Register is the *only* path into functions.json for loop

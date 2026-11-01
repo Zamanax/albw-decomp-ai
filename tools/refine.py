@@ -6,7 +6,10 @@
 
 Wraps the fn.py oracle with diff-class-driven mutation (no hand-written
 specs). Start source: resumed state > --src > dna twin > synth skeleton.
-Loop until MATCH or budget (fn.py checks, ~5-9 s each) exhausted:
+A twin start takes the target's function name; after the baseline check,
+externs whose name claims an address the original does not target (fn.py
+IDENTITY mismatches) are renamed to func_/g_<real target> (RETARGET).
+Loop until MATCH or budget (fn.py checks, ~0.1 s native, ~5-9 s wine) exhausted:
 
   OP-class best    -> VALUES wave (store RHS candidates from the store-map
                       kinds: c0->0, c->immediate, aN->&self+off, l/x->params)
@@ -37,6 +40,8 @@ PREAMBLE = "typedef unsigned int u32;\ntypedef unsigned char u8;\ntypedef unsign
 # skeleton store line: *(u32*)((char*)self + 0xOFF) = RHS;
 STORE_LINE = re.compile(r"^(\s*\*\((?:u8|u16|u32)\*\)\(\(char\*\)self \+ (0x[0-9a-f]+)\) = )([^;]+);$")
 OPT_VARIANTS = ("-O3 -Otime", "-O3", "-O2 -Otime", "-O2")
+# fn.py check IDENTITY detail line: an extern whose name claims another address than the original targets
+MISMATCH_LINE = re.compile(r"!! \+\S+ '([^']*)' names \S+, the original targets (0x[0-9a-fA-F]+)")
 
 
 def flag_variants(base):
@@ -115,11 +120,31 @@ def twin_start(addr):
         full = os.path.join(ROOT, path)
         if not os.path.exists(full):
             continue
-        text = open(full, errors="replace").read()
-        return dict(text=fix_includes(text, full),
-                    flags=entry.get("flags") or DEFAULT_FLAGS,
-                    name="func_%s" % r["addr"], origin="twin:%s" % path)
+        text = fix_includes(open(full, errors="replace").read(), full)
+        # the twin's own definition takes the target's name; its externs are retargeted after the baseline check
+        own = "func_%08X" % addr
+        text = re.sub(r"\bfunc_%s\b" % r["addr"], own, text)
+        return dict(text=text, flags=entry.get("flags") or DEFAULT_FLAGS,
+                    name=own, origin="twin:%s" % path)
     return None
+
+
+def retarget_externs(text, mismatches):
+    """Rename each extern whose name claims an address the original does not target (fn.py IDENTITY
+    mismatches, typical of twin starts) to a neutral name for the address it does target (func_XXXXXXXX
+    in code, g_XXXXXXXX in data: the twin's descriptive name belongs to the twin's callee). None if
+    nothing can be renamed: no mismatch, or one name used for two different targets."""
+    subs = {}
+    for sym, got in mismatches:
+        old, a = fn.address_named(sym), int(got, 16) & ~1
+        new = ("func_%08X" if fn.in_text(a) else "g_%08X") % a
+        if old is None or subs.get(old, new) != new:
+            return None
+        subs[old] = new
+    if not subs:
+        return None
+    pat = re.compile(r"\b(%s)\b" % "|".join(re.escape(k) for k in subs))
+    return pat.sub(lambda m: subs[m.group(1)], text)  # one pass: a rename never feeds another
 
 
 # ------------------------------------------------------------ body manipulation
@@ -343,7 +368,7 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
         else:
             rec = dict(classify(r["out"], r["words"], r["total"]))
             rec.update(match=r["match"], words=r["words"], total=r["total"],
-                       sim=r["sim"], err="")
+                       sim=r["sim"], err="", mismatches=MISMATCH_LINE.findall(r["out"]))
         rec.update(iter=state["iter"], wave=wave, flags=flags, path=path)
         with open(hist_path, "a") as fh:
             fh.write(json.dumps({k: rec.get(k) for k in
@@ -378,6 +403,14 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
                 keep_best(rec, text)
                 if not quiet:
                     _print_rec("baseline-synth", rec)
+        # a twin start keeps the twin's callees: point every address-named extern at what the original targets
+        fixed = retarget_externs(open(os.path.join(sd, "best.c")).read(), state["best"].get("mismatches", []))
+        if fixed is not None:
+            rec = check(fixed, state["best"]["flags"], "baseline-retarget")
+            if not better(state["best"], rec):  # same code, only names change: keep unless it broke
+                keep_best(rec, fixed)
+            if not quiet:
+                _print_rec("retarget", rec)
     if state["best"]["match"]:
         state["status"] = "MATCH"
         _save(state_path, state)
@@ -460,12 +493,14 @@ def _finish(addr, state, status, as_json, quiet):
                           "used": state["used"], "origin": state["origin"],
                           "best": {k: b.get(k) for k in
                                    ("n_op", "n_reg", "perm", "words", "total",
-                                    "sim", "match", "flags", "err")}}))
+                                    "sim", "match", "flags", "err", "mismatches")}}))
         return {"addr": addr, "status": status, "used": state["used"], "best": b}
     if not quiet:
         print("STATUS %s  %d checks used, best OP=%d REG=%d %s %d/%d sim=%.1f" % (
             status, state["used"], b["n_op"], b["n_reg"], "PERM " if b["perm"] else "",
             b["words"], b["total"], b["sim"]))
+        for sym, got in b.get("mismatches", []):
+            print("IDENTITY  '%s' still names another address than the original's %s: register will refuse" % (sym, got))
     if not quiet:
         if status == "MATCH":
             print("NEXT  python tools/fn.py check %s 0x%08X --cc 4.1/b1049 --flags \"%s\"  # verify, then register" % (
