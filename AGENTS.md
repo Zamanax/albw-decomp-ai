@@ -18,8 +18,10 @@ The workflow lives in the tools, not in this file — every tool prints a
 # Non-negotiable rules
 
 1. **Never claim a match you did not verify.** A function is done only
-   after `python tools/fn.py check` prints `RESULT: MATCH`. A diff you
-   "feel" is close is a non-match.
+   after `python tools/fn.py check` prints `RESULT: MATCH` and
+   `IDENTITY: … 0 MISMATCH`. The byte compare masks relocated words, so
+   only the identity line catches a call to the wrong function. A diff
+   you "feel" is close is a non-match.
 2. **Honest matches only.** The following are FORBIDDEN tricks, and a
    match that needs any of them must be recorded as a hack, not hidden:
    - `__attribute__((weak))` / `__weak` used only to stop a tail call

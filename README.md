@@ -84,7 +84,9 @@ uv run python tools/fn.py show  0x001747E8                     # annotated disas
 uv run python tools/fn.py check <path from functions.json> 0x<ADDR> --cc <cc> --flags "<flags>"
 ```
 `check` compiles the file, finds the function, compares it with the game bytes, and prints `RESULT: MATCH` or an
-aligned diff. Some C++ members need `--sym <mangled-name substring>`.
+aligned diff. Some C++ members need `--sym <mangled-name substring>`. It then prints `IDENTITY: N verified,
+M unverifiable, K MISMATCH`: every relocated word whose symbol name ends in an address (`g_104918`, `func_00100B88`)
+must resolve to that address in the original. Names without an address cannot be verified.
 
 ## How it was made
 

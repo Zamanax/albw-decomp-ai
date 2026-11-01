@@ -38,6 +38,7 @@ CAND_FILE = os.path.join(ROOT, "logs", "triage", "unindexed_candidate.txt")
 AUTO_DIR = os.path.join(ROOT, "src", "work8", "auto")
 DEFAULT_CC = "4.1/b1049"
 INCLUDE_LINE = re.compile(r'(\s*#include\s+")([^"]+)(")')
+IDENTITY_LINE = re.compile(r"IDENTITY: (\d+) verified, (\d+) unverifiable, (\d+) MISMATCH")
 
 
 def load_state():
@@ -194,7 +195,9 @@ def rebase_includes(text, dest_dir):
 def register(addr, src=None, flags=None, as_json=False):
     """Verify the source at its FINAL path, then update functions.json.
 
-    Refuses unless fn.py check prints RESULT: MATCH for the registered file.
+    Refuses unless fn.py check prints RESULT: MATCH for the registered file
+    and no relocated word targets an address other than the one its extern
+    name claims (IDENTITY: 0 MISMATCH).
     Defaults come from refine's state (best.c, winning flags, source language).
     """
     key = "%08X" % addr
@@ -227,8 +230,21 @@ def register(addr, src=None, flags=None, as_json=False):
             r["err"] or "NO MATCH", r["words"], r["total"]))
         print("  source kept (unregistered) at %s" % dest)
         return
+    ident = IDENTITY_LINE.search(r["out"])
+    if not ident or int(ident.group(3)):
+        bad = [l.strip() for l in r["out"].splitlines() if l.lstrip().startswith("!! +")]
+        print("REFUSED: relocation identity: a relocated word targets another address than its extern name claims")
+        for line in bad:
+            print("  " + line)
+        print("  source kept (unregistered) at %s" % dest)
+        # park it: `next` must not keep suggesting this register; `report` lists it for a fix
+        state = load_state()
+        state["attempted"][key] = {"status": "identity-mismatch", "detail": bad[0] if bad else "no IDENTITY line"}
+        save_state(state)
+        return
     rel = os.path.relpath(dest, ROOT)
-    print("RESULT: MATCH %d/%d words  ->  %s" % (r["words"], r["total"], rel))
+    print("RESULT: MATCH %d/%d words, identity %s verified / %s unverifiable  ->  %s" % (
+        r["words"], r["total"], ident.group(1), ident.group(2), rel))
 
     status = load_status()
     status[key] = {"cc": DEFAULT_CC, "flags": flags, "hack_reasons": [],
@@ -266,8 +282,13 @@ def report(as_json=False):
             continue
         b = rstate["best"]
         if b.get("match"):
-            rows.append(dict(addr=key, kind="MATCH-unregistered", frac=1.0,
-                             hypothesis="run: python tools/worklist.py register 0x%s" % key))
+            if info.get("status") == "identity-mismatch":
+                rows.append(dict(addr=key, kind="MATCH-wrong-callee", frac=1.0,
+                                 hypothesis="point the extern at the real target, then register --src: "
+                                            + info.get("detail", "")))
+            else:
+                rows.append(dict(addr=key, kind="MATCH-unregistered", frac=1.0,
+                                 hypothesis="run: python tools/worklist.py register 0x%s" % key))
             continue
         frac = b["words"] / b["total"] if b["total"] else 0.0
         if b["n_op"] == 0 and b["n_reg"] > 0:
@@ -298,8 +319,9 @@ def report(as_json=False):
 def status_summary(as_json=False):
     state = load_state()
     n_cand = sum(1 for _ in open(CAND_FILE)) if os.path.exists(CAND_FILE) else -1
-    waiting = sum(1 for k in state["attempted"]
-                  if (refine_state(int(k, 16)) or {}).get("best", {}).get("match"))
+    waiting = sum(1 for k, info in state["attempted"].items()
+                  if info.get("status") != "identity-mismatch"
+                  and (refine_state(int(k, 16)) or {}).get("best", {}).get("match"))
     s = {"candidates": n_cand, "attempted": len(state["attempted"]),
          "registered": len(state["registered"]), "match_waiting": waiting}
     if as_json:

@@ -14,10 +14,14 @@ description: "Use this skill for the standard ALBW decomp matching loop: continu
 3. Read refine's STATUS line:
    - **MATCH** → `python tools/worklist.py register 0xADDR`
      (re-verifies the source at its final registered path; refuses
-     unless fn.py check prints `RESULT: MATCH`)
+     unless fn.py check prints `RESULT: MATCH` and `IDENTITY: … 0 MISMATCH`)
      → then commit exactly what register prints (source +
      functions.json), e.g. `git add src/work8/auto/func_<addr>.c
      functions.json && git commit -m "Match <addr> (honest, N/N): ..."`.
+     **REFUSED: relocation identity** → the source calls or references
+     the wrong address (typical for twin starts: the twin's externs are
+     kept). Rename each `!!` extern to the address the original targets,
+     then `python tools/worklist.py register 0xADDR --src <fixed file>`.
    - **DEFER / BUDGET** → the function is already recorded in
      `worklist.py report`; do not thrash it. Go back to step 1.
 4. Repeat. Register is the *only* path into functions.json for loop

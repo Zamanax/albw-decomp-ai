@@ -366,6 +366,80 @@ def parse_elf(path):
     return d, secs, syms, rels
 
 
+# ---------------- relocation identity ----------------
+# fn.py check masks relocated words (call targets, pool addresses): a source that calls the wrong function still
+# prints MATCH. Extern names that end in an address ("g_104918", "func_00100B88", "FUN_0010A2C4") say which target
+# they mean, so for those the target the original word resolves to can be compared with the name.
+_ADDR_TAIL = re.compile(r"(?:^|_)(?:0x)?([0-9A-Fa-f]{6,8})$")
+
+
+def _identifier(name):
+    """Identifier of a plain or Itanium-mangled symbol (_ZN3Foo8g_104918Ev -> g_104918); None if not a plain name."""
+    if not name.startswith("_Z"):
+        return name
+    i, ids = 2, []
+    nested = name[i:i + 1] == "N"
+    if nested:
+        i += 1
+        while name[i:i + 1] in ("r", "V", "K", "R", "O"):
+            i += 1
+    if name[i:i + 1] == "L":  # internal linkage
+        i += 1
+    while name[i:i + 1].isdigit():
+        j = i
+        while name[j:j + 1].isdigit():
+            j += 1
+        n = int(name[i:j])
+        ids.append(name[j:j + n])
+        i = j + n
+        if not nested:
+            break
+    if not ids or (nested and name[i:i + 1] in ("C", "D")):  # constructors/destructors are named by their class
+        return None
+    return ids[-1]
+
+
+def named_address(name):
+    """The address an extern's name claims (trailing hex in the game image), or None."""
+    ident = _identifier(name)
+    m = ident and _ADDR_TAIL.search(ident)
+    if not m:
+        return None
+    a = int(m.group(1), 16)
+    return a if in_text(a) or in_ro(a) or in_data(a) else None
+
+
+def reloc_identity(s, rows):
+    """Compare each matched relocated word's real target with the address its symbol name claims.
+    Returns (verified, unverifiable, [(offset, name, claimed, actual)])."""
+    ok, unknown, bad = 0, 0, []
+    for i, tw, mw, same, rel in rows:
+        if not (rel and same):
+            continue
+        typ, name = rel
+        a = s + i * 4
+        imm = ((tw & 0xFFFFFF) ^ 0x800000) - 0x800000
+        if typ in (1, 28, 29) and (tw & 0x0E000000) == 0x0A000000:
+            got = a + 8 + imm * 4  # b / bl
+        elif typ in (1, 28) and (tw >> 25) == 0x7D:
+            got = a + 8 + imm * 4 + ((tw >> 23) & 2)  # bl turned into blx by the linker
+        elif typ == 29 and tw == 0xE1A00000:
+            got = a + 4  # tail call to the very next function, turned into a NOP by the linker
+        elif typ == 2:
+            got = (tw - mw) & 0xFFFFFFFF  # absolute pool word minus the in-place addend
+        else:
+            got = None  # call inlined by the linker: target not recoverable
+        want = named_address(name)
+        if got is None or want is None:
+            unknown += 1
+        elif got & ~1 == want & ~1:
+            ok += 1
+        else:
+            bad.append((i * 4, name, want, got))
+    return ok, unknown, bad
+
+
+
 def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=False):
     s, e = func_range(addr)
     if prebuilt:  # the caller already compiled src to obj (e.g. many files in one armcc call)
@@ -506,6 +580,10 @@ def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=
     sim = 100.0 if exact else 100.0 * sm.ratio()
     print(f"target func_{s:08X} {len(target)} bytes | yours '{f['name']}' {len(mine)} bytes")
     print(f"RESULT: {'MATCH' if exact else 'NO MATCH'}  {same}/{total} words ({pct:.1f}%)  similarity {sim:.1f}%")
+    n_ok, n_unk, bad = reloc_identity(s, rows)
+    print(f"IDENTITY: {n_ok} verified, {n_unk} unverifiable, {len(bad)} MISMATCH")
+    for off, name, want, got in bad:
+        print(f"  !! +{off:#x} '{name}' names {want:#010x}, the original targets {got:#010x}")
 
     def dis(w, a):
         if w is None:

@@ -62,7 +62,9 @@ description: "Use this skill for manual ALBW decomp work beyond the standard loo
    PERM = reordering).
 6. Verify: `python tools/fn.py check <path> 0x<ADDR> --cc <cc>
    --flags "<flags>"` (some C++ members need `--sym <mangled-name
-   substring>`). Iterate until `RESULT: MATCH`.
+   substring>`). Iterate until `RESULT: MATCH` with
+   `IDENTITY: … 0 MISMATCH` (an extern named after an address must
+   resolve to that address in the original).
 7. Register: update `functions.json` for that address — status `honest`
    (or `hack` with explicit `hack_reasons` if truly unavoidable — this
    should be rare). Keep the canonical flat format (see AGENTS.md).
