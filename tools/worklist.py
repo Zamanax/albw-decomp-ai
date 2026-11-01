@@ -181,14 +181,32 @@ def next_candidate(budget, region, scan_cap=60, as_json=False):
 
 # ------------------------------------------------------------------- register
 
-def rebase_includes(text, dest_dir):
-    """Absolute #includes (twin fixups) -> paths relative to the dest file."""
+def rebase_includes(text, dest_dir, src_dir=None, seen=None):
+    """#includes of the source -> paths valid from the dest file.
+
+    Absolute includes (twin fixups) and includes relative to src_dir are
+    rewritten relative to dest_dir when they live in the repo's src/ or
+    shared/ trees (committed headers). A header next to a scratch source
+    (logs/..., never committed) is inlined, recursively, each once.
+    Anything else (e.g. -I shared/include names) is left untouched.
+    """
+    seen = set() if seen is None else seen
+    kept = tuple(os.path.normcase(os.path.join(ROOT, d)) for d in ("src", "shared"))
     out = []
     for line in text.splitlines():
         m = INCLUDE_LINE.match(line)
-        inc = m and os.path.normpath(m.group(2))  # agents write C:/... or C:\...\..\ forms
-        if m and os.path.normcase(inc).startswith(os.path.normcase(ROOT)):
-            line = m.group(1) + os.path.relpath(inc, dest_dir).replace(os.sep, "/") + m.group(3)
+        if m:
+            inc = m.group(2)
+            if not os.path.isabs(inc) and src_dir and os.path.isfile(os.path.join(src_dir, inc)):
+                inc = os.path.join(src_dir, inc)
+            inc = os.path.normpath(inc)  # agents write C:/... or C:\...\..\ forms
+            if os.path.isabs(inc) and os.path.normcase(inc).startswith(kept):
+                line = m.group(1) + os.path.relpath(inc, dest_dir).replace(os.sep, "/") + m.group(3)
+            elif os.path.isabs(inc) and os.path.isfile(inc) and os.path.normcase(inc).startswith(os.path.normcase(ROOT)):
+                if inc not in seen:
+                    seen.add(inc)
+                    out.append(rebase_includes(open(inc).read(), dest_dir, os.path.dirname(inc), seen).rstrip("\n"))
+                continue
         out.append(line)
     return "\n".join(out) + "\n"
 
@@ -216,7 +234,7 @@ def register(addr, src=None, flags=None, as_json=False):
 
     os.makedirs(AUTO_DIR, exist_ok=True)
     dest = os.path.join(AUTO_DIR, "func_%s%s" % (key, ext))
-    text = rebase_includes(open(src).read(), AUTO_DIR)
+    text = rebase_includes(open(src).read(), AUTO_DIR, os.path.dirname(os.path.abspath(src)))
     open(dest, "w").write(text)
 
     # path audit: registered sources include nothing absolute
