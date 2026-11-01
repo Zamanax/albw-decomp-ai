@@ -62,11 +62,13 @@ back that way in this update.
 
 ## Requirements
 
-1. **Python 3** with `capstone` (`pip install capstone`).
+1. **Python 3.13+** via [uv](https://docs.astral.sh/uv/): `uv sync` creates `.venv` with `capstone` from `uv.lock`.
+   Run every tool through it, e.g. `uv run python tools/fn.py show 0x001747E8`.
 2. **The game code binary.** Save it as `code.bin` in the repository root. It is the decompressed `.code` section of
    the USA release, dumped from your own copy, 6,455,296 bytes, SHA-1 `e6ab7d66ee62e879248b0660aaf38d22202e604b`.
 3. **ARM Compiler (armcc) 4.1, build 1049.** Place it at `tools/armcc/4.1/b1049/bin/armcc.exe`. Every published
-   function uses this build. You need your own licensed copy.
+   function uses this build. You need your own licensed copy. On Windows it runs natively; elsewhere `fn.py` runs it
+   under `wine`.
 
 Default flags:
 ```
@@ -78,8 +80,8 @@ of each function.
 ## Usage
 
 ```
-python tools/fn.py show  0x001747E8                     # annotated disassembly of the original function
-python tools/fn.py check <path from functions.json> 0x<ADDR> --cc <cc> --flags "<flags>"
+uv run python tools/fn.py show  0x001747E8                     # annotated disassembly of the original function
+uv run python tools/fn.py check <path from functions.json> 0x<ADDR> --cc <cc> --flags "<flags>"
 ```
 `check` compiles the file, finds the function, compares it with the game bytes, and prints `RESULT: MATCH` or an
 aligned diff. Some C++ members need `--sym <mangled-name substring>`.
