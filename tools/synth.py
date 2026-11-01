@@ -34,8 +34,8 @@ def view(addr):
         if i is None:
             continue
         m = i.mnemonic.split(".")[0]
-        if m in ("ldr", "vldr") and "pc" in i.op_str:
-            mm = re.search(r"\[pc, #(-?0x[0-9a-f]+|-?\d+)\]", i.op_str)
+        mm = re.search(r"\[pc, #(-?0x[0-9a-f]+|-?\d+)\]", i.op_str) if m in ("ldr", "vldr") else None
+        if mm:  # pc-relative pool load; register-indexed forms (switch tables) stay plain
             la = a + 8 + int(mm.group(1), 0)
             ins.append((m, "POOL %08X" % fn.rd32(la & ~3)))
             continue
@@ -160,8 +160,8 @@ def skeleton(addr, cls, ins):
                 "}\n" % (target, addr, target))
     if cls == "thunk":
         # b target with arg-preserving regs
-        tgt = [o for m, o in ins if m == "b"][0].split()[1]
-        tgt = re.sub(r"[^0-9a-fA-Fx]", "", tgt)
+        tgt = [o for m, o in ins if m == "b"][0].split()[-1]  # "#0x375314" has no mnemonic prefix
+        tgt = "%08X" % int(tgt.lstrip("#"), 16)
         return ("// tail thunk\nextern void func_%s(u32, u32, u32, u32);\n\n"
                 "void func_%08X(u32 a, u32 b, u32 c, u32 d) {\n"
                 "    func_%s(a, b, c, d);\n"
