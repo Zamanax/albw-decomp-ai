@@ -608,3 +608,52 @@ params 1-2 live at the first computation; r1=2 implies param1 dead by
 the third value — contradictory lifetime order under any single-pass
 model. Likely needs a two-block structure (the zero/0xff stores in a
 different basic block than the 2-store). PARKED.
+
+## Native Windows pipeline + Haiku subagent passes (2026-11-01)
+
+Setup: armcc runs natively on Windows (~0.1 s/check, `--jobs 16` safe), so
+refine budgets cost seconds and near-misses go to parallel small-model
+subagents (one family per agent, re-verified at registration). Yield:
+refine alone matched 141 linker-NOP tail calls + 10 twins out of ~4,100
+candidates (≤256 B); subagent waves on the closest near-misses matched
+~50 of ~110 functions attempted.
+
+Tooling facts learned:
+- fn.py masks relocated words; `IDENTITY:` (printed on a match) is the
+  only guard against a twin that calls the wrong function. refine now
+  renames address-named externs to the original's targets ("retarget"),
+  copying src/ headers in when the callee is a member declared there
+  (and dropping `weak` from the copy).
+- Many refine "twins" are a different function of similar shape; agents
+  did best when told to diff every callee/offset/constant/size against
+  `fn.py show` and to write from the disassembly when they don't line up.
+
+Constructs that closed near-misses (all honest):
+- Last word `mov r0,r0` (often after `pop {..,lr}`): tail call to the
+  function that starts right after; end the source with that call
+  (004ECF84, 00450EB8, 0031D4FC, 0023F828, 0036E418).
+- Original `bl X; pop {..,pc}` where armcc emits tail `b X`:
+  `--apcs=/fpic` (004FFFDC, 00500DCC, 00478E08, 00288510, 001CDF44 with
+  -O2). This is a flag choice, not the forbidden `weak`; worth trying on
+  every weak-hack entry (dehack.py already does).
+- Constant in an argument register (r1) instead of a scratch register:
+  pass it through an inlined helper's parameter (001CD1D4 setAB(self,1,0),
+  00288090 setTimer) or a named local just before the call
+  (00504C5C `void* hh = heap; u32 kk = 3;`, 002AC998 `int code = 0xf;`).
+- Static-TypeInfo dynamic_cast family: `static getTI()` with
+  `__cxa_guard_acquire/release`, `isDerived(a) = a && a->vt->check(a, getTI())`,
+  `dynCast(a) = isDerived(a) ? a : 0`, then `if (a) a = dynCast(a); if (a) f(a);`
+  with a **void** f gives the `moveq r4,#0; movs r0,r4; beq` zero path
+  (0022FA4C, 0037823C, 004CADD8, 00161178). The guard-release NOP is
+  accepted by fn.py once the rest aligns; it was never the blocker.
+- Static initializers: declare the globals in address order; the
+  pointer-holding struct last (005CE944 family).
+
+Open, recurring (not reproduced honestly yet):
+- Dead `ldr` of a field immediately overwritten (003C0698, 0031A710,
+  003C1FC4): armcc DCEs every C form tried.
+- Unreferenced trailing `0xFFFFFFFF` after the pool (0059F7B8, 005A8AA0).
+- Null-path `streq rP,[..]; moveq rP,#0` in alloc+init getters
+  (0013B418, 001664CC, 002A9B34).
+- Pointer-to-member dispatch with r1/r2 swapped vs armcc (004D9508,
+  0035B210, 00311DE0, 00386FF4).
