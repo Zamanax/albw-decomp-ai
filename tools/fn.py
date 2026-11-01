@@ -368,12 +368,14 @@ def parse_elf(path):
 
 def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=False):
     s, e = func_range(addr)
-    obj = os.path.splitext(src)[0] + ".o"
     if prebuilt:  # the caller already compiled src to obj (e.g. many files in one armcc call)
+        obj = os.path.splitext(src)[0] + ".o"
         if not os.path.exists(obj):
             print("COMPILE ERROR\n(no object)")
             return
     else:
+        # per-process object: parallel checks of functions sharing one source file must not clobber each other
+        obj = "%s.%d.o" % (os.path.splitext(src)[0], os.getpid())
         exe = os.path.join(ROOT, "tools", "armcc", *cc.split("/"), "bin", "armcc.exe")
         # 4.1/b1049 ships a broken Authenticode signature that Windows re-verifies on every launch (serialized, ~4/s);
         # b1049ns is the same exe with the certificate table stripped (code untouched, identical output, verified).
@@ -396,7 +398,11 @@ def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=
             return
         if msg:
             print(msg)
-    d, secs, syms, rels = parse_elf(obj)
+    try:
+        d, secs, syms, rels = parse_elf(obj)
+    finally:
+        if not prebuilt and os.path.exists(obj):
+            os.remove(obj)
     funcs = [x for x in syms if x["type"] == 2 and x["shndx"] not in (0, 0xFFF1) and x["size"] and "$$" not in x["name"]]
     if sym:
         funcs = [x for x in funcs if sym in x["name"]]

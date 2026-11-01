@@ -220,8 +220,6 @@ def register(addr, src=None, flags=None, as_json=False):
         sys.exit("PATH AUDIT FAILED: absolute include survived rewrite: %s" % bad[0])
 
     r = check_one(AUTO_DIR, dest, addr, flags, None)
-    if os.path.exists(dest + ".o"):
-        os.unlink(dest + ".o")
     if not r["match"]:
         print("REFUSED: fn.py check says %s %d/%d words" % (
             r["err"] or "NO MATCH", r["words"], r["total"]))
