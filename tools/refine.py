@@ -77,6 +77,25 @@ def fix_includes(text, path):
     return "\n".join(out) + "\n"
 
 
+def inline_src_includes(text, seen=None):
+    """Expand quoted #includes of headers under src/ (absolute after fix_includes) into the text, recursively,
+    each header once. A twin's callee may be a member declared in such a header; retargeting has to rename
+    the declaration too, and the header is shared by other matched sources, so it is copied, not edited."""
+    seen = set() if seen is None else seen
+    src_root = os.path.join(ROOT, "src")
+    out = []
+    for line in text.splitlines():
+        m = re.match(r'\s*#include\s+"([^"]+)"', line)
+        path = os.path.normpath(m.group(1)) if m else None
+        if path and os.path.isfile(path) and path.startswith(src_root):
+            if path not in seen:
+                seen.add(path)
+                out.append(inline_src_includes(fix_includes(open(path, errors="replace").read(), path), seen))
+            continue
+        out.append(line)
+    return "\n".join(out) + "\n"
+
+
 def synth_start(addr):
     """Skeleton from synth.py, or (None, reason) to defer."""
     import synth
@@ -386,14 +405,20 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
         at what the original targets (fn.py only checks identity on a match)."""
         if not state["best"]["match"]:
             return
-        fixed = retarget_externs(open(os.path.join(sd, "best.c")).read(), state["best"].get("mismatches", []))
-        if fixed is None:
-            return
-        rec = check(fixed, state["best"]["flags"], "retarget")
-        if not better(state["best"], rec):  # same code, only names change: keep unless it broke
-            keep_best(rec, fixed)
-        if not quiet:
-            _print_rec("retarget", rec)
+        text = open(os.path.join(sd, "best.c")).read()
+        mism = state["best"].get("mismatches", [])
+        # plain rename first; a callee declared in a shared header needs the header copied in to be renamed
+        # (weak qualifiers in a copied header served other sources; a match without them is the honest one)
+        for src in (text, re.sub(r"__attribute__\(\(weak\)\)\s*|\b__weak\s+", "", inline_src_includes(text))):
+            fixed = retarget_externs(src, mism)
+            if fixed is None:
+                return
+            rec = check(fixed, state["best"]["flags"], "retarget")
+            if not quiet:
+                _print_rec("retarget", rec)
+            if not better(state["best"], rec):  # same code, only names change: keep unless it broke
+                keep_best(rec, fixed)
+                return
 
     # ---- baseline
     if state["best"] is None:
