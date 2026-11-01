@@ -186,8 +186,9 @@ def rebase_includes(text, dest_dir):
     out = []
     for line in text.splitlines():
         m = INCLUDE_LINE.match(line)
-        if m and m.group(2).startswith(ROOT):
-            line = m.group(1) + os.path.relpath(m.group(2), dest_dir).replace(os.sep, "/") + m.group(3)
+        inc = m and os.path.normpath(m.group(2))  # agents write C:/... or C:\...\..\ forms
+        if m and os.path.normcase(inc).startswith(os.path.normcase(ROOT)):
+            line = m.group(1) + os.path.relpath(inc, dest_dir).replace(os.sep, "/") + m.group(3)
         out.append(line)
     return "\n".join(out) + "\n"
 
@@ -219,7 +220,8 @@ def register(addr, src=None, flags=None, as_json=False):
     open(dest, "w").write(text)
 
     # path audit: registered sources include nothing absolute
-    bad = [m.group(2) for m in INCLUDE_LINE.finditer(text) if m.group(2).startswith("/")]
+    bad = [m.group(2) for m in INCLUDE_LINE.finditer(text)
+           if m.group(2).startswith(("/", "\\")) or re.match(r"[A-Za-z]:", m.group(2))]
     if bad:
         os.unlink(dest)
         sys.exit("PATH AUDIT FAILED: absolute include survived rewrite: %s" % bad[0])
