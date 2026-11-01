@@ -381,6 +381,20 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
         open(os.path.join(sd, "best.c"), "w").write(text)
         _save(state_path, state)
 
+    def retarget():
+        """A twin start keeps the twin's callees: once the code matches, point every address-named extern
+        at what the original targets (fn.py only checks identity on a match)."""
+        if not state["best"]["match"]:
+            return
+        fixed = retarget_externs(open(os.path.join(sd, "best.c")).read(), state["best"].get("mismatches", []))
+        if fixed is None:
+            return
+        rec = check(fixed, state["best"]["flags"], "retarget")
+        if not better(state["best"], rec):  # same code, only names change: keep unless it broke
+            keep_best(rec, fixed)
+        if not quiet:
+            _print_rec("retarget", rec)
+
     # ---- baseline
     if state["best"] is None:
         start_text = open(os.path.join(sd, "start" + state["ext"])).read()
@@ -403,14 +417,7 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
                 keep_best(rec, text)
                 if not quiet:
                     _print_rec("baseline-synth", rec)
-        # a twin start keeps the twin's callees: point every address-named extern at what the original targets
-        fixed = retarget_externs(open(os.path.join(sd, "best.c")).read(), state["best"].get("mismatches", []))
-        if fixed is not None:
-            rec = check(fixed, state["best"]["flags"], "baseline-retarget")
-            if not better(state["best"], rec):  # same code, only names change: keep unless it broke
-                keep_best(rec, fixed)
-            if not quiet:
-                _print_rec("retarget", rec)
+        retarget()
     if state["best"]["match"]:
         state["status"] = "MATCH"
         _save(state_path, state)
@@ -467,6 +474,7 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
         state["tried"] = sorted(tried)
         _save(state_path, state)
 
+    retarget()
     state["tried"] = sorted(tried)
     status = "MATCH" if state["best"]["match"] else \
         ("BUDGET" if state["used"] >= budget else "DEFER")

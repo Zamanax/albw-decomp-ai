@@ -586,10 +586,13 @@ def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=
     sim = 100.0 if exact else 100.0 * sm.ratio()
     print(f"target func_{s:08X} {len(target)} bytes | yours '{f['name']}' {len(mine)} bytes")
     print(f"RESULT: {'MATCH' if exact else 'NO MATCH'}  {same}/{total} words ({pct:.1f}%)  similarity {sim:.1f}%")
-    n_ok, n_unk, bad = reloc_identity(s, rows)
-    print(f"IDENTITY: {n_ok} verified, {n_unk} unverifiable, {len(bad)} MISMATCH")
-    for off, name, want, got in bad:
-        print(f"  !! +{off:#x} '{name}' names {want:#010x}, the original targets {got:#010x}")
+    if exact:
+        n_ok, n_unk, bad = reloc_identity(s, rows)
+        print(f"IDENTITY: {n_ok} verified, {n_unk} unverifiable, {len(bad)} MISMATCH")
+        for off, name, want, got in bad:
+            print(f"  !! +{off:#x} '{name}' names {want:#010x}, the original targets {got:#010x}")
+    else:  # words are not aligned with the original: relocated words would be compared with unrelated ones
+        print("IDENTITY: not checked (no match)")
 
     def dis(w, a):
         if w is None:
