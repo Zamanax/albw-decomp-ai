@@ -195,20 +195,22 @@ def register(addr, src=None, flags=None, as_json=False):
     """Verify the source at its FINAL path, then update functions.json.
 
     Refuses unless fn.py check prints RESULT: MATCH for the registered file.
-    Defaults come from refine's state (best.c, winning flags).
+    Defaults come from refine's state (best.c, winning flags, source language).
     """
     key = "%08X" % addr
     sd = os.path.join(ROOT, "logs", "refine", key)
     rstate = refine_state(addr)
     if src is None:
-        src = os.path.join(sd, "best.c")
+        src = os.path.join(sd, "best.c")  # the winner, whatever its language
+        ext = rstate.get("ext", ".c") if rstate else ".c"
+    else:
+        ext = os.path.splitext(src)[1] or ".c"
     if flags is None:
         flags = rstate["best"]["flags"] if rstate else DEFAULT_FLAGS
     if not os.path.exists(src):
         sys.exit("no source to register: %s (run refine.py first or pass --src)" % src)
 
     os.makedirs(AUTO_DIR, exist_ok=True)
-    ext = os.path.splitext(src)[1] or ".c"
     dest = os.path.join(AUTO_DIR, "func_%s%s" % (key, ext))
     text = rebase_includes(open(src).read(), AUTO_DIR)
     open(dest, "w").write(text)

@@ -468,9 +468,8 @@ def _finish(addr, state, status, as_json, quiet):
             b["words"], b["total"], b["sim"]))
     if not quiet:
         if status == "MATCH":
-            print("NEXT  python tools/fn.py check logs/refine/%08X/best.c 0x%08X "
-                  "--cc 4.1/b1049 --flags \"%s\"  # verify, then register" % (
-                      addr, addr, b["flags"]))
+            print("NEXT  python tools/fn.py check %s 0x%08X --cc 4.1/b1049 --flags \"%s\"  # verify, then register" % (
+                os.path.relpath(b["path"], ROOT), addr, b["flags"]))
         else:
             print("NEXT  manual review (near-miss in logs/refine/%08X/history.jsonl)" % addr)
     return {"addr": addr, "status": status, "used": state["used"], "best": b,
