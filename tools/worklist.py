@@ -22,14 +22,13 @@ import argparse
 import json
 import os
 import re
-import signal
 import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fn
 import synth
-from permuter import check_one
+from permuter import check_one, kill_tree
 from sweep import DEFAULT_FLAGS
 
 ROOT = fn.ROOT
@@ -63,7 +62,7 @@ def run_checked(argv, timeout):
     try:
         out, _ = p.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        kill_tree(p)
         return None
     return out
 

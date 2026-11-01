@@ -15,13 +15,24 @@ score; the full sweep log lands beside the variants, matches print the source.
 import importlib.util, itertools, os, re, shutil, signal, subprocess, sys, tempfile, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PATH_PREFIX = "/data/data/com.termux/files/usr/bin:"
+TERMUX_BIN = "/data/data/com.termux/files/usr/bin"
 RESULT_RE = re.compile(r"RESULT: (MATCH|NO MATCH)\s+(\d+)/(\d+) words \(([\d.]+)%\)\s+similarity ([\d.]+)%")
 
 
+def kill_tree(p):
+    """Kill a timed-out check and its armcc/wine children (wine can hang)."""
+    if os.name == "nt":  # no process groups: taskkill /T walks the child tree
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True)
+    else:
+        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+    p.wait()
+
+
 def check_one(workdir, src, addr, flags, sym, timeout=300):
-    env = dict(os.environ, PATH=PATH_PREFIX + os.environ.get("PATH", ""))
-    args = ["python", os.path.join(ROOT, "tools", "fn.py"), "check", src, "0x%08X" % addr,
+    env = dict(os.environ)
+    if os.path.isdir(TERMUX_BIN):
+        env["PATH"] = TERMUX_BIN + os.pathsep + env.get("PATH", "")
+    args = [sys.executable, os.path.join(ROOT, "tools", "fn.py"), "check", src, "0x%08X" % addr,
             "--cc", "4.1/b1049", "--flags", flags]
     if sym:
         args += ["--sym", sym]
@@ -30,7 +41,7 @@ def check_one(workdir, src, addr, flags, sym, timeout=300):
     try:
         out, _ = p.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        kill_tree(p)
         return dict(match=False, words=0, total=0, sim=0.0, err="TIMEOUT", out="")
     m = RESULT_RE.search(out)
     if "COMPILE ERROR" in out:

@@ -25,6 +25,7 @@ MAX_DIFF_WORDS = 24
 
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import clone_twin as ct  # words/rng/branch_target over code.bin  # noqa: E402
+from permuter import kill_tree  # noqa: E402
 
 
 def deep_mask(w):
@@ -197,8 +198,7 @@ def verify(dest, cand, anchor_entry):
         try:
             out, _ = proc.communicate(timeout=300)
         except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, 9)
-            proc.wait()
+            kill_tree(proc)
             out = ""
         if "RESULT: MATCH" in (out or ""):
             return True

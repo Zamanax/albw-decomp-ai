@@ -15,10 +15,11 @@ import json
 import os
 import re
 import shutil
-import signal
 import subprocess
 import sys
 from pathlib import Path
+
+from permuter import kill_tree  # tools/ is sys.path[0] when run as a script
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -58,8 +59,7 @@ def run_check(src, addr, cc, flags, timeout=300):
     try:
         out, _ = proc.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(proc.pid, signal.SIGKILL)
-        proc.wait()
+        kill_tree(proc)
         return False, "TIMEOUT"
     out = (out or "").strip()
     return "RESULT: MATCH" in out, (out.splitlines() or [""])[-1]
