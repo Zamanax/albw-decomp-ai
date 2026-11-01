@@ -42,17 +42,25 @@ The workflow lives in the tools, not in this file — every tool prints a
 - Work in the repository root.
 - `code.bin` (user-supplied USA dump, 6,455,296 bytes, SHA-1
   e6ab7d66...) and `tools/armcc/` are gitignored and user-supplied. In
-  a fresh checkout `fn.py` cannot run until both are supplied, and it
-  needs `pip install capstone`.
+  a fresh checkout `fn.py` cannot run until both are supplied.
+- Python is managed by uv: `uv sync` once, then run every tool as
+  `uv run python tools/<tool>.py ...` (or activate `.venv` so the bare
+  `python tools/...` commands in the skills resolve to it).
 - The compiler is a Windows exe: ARM Compiler (armcc) 4.1, build 1049,
-  at `tools/armcc/4.1/b1049/bin/armcc.exe`. Running it from a non-
-  Windows host needs wine or an equivalent; plan for that before
-  promising any match.
+  at `tools/armcc/4.1/b1049/bin/armcc.exe`. On Windows it runs
+  natively; from a non-Windows host `fn.py` runs it under wine. Plan
+  for that before promising any match.
 - `rom/` may hold a ROM of the wrong region (an EU dump is not the
   target). The project targets the **USA** binary — never extract
   `code.bin` from `rom/`.
-- One oracle check takes ~5-9 s. Never run compiler jobs in parallel on
-  this device (`--jobs 1` everywhere) — parallel wine instances OOM it.
+- Check cost and parallelism depend on the host:
+  - native Windows: one oracle check takes ~0.1-0.2 s, and parallel
+    checks are safe (`--jobs 16` measured: identical results, <1 GB
+    RAM; no gain beyond 16);
+  - wine: one check takes ~5-9 s, and parallel wine instances OOM a
+    small device — use `--jobs 1` there.
+- `worklist.py next` does not lease its candidate: concurrent agents
+  get the same one. Give each agent its own `--region LO-HI`.
 - Use the exact `cc` and `flags` recorded in `functions.json` for each
   function — never assume the defaults. Defaults when unspecified:
   `--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections`

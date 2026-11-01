@@ -8,8 +8,9 @@ description: "Use this skill for the standard ALBW decomp matching loop: continu
 1. `python tools/worklist.py next --budget 60`
    → prints one CANDIDATE and the ONE command to run.
 2. Run the printed command (normally
-   `python tools/refine.py 0xADDR --budget 60`; one check ≈ 5-9 s, so a
-   full budget is ~7-9 min).
+   `python tools/refine.py 0xADDR --budget 60`; one check ≈ 0.1-0.2 s
+   on native Windows, ≈ 5-9 s under wine, so a full budget is seconds
+   natively and ~7-9 min under wine).
 3. Read refine's STATUS line:
    - **MATCH** → `python tools/worklist.py register 0xADDR`
      (re-verifies the source at its final registered path; refuses
