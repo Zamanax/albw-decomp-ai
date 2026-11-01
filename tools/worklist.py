@@ -187,7 +187,7 @@ def rebase_includes(text, dest_dir):
     for line in text.splitlines():
         m = INCLUDE_LINE.match(line)
         if m and m.group(2).startswith(ROOT):
-            line = m.group(1) + os.path.relpath(m.group(2), dest_dir) + m.group(3)
+            line = m.group(1) + os.path.relpath(m.group(2), dest_dir).replace(os.sep, "/") + m.group(3)
         out.append(line)
     return "\n".join(out) + "\n"
 
@@ -242,7 +242,7 @@ def register(addr, src=None, flags=None, as_json=False):
         state["attempted"][key] = {"status": "identity-mismatch", "detail": bad[0] if bad else "no IDENTITY line"}
         save_state(state)
         return
-    rel = os.path.relpath(dest, ROOT)
+    rel = os.path.relpath(dest, ROOT).replace(os.sep, "/")  # functions.json paths are repo-style on every host
     print("RESULT: MATCH %d/%d words, identity %s verified / %s unverifiable  ->  %s" % (
         r["words"], r["total"], ident.group(1), ident.group(2), rel))
 
