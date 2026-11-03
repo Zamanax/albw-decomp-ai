@@ -723,3 +723,27 @@ hand-written source, so a clone that only matches with the anchor's flags is ref
 Next lever if these run dry: `permuter.py`/`sweep.py` on functions whose only remaining diff is a
 register permutation (e.g. 00526744: 272 B, 44/68, "our cursor is r1, theirs r2"), and de-hacking
 the 789 hack entries now that `/fpic` is known to replace `weak` honestly.
+
+## Two findings from the 4-agent DeepSeek pass (2026-11-03, family anchors)
+
+**1. Inline timing decides where a constant lives (actionable, general).** armcc 4.1 b1049 inlines a
+*parameterless* `inline`/member function EARLY (before constant promotion), but one **with a
+parameter** LATE (after promotion). Consequence: two literal `1` stores in one function are normally
+CSE'd into one callee-saved register (`mov r8,#1; strbeq r8; strb r8`); to reproduce an original that
+keeps them in different registers (`moveq r0,#1` / `mov r0,#1`), put the first store inside a member
+helper that takes a byte parameter — `void Npc::bump(u8 s){ if (m988 == 0) { u8 v = 1; m988 = v; } }`
+called as `p->bump(1)` — and leave the second inline. Static free functions with parameters inline
+early, so they do not work. Found on 0060BE24 (51-member family); source of the prologue/tail that all
+700+ plain variants failed to produce.
+
+**2. Open problem: a call-result copy across `blx` (0060C038, blocks a 49-member family).** The
+original stores a virtual-call result via `mov r1,r0; str r1,[r4,#0x818]`; b1049 always emits
+`str r0,[r4,#0x818]`. The same `bl → mov r1,r0 → str` shape IS reproduced for *direct* BL callees
+(matched functions 0011EE58/0011EED0), never for the indirect `blx r1` vtable dispatch this family
+uses. ~700 source variants, all -O levels, 11 --cpu settings and 20 misc flags were tried; all 49
+clones are byte-identical, so a single compiler/scheduler setting produced them. Parked; the family is
+a good candidate for a future permuter/asm-free trick or for an accepted `hack` classification.
+
+**3. Register-permutation-only misses are permuter work, not agent work** (00526744: 272 B, 44/68
+words, cursor in r1 instead of r2, every opcode/operand identical). Route these to
+`permuter.py`/`sweep.py` over cursor/pointer source forms.
