@@ -657,3 +657,35 @@ Open, recurring (not reproduced honestly yet):
   (0013B418, 001664CC, 002A9B34).
 - Pointer-to-member dispatch with r1/r2 swapped vs armcc (004D9508,
   0035B210, 00311DE0, 00386FF4).
+
+### DeepSeek retry pass on Haiku misses (2026-11-03)
+
+29 of ~35 retried functions matched; several "open, recurring" shapes above are now solved:
+- **Dead `ldr` of a count field** (003C0698, 0031A710): an inlined bounds-checked accessor
+  `T& at(u32 i){ if (i < count) return data[i]; return data[0]; }` evaluated at a constant index:
+  both arms fold, armcc drops the compare but keeps the count load.
+- **Null-path `moveq r4,#0; movs r0,r4; beq`** (00125FE4, 002A9B34): `dynCast` must be the ternary
+  `isDerived(a) ? a : 0`, not `if (isDerived(a)) return a; return 0;`.
+- **pmf dispatch r1/r2 swap** (00311DE0): take the state through a pointer local first
+  (`NpcExecState30* s = &p->state; s->execute();`). Not sufficient for 004D9508.
+- **Whole TU at another optimisation level**: 002F8F5C/0049E74C `-O2`, 00457FC0 `-O2 -Otime`,
+  0048E398/00323D3C/0034B674 `-O3` without `-Otime`. A flag sweep on the best source is cheap
+  (~0.1 s/check) and should precede source-shape sweeps.
+- **`--cpu=Cortex-A9`** (0047F1CC): MPCore inserts an alignment NOP before a BL 8 bytes after
+  another BL; the original has none. Cortex-A8/A9 produce the same code without it.
+- **Register order from inlined-helper parameters**: float lerp `app(f32& v, f32 t, f32 k)` (0031A710),
+  flag block taking the session by value (004A523C), `orFlag(a0, 0x1000)` (00125FE4),
+  second basis vector via an inlined setter (0014E4B0).
+- **Value re-read through the stored slot**: `*(f32*)(t3+0x1B8) = 1.0f; ... = *(u32*)(t3+0x1B8)` gives
+  `vmovne r0,s0` (001ABB68); `u32& slot = c->val; slot = v; u32 b = slot;` gives the load order (0044AE1C).
+- **Bool normalisation** `u32 b = v; if (b) b = 1;` gives `movne r1,#1; cmp r1,#0` (004616E0).
+- **Class-chain depth sets vptr store order** in destructors: one empty intermediate class flips
+  primary/secondary store interleaving (0024673C family, 00373A60).
+- **Static initializers**: static members of one class decouple .bss order from init order
+  (005B8944); route `PtrListBase` buffer through a named local (005BDEA8, 0059C094).
+- **Literal-pool order follows constant definition order** (0048E398 family); `1.3f - 1.0f` folds to
+  0x3e999998, not 0.3f's 0x3e99999a (00154F1C).
+
+Not registered as honest (compiler-steering): 0013B418 (`m0 = buf ? buf : 0`), 00154F1C
+(body inside `do { } while (0)`). Still open after DeepSeek: 004D9508 (pmf swap), 0026171C, 001E78AC
+(2 words), 003E19E8 / 00245484 / 002CEFDC / 00491404 / 003FBC88 / 00115CE4 / 00115D88 (VFP allocation).
