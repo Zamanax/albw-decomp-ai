@@ -50774,6 +50774,13 @@
 "path": "src/work5/templater/gen/func_003A0454.cpp",
 "status": "honest"
 },
+"003A05BC": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003A05BC.c",
+"status": "honest"
+},
 "003A06F0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -51015,7 +51022,11 @@
 "status": "hack"
 },
 "003A3AC0": {
-"status": "no_source"
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003A3AC0.c",
+"status": "honest"
 },
 "003A3B7C": {
 "cc": "4.1/b1049",
