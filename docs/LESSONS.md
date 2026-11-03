@@ -747,3 +747,30 @@ a good candidate for a future permuter/asm-free trick or for an accepted `hack` 
 **3. Register-permutation-only misses are permuter work, not agent work** (00526744: 272 B, 44/68
 words, cursor in r1 instead of r2, every opcode/operand identical). Route these to
 `permuter.py`/`sweep.py` over cursor/pointer source forms.
+
+## The campaign method (tools/campaign.py, skill decomp-campaign) — why it is shaped this way
+
+Costs and yields measured over this session's ~600 agent runs (Haiku 4.5-class, DeepSeek v4.1 flash):
+
+| tier | cost / agent | hit rate | where it works |
+|---|---:|---:|---|
+| famclone / refine (no LLM) | $0 | 1 anchor → whole shape family; refine ~0.1% of fresh candidates | always run first |
+| Haiku | ~$0.01-0.05 | 35-50% on the closest ~500 near-misses, 22% on the next tier down | ≤ ~110 words, constant/offset/callee/flag fixes |
+| DeepSeek | ~$0.10-0.30 | 68-80% on Haiku misses, 1 in 4 on hard family anchors | register-allocation physics, class layouts, VFP |
+
+What wasted money and what replaced it:
+- **Per-function agents on family members** (the same shape solved several times) → one representative
+  per masked shape; famclone clones the match to the rest (round 1: 2 DeepSeek matches + 3 free clones).
+- **Parsing agents' final messages** (JSON, prose, varying keys; lost when the kernel died or handles
+  expired) → each agent writes `logs/manual/<ADDR>/REPORT.json`; harvest reads files. A dead round loses
+  nothing; unreported targets are re-planned.
+- **100-agent bursts** hit the Haiku rate limit (429, ~28 min lockout, a whole wave lost) and the
+  100-background-job cap → batches of 20.
+- **DeepSeek without a rule** (71 dispatched at once, credits exhausted after ~35) → hard cap of 4 per
+  round, only for Haiku misses or > 160-word functions, ranked by family size × closeness.
+- **Retrying the same dead end** → `logs/campaign/ledger.jsonl` (never the same function twice per tier,
+  applied per shape family) and the committed `shared/parked.json`.
+- **A 5 KB context pasted into every prompt** → one `docs/AGENT_BRIEF.md`; the per-task prompt is a few
+  lines. New constructs go into the brief once, so every later Haiku agent gets them.
+- **Agent labels reused across sessions** made the harness return another session's results → labels
+  carry a timestamp.

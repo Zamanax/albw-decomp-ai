@@ -1,0 +1,13 @@
+{
+"_doc": "Functions no agent tier should be sent to (tools/campaign.py skips them). Each has a documented reason, usually in docs/LESSONS.md. Remove an entry when a new construct or tool makes it worth another attempt.",
+"0060C038": "49-member family: call-result copy `mov r1,r0` before a blx-dispatched call; b1049 emits it only for direct BL (LESSONS 2026-11-03, ~700 variants)",
+"00115CE4": "VFP bulk-load + fresh consecutive result regs: no b1049 producer (LESSONS VFP bulk-copy family)",
+"00115D88": "VFP bulk-load + fresh consecutive result regs: no b1049 producer",
+"00115E10": "VFP bulk-load + fresh consecutive result regs: no b1049 producer",
+"00115074": "VFP transform family (LESSONS 00115074/00115CA8/00115D18)",
+"00115CA8": "VFP transform family",
+"0059F7B8": "unreferenced trailing 0xFFFFFFFF after the pool (open problem)",
+"005A8AA0": "unreferenced trailing 0xFFFFFFFF after the pool (open problem)",
+"0013B418": "matches only with `m0 = buf ? buf : 0` (compiler steering, refused as honest)",
+"00154F1C": "matches only inside `do { } while (0)` (compiler steering, refused as honest)"
+}

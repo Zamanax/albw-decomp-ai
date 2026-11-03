@@ -11,13 +11,13 @@ not included either.
 
 | | Functions | Share of 25,986 |
 |---|---:|---:|
-| Matched, source included | 17,110 | 65.8% |
-| of which honest (no hack, see below) | 16,321 | 62.8% |
+| Matched, source included | 17,125 | 65.9% |
+| of which honest (no hack, see below) | 16,336 | 62.9% |
 | of which matched only with a hack | 789 | 3.0% |
 | Matched earlier, source not included | 131 | 0.5% |
-| Not matched yet | 8,745 | 33.6% |
+| Not matched yet | 8,730 | 33.6% |
 
-Still to do for a fully honest decomp: **9,665** functions (37.2%) = 8,745 never matched + 789 hack matches that
+Still to do for a fully honest decomp: **9,650** functions (37.1%) = 8,730 never matched + 789 hack matches that
 need an honest source + 131 without a published source.
 
 The 131 functions without source break down as follows:
@@ -59,6 +59,7 @@ back that way in this update.
 | `funcs.json` | The function table: start addresses, call targets, pointers. Addresses only, no code |
 | `tools/fn.py` | Disassembly, cross-references, and the byte-exact checker |
 | `tools/audit.py` | Offline invariant audit of `functions.json` + status-table stats |
+| `tools/campaign.py` | Session driver: free family cloning + refine, then a cost-routed subagent plan (Haiku / at most 4 DeepSeek) and its harvest; see `.agents/skills/decomp-campaign` |
 
 ## Requirements
 
@@ -103,7 +104,7 @@ See `docs/LESSONS.md` for what worked, what did not, and the measured numbers.
 
 ## Where to go next
 
-The remaining 8,745 unmatched functions are the hard tail. Our tests show the main blocker is **the shape of small inline
+The remaining 8,730 unmatched functions are the hard tail. Our tests show the main blocker is **the shape of small inline
 helpers and classes from the game's own headers**:
 - inlined constructors;
 - setters with parameters;
