@@ -45,7 +45,12 @@ MISMATCH_LINE = re.compile(r"!! \+\S+ '([^']*)' names \S+, the original targets 
 
 
 def flag_variants(base):
-    """Optimization-level variants of a flag string, deduped, base first."""
+    """Optimisation-level variants of a flag string, deduped, base first.
+
+    Each level is also tried with --apcs=/fpic (never emits a tail call: the
+    honest stand-in for a `weak` callee) and with --cpu=Cortex-A9 (MPCore adds
+    an alignment NOP before a BL that follows another BL 8 bytes earlier).
+    """
     toks = base.split()
     idx = [i for i, t in enumerate(toks) if t.startswith("-O")]
     if not idx:
@@ -54,8 +59,12 @@ def flag_variants(base):
     out = []
     for opt in OPT_VARIANTS:
         f = " ".join(head + opt.split() + tail)
-        if f not in out:
-            out.append(f)
+        for g in (f,
+                  f.replace("--apcs=/interwork", "--apcs=/fpic"),
+                  f.replace("--cpu=MPCore", "--cpu=Cortex-A9"),
+                  f.replace("--apcs=/interwork", "--apcs=/fpic").replace("--cpu=MPCore", "--cpu=Cortex-A9")):
+            if g not in out:
+                out.append(g)
     return out
 
 
