@@ -689,3 +689,37 @@ Open, recurring (not reproduced honestly yet):
 Not registered as honest (compiler-steering): 0013B418 (`m0 = buf ? buf : 0`), 00154F1C
 (body inside `do { } while (0)`). Still open after DeepSeek: 004D9508 (pmf swap), 0026171C, 001E78AC
 (2 words), 003E19E8 / 00245484 / 002CEFDC / 00491404 / 003FBC88 / 00115CE4 / 00115D88 (VFP allocation).
+
+## Where the remaining failures are (measured 2026-11-03, 8,770 unmatched)
+
+Numbers that redirect effort away from single-function agent work:
+- **The near-miss tail is thin.** Of 7,690 attempted-but-unmatched functions, 4 are within 2
+  instructions of a match and 30 within 5. Dispatching an agent per near-miss now costs more than
+  it returns; the 1-in-2 hit rate seen in waves 6-10 came from the *closest ~100*, which are gone.
+- **Flags are not the lever they looked like.** Of the 16,296 honest entries, 5.4% need
+  `--apcs=/fpic`, 0.1% `-O2`, 0.1% `-O3` without `-Otime`, 0.02% `--cpu=Cortex-A9`, 94.3% the
+  default set. A blanket flag sweep over the backlog is not worth 7,000 x 15 checks. (refine's
+  flag wave still sweeps 15 variants now, since a wave costs ~1.5 s.)
+- **Shape families are the lever.** 393 unmatched functions sit in 123 shape groups (identical
+  instruction stream after masking branch displacements and any word pointing into the image).
+  Worked examples: the 20-member sead RTTI family (one match + a rename loop) and the deep_twins
+  harvest (003A05BC, 003A3AC0 in 1.3 s, both previously missed twice by agents).
+- **Twin-origin clustering is useless.** The largest "cluster by twin origin" buckets are 776-1548 B
+  functions (fam_sti) whose *closest* twin is arbitrary; 167 of them share one bogus anchor.
+  Cluster by masked shape, not by which source refine happened to start from.
+
+## tools/famclone.py — harvest, don't solve
+
+For each unmatched candidate sharing a shape with an honest match, compile the matched source
+against it. No text edit is needed: `fn.py check` scores the object's best-matching symbol, so the
+source's own function name is irrelevant (verified: the renamed and unrenamed forms both match all
+20 RTTI siblings). Runs in ~1.4 s for the current tail; `--apply` registers through
+`worklist.py register` with the anchor's flags, falling back to the default set, `/fpic` and `-O2`.
+
+Pitfall found while doing this by hand: `worklist.py register --src` uses the *default* flags for a
+hand-written source, so a clone that only matches with the anchor's flags is refused
+(003A05BC needs `-O3` without `-Otime`). famclone passes `--flags` explicitly; do the same by hand.
+
+Next lever if these run dry: `permuter.py`/`sweep.py` on functions whose only remaining diff is a
+register permutation (e.g. 00526744: 272 B, 44/68, "our cursor is r1, theirs r2"), and de-hacking
+the 789 hack entries now that `/fpic` is known to replace `weak` honestly.
