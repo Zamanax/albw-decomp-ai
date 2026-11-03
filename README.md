@@ -11,13 +11,13 @@ not included either.
 
 | | Functions | Share of 25,986 |
 |---|---:|---:|
-| Matched, source included | 16,881 | 65.0% |
-| of which honest (no hack, see below) | 16,092 | 61.9% |
+| Matched, source included | 17,085 | 65.7% |
+| of which honest (no hack, see below) | 16,296 | 62.7% |
 | of which matched only with a hack | 789 | 3.0% |
 | Matched earlier, source not included | 131 | 0.5% |
-| Not matched yet | 8,974 | 34.5% |
+| Not matched yet | 8,770 | 33.7% |
 
-Still to do for a fully honest decomp: **9,894** functions (38.1%) = 8,974 never matched + 789 hack matches that
+Still to do for a fully honest decomp: **9,690** functions (37.3%) = 8,770 never matched + 789 hack matches that
 need an honest source + 131 without a published source.
 
 The 131 functions without source break down as follows:
@@ -103,7 +103,7 @@ See `docs/LESSONS.md` for what worked, what did not, and the measured numbers.
 
 ## Where to go next
 
-The remaining 8,974 unmatched functions are the hard tail. Our tests show the main blocker is **the shape of small inline
+The remaining 8,770 unmatched functions are the hard tail. Our tests show the main blocker is **the shape of small inline
 helpers and classes from the game's own headers**:
 - inlined constructors;
 - setters with parameters;
