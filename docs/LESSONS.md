@@ -790,3 +790,36 @@ What wasted money and what replaced it:
   lines. New constructs go into the brief once, so every later Haiku agent gets them.
 - **Agent labels reused across sessions** made the harness return another session's results → labels
   carry a timestamp.
+
+## Five-problem DeepSeek pass (2026-11-04)
+
+One agent per cross-cutting blocker, no check budget. Reports and sources: `logs/manual/P1..P5_*/`.
+
+- **P1, per-callee tail call (SOLVED, honesty pending).** armcc b1049 accepts
+  `__attribute__((notailcall))` on a callee prototype: calls to it become `bl f; pop {..,pc}` while
+  other callees in the same function still tail-call (verified with `--asm`: `c(){k(x); h(x);}` gives
+  `BL k ... B h`). It replaces `weak` in 129 of the 131 weak-only hacks (all verified MATCH + 0
+  MISMATCH); 001064D0 and 0054F3AC use weak to stop inlining of a same-TU callee instead.
+- **P2, `__schedule_barrier` (87 converted and registered, 64 open).** Three causes: (a) an inlined
+  virtual call whose argument load was hoisted past the object load — an explicit function-pointer
+  local fixes it, `void (*fp)(Npc*,s32,s32) = *(void(**)(Npc*,s32,s32))((char*)(*(void**)q) + 0xac);
+  fp(q, q->m854, -1);` (the whole 51-member 0060BD64 family); (b) adjacent stores reordered — a
+  struct copy `T tmp = r; tmp.m = 1; r = tmp;` (001D3DBC) or pointer locals per store (002D455C,
+  002FE86C); (c) the barrier was redundant or only masked the TU's real -O level (`-O2 -Otime`,
+  `-O2`). Open: pure load-load swaps and mixed branch/load/store swaps
+  (`logs/manual/P2_schedule_barrier/remaining_final.json`).
+- **P3, TLS `mrc p15` (SOLVED, honesty pending).** The armcc named register variable
+  `register unsigned int tp __asm("cp15:0:c13:c0:3");` (a declaration, not an asm statement) emits
+  `mrc` on read and `mcr` on write, re-read every use; `cp15:0:c7:c10:4/5` gives DSB/DMB. It matches 83
+  of the 94 asm hacks; the other 11 are per-function instruction nudges (`moveq rX,rX`, etc.).
+  `__nop()` is an intrinsic in b1049; `__dmb/__dsb/__isb/__mrc` are not.
+- **P4, family 0060BE24 (OPEN, 107/120).** Not the blx blocker. A case-0 body written as a member
+  helper with a u32 parameter (`p->run0(tgt, 0)`) places the zero constant in r5. Remaining 13 words are
+  a register rotation: a member owner helper gives the target's owner region but breaks the early one;
+  a static helper does the reverse. Best: `logs/manual/P4_fam_0060BE24/best.cpp`.
+- **P5, family 0060C038 (OPEN, 21/22).** Correction to the earlier finding: b1049 *does* emit
+  `blx; mov r1,r0; ...; str r1,[..]` after an indirect call, when the result must survive a fixed-r0
+  user (argument setup `mov r0,x` or the function's own return value) before its single store. A
+  second use alone gives the copy but still stores r0. 0060C038 has no fixed-r0 user, so the original's
+  copy implies one existed before register allocation and was then deleted. The if-block order needs
+  the alias `Npc* q = p; q->request(q->request854, -1);`.

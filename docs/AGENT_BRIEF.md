@@ -70,6 +70,11 @@ Prefer an honest miss. Never claim a match you did not see printed.
   before reshaping (003AA984 family plateaued at 27/44 with -Otime, exact without).
 - Float field compared against two ints (`vcvt` then `cmp`/`cmpne` with `vmovne r1,s0`): cast at
   each comparison, `(s32)o->v == 1 || (s32)o->v == 3`, not a cached int local (003327FC).
+- Virtual call whose argument load is scheduled before the object/vtable load in the original: write
+  the dispatch as a function-pointer local, `void (*fp)(T*,s32,s32) = *(void(**)(T*,s32,s32))
+  ((char*)(*(void**)q) + 0xac); fp(q, q->m854, -1);` (0060BD64 family, 51 functions).
+- Two adjacent stores in the wrong order: struct copy `T tmp = r; tmp.m = 1; r = tmp;` (001D3DBC) or a
+  pointer local per stored field (002D455C).
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`
