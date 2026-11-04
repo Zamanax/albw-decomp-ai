@@ -672,7 +672,7 @@ Open, recurring (not reproduced honestly yet):
   `isDerived(a) ? a : 0`, not `if (isDerived(a)) return a; return 0;`.
 - **pmf dispatch r1/r2 swap** (00311DE0): take the state through a pointer local first
   (`NpcExecState30* s = &p->state; s->execute();`). Not sufficient for 004D9508.
-- **Whole TU at another optimisation level**: 002F8F5C/0049E74C `-O2`, 00457FC0 `-O2 -Otime`,
+- **Whole TU at another optimisation level**: 002F8F5C/0049E74C `-O2`, 00457FC0/002E11AC `-O2 -Otime`,
   0048E398/00323D3C/0034B674/003AA984/003BC8F4 `-O3` without `-Otime`. A flag sweep on the best source is cheap
   (~0.1 s/check) and should precede source-shape sweeps.
 - **Unaligned u64 field** (00429F14): `__packed u64* q = &x->v; u64 xv = *q;` gives the split

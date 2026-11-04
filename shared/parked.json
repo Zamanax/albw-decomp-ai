@@ -11,5 +11,6 @@
 "0013B418": "matches only with `m0 = buf ? buf : 0` (compiler steering, refused as honest)",
 "00154F1C": "matches only inside `do { } while (0)` (compiler steering, refused as honest)",
 "005CDB38": "strd #0x10 vs #8: TU .data has an 8-byte leading hole (lazy singleton) unreachable from one function (logs/manual/005CDB38 REPORT, 12/13)",
-"00114E74": "VFP 3x4 affine concat block-register picture: 40+ DeepSeek shapes, none above 1/72 (logs/manual/00114E74 REPORT)"
+"00114E74": "VFP 3x4 affine concat block-register picture: 40+ DeepSeek shapes, none above 1/72 (logs/manual/00114E74 REPORT)",
+"00115D70": "Vec3 scale: target's fresh s4-s6 results vs armcc in-place coalescing; ~180 shapes x 8820 flag combos, best 1/7 (LESSONS 00115D70, logs/manual REPORT)"
 }
