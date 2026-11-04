@@ -1,6 +1,6 @@
 #include "ds4.h"
 extern u8* data_007142C8;
-extern "C" __attribute__((weak)) void func_00668E44(void*, u32);
+extern "C" void func_00668E44(void*, u32);
 
 void func_003A9FB0(u8* self) {
     u8* m = data_007142C8;

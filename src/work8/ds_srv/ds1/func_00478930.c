@@ -177,7 +177,7 @@ typedef int code(); typedef unsigned char unkbyte; typedef unsigned int unkuint;
 #define NAN(x) ((x) != (x))
 extern char G_0070B728[];
 extern int FUN_004cdf40();
-extern int FUN_0066bffc() __attribute__((weak));
+extern int FUN_0066bffc() ;
 
 void FUN_00478930(int param_1)
 

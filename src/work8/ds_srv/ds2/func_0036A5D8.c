@@ -178,7 +178,7 @@ typedef int code(); typedef unsigned char unkbyte; typedef unsigned int unkuint;
 extern char G_0070FB60[];
 extern int FUN_0036a638();
 extern int FUN_005568d4();
-extern int FUN_00666e8c(int,int) __attribute__((weak));
+extern int FUN_00666e8c(int,int) ;
 
 void FUN_0036a5d8(int param_1)
 

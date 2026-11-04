@@ -30,7 +30,7 @@ bool func_00547404(Mgr7142B0* m);
 void func_003FF904(void* a, Res10* b);
 void func_003FF898(void* a, Res10* b);
 void* func_005229AC(void* a, void* b);
-__attribute__((weak)) void func_0066D544(void* p, int n);
+void func_0066D544(void* p, int n);
 
 struct Obj {
     char pad0[0x1c];

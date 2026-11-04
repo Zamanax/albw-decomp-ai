@@ -34,7 +34,7 @@ extern char* data_00706E20;
 extern Obj* func_0052FBA0(void* mgr, u32 h);
 typedef struct Self { u8 pad[0x2c]; u16 m2C; u8 pad2e[0x2cc - 0x2e]; u32 m2CC; u8 pad2d0[0x498 - 0x2d0]; u8 m498[4]; } Self;
 extern _Bool func_00588BF0(Self* self, s32 v);
-extern __attribute__((weak)) void func_0065B668(void* p, s32 v);
+extern void func_0065B668(void* p, s32 v);
 void func_001BFA20(Self* self)
 {
     Obj* a = dynCast(func_0052FBA0(data_00706E20 + 0x3dbbc, self->m2CC));

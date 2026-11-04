@@ -8,7 +8,7 @@ public:
 };
 }
 extern void func_00150A84(void*, const sead::SafeString&, s32);
-extern void func_00659024(void*, s32) __attribute__((weak));
+extern void func_00659024(void*, s32) ;
 void func_00177924(void* self) {
     u64 v = *(u64*)((char*)self + 0x4a4);
     u32 x = (u32)v;

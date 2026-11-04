@@ -179,7 +179,7 @@ extern char G_0070B728[];
 extern char G_0070D858[];
 extern int FUN_001e6ab4();
 extern int FUN_004cddec();
-extern int FUN_00667258() __attribute__((weak));
+extern int FUN_00667258() ;
 
 void FUN_00373394(int *param_1)
 

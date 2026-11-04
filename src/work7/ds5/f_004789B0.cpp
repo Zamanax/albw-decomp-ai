@@ -1,6 +1,6 @@
 // 0x4789B0
 extern "C" void func_004CDF40(void*, int, int);
-extern "C" void func_0066C0CC(void*, int) __attribute__((weak));
+extern "C" void func_0066C0CC(void*, int) ;
 extern void* data_0070B728;
 
 struct Ctrl {

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """De-hack sweep: try to convert `weak` and `__schedule_barrier` hack matches
 to honest matches by removing the hack construct from the source and
-re-checking (with the original flags, then --apcs=/fpic for weak hacks).
+re-checking (with the original flags, then --apcs=/fpic, then -Ono_tailcall
+for weak hacks — both flags suppress the tail call `weak` was blocking).
 
 Only entries whose hack_reasons are a subset of {weak, __schedule_barrier}
 are attempted. Other hack kinds (asm, identical_arms, perm_t, dummies) need
@@ -65,20 +66,29 @@ def run_check(src, addr, cc, flags, timeout=300):
     return "RESULT: MATCH" in out, (out.splitlines() or [""])[-1]
 
 
-def check_all(entries, fpic):
-    """Check every entry against the (possibly fpic-rewritten) file.
+NO_TAILCALL = "-Ono_tailcall"
 
-    Each entry uses its own recorded flags/cc; `fpic` rewrites
-    --apcs=/interwork to --apcs=/fpic in each.
+
+def mode_flags(flags, mode):
+    """Rewrite recorded flags for an attempt mode: orig, fpic or no_tailcall."""
+    if mode == "fpic":
+        return flags.replace("--apcs=/interwork", "--apcs=/fpic")
+    if mode == "no_tailcall" and NO_TAILCALL not in flags:
+        return flags.replace("--split_sections", NO_TAILCALL + " --split_sections")
+    return flags
+
+
+def check_all(entries, mode):
+    """Check every entry against the edited file.
+
+    Each entry uses its own recorded flags/cc, rewritten by `mode_flags`.
     Returns (ok, detail).
     """
     for key, entry in entries:
         if entry.get("status") in ("excluded", "no_source"):
             continue
         cc = entry.get("cc") or DEFAULT_CC
-        flags = entry.get("flags") or DEFAULT_FLAGS
-        if fpic:
-            flags = flags.replace("--apcs=/interwork", "--apcs=/fpic")
+        flags = mode_flags(entry.get("flags") or DEFAULT_FLAGS, mode)
         try:
             matched, last = run_check(entry["path"], int(key, 16), cc, flags)
         except Exception as e:
@@ -122,7 +132,7 @@ def main():
                 "entries": by_file[entry["path"]],
             })
 
-    stats = {"ok_orig": 0, "ok_fpic": 0, "fail": 0, "skip": 0}
+    stats = {"ok_orig": 0, "ok_fpic": 0, "ok_no_tailcall": 0, "fail": 0, "skip": 0}
     for i, group in enumerate(groups):
         if i < skip:
             continue
@@ -139,14 +149,16 @@ def main():
             continue
 
         path.write_text(new)
-        attempts = [(False, "fail"), (True, "fail_fpic")]
+        attempts = ["orig"]
+        if "weak" in group["reasons"]:
+            attempts += ["fpic", "no_tailcall"]
         result, detail = None, None
-        for fpic, fail_name in attempts:
-            ok, detail = check_all(group["entries"], fpic)
+        for mode in attempts:
+            ok, detail = check_all(group["entries"], mode)
             if ok:
-                result = "ok_fpic" if fpic else "ok_orig"
+                result = "ok_" + mode
                 break
-            fail_name_used = fail_name
+            fail_name_used = "fail" if mode == "orig" else "fail_" + mode
 
         if result:
             stats[result] += 1
@@ -156,9 +168,9 @@ def main():
                 if entry.get("status") == "hack":
                     entry["status"] = "honest"
                     entry["hack_reasons"] = []
-                if result == "ok_fpic":
-                    entry["flags"] = (entry.get("flags") or DEFAULT_FLAGS).replace(
-                        "--apcs=/interwork", "--apcs=/fpic")
+                if result != "ok_orig":
+                    entry["flags"] = mode_flags(entry.get("flags") or DEFAULT_FLAGS,
+                                                result[3:])
             save_functions(functions)
         else:
             stats["fail"] += 1

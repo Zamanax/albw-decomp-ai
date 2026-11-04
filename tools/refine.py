@@ -48,8 +48,9 @@ def flag_variants(base):
     """Optimisation-level variants of a flag string, deduped, base first.
 
     Each level is also tried with --apcs=/fpic (never emits a tail call: the
-    honest stand-in for a `weak` callee) and with --cpu=Cortex-A9 (MPCore adds
-    an alignment NOP before a BL that follows another BL 8 bytes earlier).
+    honest stand-in for a `weak` callee), with -Ono_tailcall (same effect,
+    keeps /interwork) and with --cpu=Cortex-A9 (MPCore adds an alignment NOP
+    before a BL that follows another BL 8 bytes earlier).
     """
     toks = base.split()
     idx = [i for i, t in enumerate(toks) if t.startswith("-O")]
@@ -60,6 +61,7 @@ def flag_variants(base):
     for opt in OPT_VARIANTS:
         f = " ".join(head + opt.split() + tail)
         for g in (f,
+                  " ".join(head + opt.split() + ["-Ono_tailcall"] + tail),
                   f.replace("--apcs=/interwork", "--apcs=/fpic"),
                   f.replace("--cpu=MPCore", "--cpu=Cortex-A9"),
                   f.replace("--apcs=/interwork", "--apcs=/fpic").replace("--cpu=MPCore", "--cpu=Cortex-A9")):

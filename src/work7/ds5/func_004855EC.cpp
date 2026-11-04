@@ -2,7 +2,7 @@
 extern "C" void func_00232468(void*);
 extern "C" void func_0016656C(void*, void*);
 extern "C" void func_00166C00(void*, int);
-extern "C" void func_0066F2B8(void*, int) __attribute__((weak));
+extern "C" void func_0066F2B8(void*, int) ;
 extern void* data_0070B850;
 struct Cls { void f(); };
 void Cls::f() {

@@ -19,7 +19,7 @@ extern "C" Base* func_0052FBA0(void* mgr, u32 h);
 struct Self { u8 pad[0x8c0]; u32 m8C0[15]; u8 m8FC[4]; };
 static u32* at(Self* s, s32 i) { u32* p = s->m8C0; if ((u32)i < 15) p += i; return p; }
 extern "C" void func_00229E24(Self* self);
-extern "C" __attribute__((weak)) void func_0065E8B8(void* p, s32 v);
+extern "C" void func_0065E8B8(void* p, s32 v);
 extern "C" void func_0022BB78(Self* self);
 void func_0022BB78(Self* self)
 {

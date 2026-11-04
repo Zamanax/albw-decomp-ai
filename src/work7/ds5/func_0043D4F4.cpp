@@ -1,7 +1,7 @@
 // 0x43D4F4
 extern "C" int func_00556AF8(void*);
 extern "C" int func_00556B94(void*);
-extern "C" void func_0066C424(void*, int) __attribute__((weak));
+extern "C" void func_0066C424(void*, int) ;
 extern void* data_0070FB60;
 struct Cls {
     char pad1[0x174];

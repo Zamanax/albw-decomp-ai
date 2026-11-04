@@ -42,7 +42,7 @@ struct Timer {
     }
 };
 
-struct StateMgr { void changeState(int s) __attribute__((weak)); };
+struct StateMgr { void changeState(int s) ; };
 
 void func_00115C70(Vec3* out, const Vec3& a, const Vec3& b);  // Vec3::setSub (out-of-line)
 inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; func_00115C70(&r, a, b); return r; }

@@ -20,7 +20,7 @@ extern "C" void func_004A8304(void*, u32);
 extern "C" void func_004A879C(void*, u32, s32);
 extern "C" void func_001E6A3C(Npc*);
 extern "C" void func_004C07D8(Npc*);
-extern "C" __attribute__((weak)) void func_006339A0(Npc*, s32, s32);
+extern "C" void func_006339A0(Npc*, s32, s32);
 u32 getId(Npc* p) { return p->m86c; }
 void target(Npc* p) {
     Blk800* b = (Blk800*)((char*)p + 0x800);

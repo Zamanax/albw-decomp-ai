@@ -4,7 +4,7 @@ typedef float f32;
 
 extern "C" void func_004D80A4(void*, u32, f32);
 extern "C" u32 func_0051D27C(void*, u32, void*);
-extern "C" void func_0065650C(void*, u32) __attribute__((weak));
+extern "C" void func_0065650C(void*, u32) ;
 extern "C" void* data_0070A89C;
 
 struct S {

@@ -41,7 +41,7 @@ extern void FUN_004c6dd0(void* p);
 extern void FUN_004cd45c(void* p);
 extern void FUN_004cdbec(void* p);
 extern void FUN_004ed740(void* p);
-extern __weak void FUN_004ef7ec(struct Obj* p);
+extern  void FUN_004ef7ec(struct Obj* p);
 extern void FUN_0051c3c8(void* p);
 
 void FUN_004efb10(struct Obj* p)

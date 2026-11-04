@@ -16,7 +16,7 @@ inline f32 dist(const Vec3& a, const Vec3& b) { f32 x = b.x - a.x; f32 z = b.z -
 extern "C" __declspec(noinline) bool func_00219630(Act* o, const Vec3* p, f32 r) { f32 d = dist(*(const Vec3*)&o->m8, *p); if (r * r < d) return false; return true; }
 extern "C" void func_00660AE4(StateControl*, s32);
 extern "C" void func_003931EC(StateControl*, s32);
-extern "C" __weak void func_00660B50(StateControl*);
+extern "C"  void func_00660B50(StateControl*);
 
 void target(void* pv) {
     u8* p = (u8*)pv;

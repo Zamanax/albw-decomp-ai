@@ -36,7 +36,7 @@ typedef struct A { Obj base; u8 pad[0x8c0 - 4]; u8 m8C0; } A;
 typedef struct Counter { u32 cur; u32 max; } Counter;
 typedef struct Self { u8 pad[0x50]; u32 m50; u8 pad54[0x8bc - 0x54]; u8 m8BC[0x28]; Counter m8E4; } Self;
 extern _Bool func_005427C4(Self* self, s32 v);
-extern __attribute__((weak)) void func_006623B0(void* p, s32 v);
+extern void func_006623B0(void* p, s32 v);
 void func_002AA5F0(Self* self)
 {
     Obj* o = func_0052FBA0(data_00706E20 + 0x3dbbc, self->m50);

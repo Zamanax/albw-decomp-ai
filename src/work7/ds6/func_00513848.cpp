@@ -2,7 +2,7 @@
 
 extern void* data_0070FB60;
 void* func_00556E7C(void* g, u32 id);
-__attribute__((weak)) void func_0066B94C(void* p, u32 v);
+void func_0066B94C(void* p, u32 v);
 
 struct Obj513848 {
     char _pad[0x48c];

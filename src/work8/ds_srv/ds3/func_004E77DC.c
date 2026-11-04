@@ -181,7 +181,7 @@ extern uint G_0069313C;
 extern char G_00706E20[];
 extern undefined1 * FUN_0052fba0(undefined1 *, uint);
 extern uint FUN_00588be4(undefined1 *);
-extern __attribute__((weak)) void FUN_0066aa1c(int,int);
+extern void FUN_0066aa1c(int,int);
 
 void FUN_004e77dc(int param_1)
 

@@ -5,7 +5,7 @@ struct FlagMgr;
 extern FlagMgr* data_0070C8E0;
 bool func_005822A0(FlagMgr* m, u16 id, u8 kind);
 struct StateMgr788 {
-    __attribute__((weak)) void func_0065CE98(int s);
+    void func_0065CE98(int s);
 };
 struct Cls704C;
 bool func_0014E2A0(Cls704C* c, u32 a, int b, int c2, int d, int e);

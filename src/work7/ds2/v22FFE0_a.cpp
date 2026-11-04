@@ -3,7 +3,7 @@ extern void* data_007142C8;
 extern s32 func_0058DB14(void*);
 extern s32 func_0058D954(void*);
 extern void func_00519B8C(void*);
-extern void func_0065EB40(void*, s32) __attribute__((weak));
+extern void func_0065EB40(void*, s32) ;
 void func_0022FFE0(void* self) {
     if (func_0058DB14(data_007142C8) != 0) {
         *(u8*)((char*)self + 0x274) = 0;

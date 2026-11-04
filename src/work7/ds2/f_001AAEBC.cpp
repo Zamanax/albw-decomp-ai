@@ -1,7 +1,7 @@
 #include "ds2.h"
 
 extern int func_0051D27C(void*, u32, u32);
-__attribute__((weak)) extern void func_0065AAC8(void*, int);
+extern void func_0065AAC8(void*, int);
 extern u32 data_0070AE10;
 
 struct Obj1AAEBC {

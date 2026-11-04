@@ -37,7 +37,7 @@ extern Obj** func_005841A8(Mgr* mgr, u32 k, void* p);
 typedef struct A { Obj base; u8 pad[0x4dc - 4]; u32 m4DC; } A;
 typedef struct Self { u8 pad[0x2cc]; u32 m2CC; u8 pad2d0[0x414 - 0x2d0]; u8 m414[4]; } Self;
 extern s32 func_00588BF0(Self* self, s32 v);
-extern __attribute__((weak)) void func_0065BF44(void* p, s32 v);
+extern void func_0065BF44(void* p, s32 v);
 void func_001C7300(Self* self)
 {
     A* a;

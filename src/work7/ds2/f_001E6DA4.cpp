@@ -3,7 +3,7 @@ typedef unsigned int u32; typedef int s32;
 struct M0 { char pad0[0x44]; void* m44; };
 extern M0* data_0070B728;
 s32 func_0014E2A0(void* self, void* p, s32 a, s32 b, s32 c, s32 d);   // 0x14E2A0
-__attribute__((weak)) void func_0065CE98(void* p, s32 a);              // 0x65CE98
+void func_0065CE98(void* p, s32 a);              // 0x65CE98
 struct C {
     char pad0[0x2c];
     u16 m2c;

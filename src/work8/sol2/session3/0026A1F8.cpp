@@ -33,7 +33,7 @@ extern "C" void func_004ED46C(void*, int);
 extern "C" void func_002694A4(void*, int);
 extern "C" void func_0035B084(int);
 extern "C" int func_0058A8F0(void*);
-extern "C" void func_00660718(void*, int) __attribute__((weak));
+extern "C" void func_00660718(void*, int) ;
 extern void* data_00708998;
 void func_0026A1F8(char* self) {
     f32 g = func_004F898C();

@@ -2,7 +2,7 @@
 
 struct G {
     static const sead::RuntimeTypeInfo::Interface* getRuntimeTypeInfoStatic();
-    static __attribute__((weak)) bool checkDerivedRuntimeTypeInfoStatic(const sead::RuntimeTypeInfo::Interface*);
+    static bool checkDerivedRuntimeTypeInfoStatic(const sead::RuntimeTypeInfo::Interface*);
 };
 
 struct A : G {

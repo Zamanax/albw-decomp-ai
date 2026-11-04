@@ -2,7 +2,7 @@
 extern u32 ro_00693090;
 extern "C" u32 func_00588BE4(void*);
 extern "C" u32 func_002ACC68(void*);
-extern "C" __attribute__((weak)) void func_006658F8(void*, u32);
+extern "C" void func_006658F8(void*, u32);
 void f(u8* self) {
   self[0x4cd] = 1;
   self[0x4cc] = 1;

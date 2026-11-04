@@ -49,7 +49,8 @@ Prefer an honest miss. Never claim a match you did not see printed.
 
 - Last word `mov r0, r0` (often after `pop {…,lr}`): linker-NOPed tail call to the function that
   starts right after this one — end the source by calling it with the right args in r0-r3.
-- Original `bl X; pop {…,pc}` but armcc emits a tail `b X`: `--apcs=/fpic` (never tail-calls).
+- Original `bl X; pop {…,pc}` but armcc emits a tail `b X`: add `-Ono_tailcall` before
+  `--split_sections` (keeps everything else identical), or `--apcs=/fpic` (never tail-calls).
 - Value/constant in the wrong register: pass it through an inlined helper's *parameter*, a
   pointer/reference local (`T* s = &p->m; s->f();`), or a named local right before the call.
   Parameterised `inline`/member helpers are inlined late (after constant promotion), parameterless

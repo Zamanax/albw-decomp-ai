@@ -5,7 +5,7 @@ extern void* g_70B728;
 extern void func_004CDF40(void*, u16, int);
 extern void func_004CF478(void*, u32, u32);
 extern void func_00151148(void*, u32);
-__attribute__((weak)) extern void func_0065C310(void*, int);
+extern void func_0065C310(void*, int);
 
 struct Obj1CD0F8 {
     char pad0[0x40c];

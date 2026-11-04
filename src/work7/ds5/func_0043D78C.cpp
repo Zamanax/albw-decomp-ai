@@ -4,7 +4,7 @@ extern "C" void func_0014AE1C(void*, int);
 extern "C" void func_0043CE2C(void*);
 extern "C" void func_0043D1D4(void*);
 extern "C" void func_0047AF3C(void*);
-extern "C" void func_0066C424(void*, int) __attribute__((weak));
+extern "C" void func_0066C424(void*, int) ;
 extern void* data_00711F50;
 extern void* data_00712468;
 struct Cls {

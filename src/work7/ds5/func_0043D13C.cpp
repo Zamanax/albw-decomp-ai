@@ -1,7 +1,7 @@
 // 0x43D13C
 extern "C" int func_0058D888(void*);
 extern "C" int func_00477024(void*);
-extern "C" void func_0066C424(void*, int) __attribute__((weak));
+extern "C" void func_0066C424(void*, int) ;
 extern void* data_007142C8;
 struct Sub { char pad[0x5f]; unsigned char m5F; };
 struct Cls {

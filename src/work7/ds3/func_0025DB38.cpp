@@ -5,7 +5,7 @@ extern "C" void* data_0070B728;
 extern "C" void* data_00712588;
 extern "C" void func_004CD7C8(void*, void*);
 extern "C" void func_002DF5C4(void*);
-extern "C" __attribute__((weak)) void func_0065FF80(void*, s32);
+extern "C" void func_0065FF80(void*, s32);
 void func_0025DB38(S25DB* p) {
     func_001E3134(p);
     func_004CD7C8(data_0070B728, p->f8);

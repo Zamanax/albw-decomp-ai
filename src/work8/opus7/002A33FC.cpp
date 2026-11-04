@@ -13,7 +13,7 @@ bool func_0058A8F0(En* e);
 void func_004FC07C(En* e, s32 a, s32 b, s32 c);
 f32 func_0058AC38(En* e);
 bool func_0058ACC8(En* e, f32 v);
-struct SM9E0 { void changeState(s32 s) __attribute__((weak)); };
+struct SM9E0 { void changeState(s32 s) ; };
 struct BitFlag32 { u32 v; void set(u32 m) { v |= m; } void reset(u32 m) { v &= ~m; } };
 struct En {
     u8 pad[0x3d0]; Vec3 m3d0; u8 pad3dc[0x3e8 - 0x3dc]; s32 m3e8; u8 pad3ec[0x59c - 0x3ec]; BitFlag32 m59c;

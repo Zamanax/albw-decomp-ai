@@ -2,7 +2,7 @@ typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; ty
 typedef unsigned int u32; typedef int s32;
 typedef struct Player Player;
 extern Player* data_0070FB60;
-void func_00167E04(void* a, void* b, s32 c) __attribute__((weak));
+void func_00167E04(void* a, void* b, s32 c) ;
 s32 func_00537B38(Player* p);
 s32 func_0053FB24(Player* p);
 s32 func_0055696C(Player* p, s32 n);

@@ -31,7 +31,7 @@ static int isDerived(Obj* a)
 }
 static Obj* dynCast(Obj* a) { if (isDerived(a)) return a; return 0; }
 typedef struct A { Obj base; u8 pad[0x40c - 4]; u8 m40C[4]; u8 m410; } A;
-extern __attribute__((weak)) void func_006666E4(void* p, s32 v);
+extern void func_006666E4(void* p, s32 v);
 void func_0011FB3C(Obj* o)
 {
     A* a = (A*)dynCast(o);

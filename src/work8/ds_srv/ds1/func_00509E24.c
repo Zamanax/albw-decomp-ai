@@ -176,7 +176,7 @@ typedef int code(); typedef unsigned char unkbyte; typedef unsigned int unkuint;
 #define SBORROW8(a,b) (((long long)((unsigned long long)(a) - (unsigned long long)(b)) < (long long)(a)) != ((long long)(b) > 0))
 #define NAN(x) ((x) != (x))
 extern char G_0070FB60[];
-extern __attribute__((weak)) int FUN_0066b580();
+extern int FUN_0066b580();
 
 void FUN_00509e24(int param_1)
 

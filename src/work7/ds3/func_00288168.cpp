@@ -4,7 +4,7 @@ extern "C" void* data_0070B728;
 extern "C" void func_004CDF40(void*, int, int);
 extern "C" void func_004CF478(void*, int, int);
 extern "C" void func_00151148(void*, int);
-extern "C" void func_00661480(void*, int) __attribute__((weak));
+extern "C" void func_00661480(void*, int) ;
 void func_00288168(S288168* self) {
     func_004CDF40(data_0070B728, 0x3c5, 1);
     func_004CF478(self->m40C, 0, 0);

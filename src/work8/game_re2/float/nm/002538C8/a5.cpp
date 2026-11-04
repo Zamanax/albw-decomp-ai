@@ -25,7 +25,7 @@ struct BitFlag16 {
     void reset(u16 m) { change(m, false); }
 };
 
-extern __attribute__((weak)) void func_0065FE3C(void*, int);
+extern void func_0065FE3C(void*, int);
 
 inline void chaseF(f32* p, f32 t, f32 r) { f32 v = *p; *p = v + (t - v) * r; }
 void func_002538C8(void* self) {

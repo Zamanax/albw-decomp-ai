@@ -634,8 +634,9 @@ Constructs that closed near-misses (all honest):
   (004ECF84, 00450EB8, 0031D4FC, 0023F828, 0036E418).
 - Original `bl X; pop {..,pc}` where armcc emits tail `b X`:
   `--apcs=/fpic` (004FFFDC, 00500DCC, 00478E08, 00288510, 001CDF44 with
-  -O2). This is a flag choice, not the forbidden `weak`; worth trying on
-  every weak-hack entry (dehack.py already does).
+  -O2) or `-Ono_tailcall` (00398B98 family; keeps `--apcs=/interwork`,
+  changes nothing else). Both are flag choices, not the forbidden `weak`;
+  dehack.py tries orig, fpic, then -Ono_tailcall on every weak-hack entry.
 - Constant in an argument register (r1) instead of a scratch register:
   pass it through an inlined helper's parameter (001CD1D4 setAB(self,1,0),
   00288090 setTimer) or a named local just before the call

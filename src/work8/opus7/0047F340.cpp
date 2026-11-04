@@ -10,7 +10,7 @@ void func_0012C718(Obj* o);
 void func_00533078(Obj* o, const SafeString& s, s32 z);
 s32 func_00559010(Node* n);
 void func_004B96A0(Obj* o, u32 v);
-__attribute__((weak)) void func_0066EB20(void* p, s32 v);
+void func_0066EB20(void* p, s32 v);
 struct Obj {
     u8 pad[0x14]; Sub14* m14; u8 pad18[0x74 - 0x18]; u8 m74[4]; u8 pad78[0x110 - 0x78];
     Node* m110; Node* m114; Node* m118; Pair m11c;

@@ -14,7 +14,7 @@ s32 func_00187C38(Obj*);
 s32 func_00521064(Obj*);
 s32 func_00520EE4(Obj*);
 s32 func_00520ED8(Obj*);
-__attribute__((weak)) void func_00659544(void*, s32);
+void func_00659544(void*, s32);
 struct Obj {
     u8 pad[0x3e0]; f32 m3e0; u8 pad3e4[0x4fc - 0x3e4]; u8 m4fc[4];
     void f();

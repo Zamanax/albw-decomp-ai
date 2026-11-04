@@ -4,7 +4,7 @@ extern char* data_00706E20;
 extern f32 func_004F898C();
 extern void func_004F8964(f32*, bool, f32);
 extern void* func_0052FBA0(void*, u32);
-__attribute__((weak)) extern void func_00658228(void*, int);
+extern void func_00658228(void*, int);
 
 struct Obj159C7C {
     char pad0[0x994];
