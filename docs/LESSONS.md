@@ -640,6 +640,9 @@ Constructs that closed near-misses (all honest):
   pass it through an inlined helper's parameter (001CD1D4 setAB(self,1,0),
   00288090 setTimer) or a named local just before the call
   (00504C5C `void* hh = heap; u32 kk = 3;`, 002AC998 `int code = 0xf;`).
+- VFP allocation (00521100): `f32 playerY = data_0070FB60->position->y;` *and*
+  `Vec3* pos = &o->position;` together reproduce the target's s3/s2/s1 picture;
+  either one alone leaves the register-only mismatch (17/19).
 - Static-TypeInfo dynamic_cast family: `static getTI()` with
   `__cxa_guard_acquire/release`, `isDerived(a) = a && a->vt->check(a, getTI())`,
   `dynCast(a) = isDerived(a) ? a : 0`, then `if (a) a = dynCast(a); if (a) f(a);`

@@ -54,6 +54,9 @@ Prefer an honest miss. Never claim a match you did not see printed.
   pointer/reference local (`T* s = &p->m; s->f();`), or a named local right before the call.
   Parameterised `inline`/member helpers are inlined late (after constant promotion), parameterless
   ones early — use a member helper with a parameter to keep two equal constants in different regs.
+- VFP registers off by one (s3 vs s2…): combine a named float local for a loaded field
+  (`f32 y = g->pos->y;`) with a pointer local for the compared struct (`Vec3* p = &o->pos;`);
+  00521100 needed both — either alone stays at 17/19.
 - Dead count load before a data-pointer load: inlined bounds-checked accessor
   `T& at(u32 i){ if (i < n) return d[i]; return d[0]; }` used at a constant index.
 - Stored value re-read through the same slot (`u32& s = c->v; s = x; u32 b = s;`) reproduces
