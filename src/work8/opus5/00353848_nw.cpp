@@ -3,7 +3,9 @@ typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; void setMul(const Vec3& a, f32 s); };
+
+#include "vec3.h"
+
 struct Ctl8C8 { u8 pad[4]; };
 bool func_0036BE78(Ctl8C8* c);
 void func_0036B758(Ctl8C8* c);

@@ -8,12 +8,9 @@ typedef unsigned int u32;
 typedef unsigned long long u64;
 typedef int s32;
 typedef float f32;
-struct Vec3 {
-f32 x,y,z;
-void setZero(){
-for(s32 i=0;i<3;++i)(&x)[i]=0.0f;
-}
-};
+
+#include "vec3.h"
+
 struct BitFlag32 {
  u32 v;
  void change(u32 mask,bool on){

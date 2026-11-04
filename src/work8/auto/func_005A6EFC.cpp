@@ -4,7 +4,9 @@ struct SafeString { const char* text; SafeString(const char* s) : text(s) {} vir
 struct Id64 { s64 v; Id64() : v(-1) {} };
 struct Pair { s64 v; Pair() : v(0) {} };
 #pragma pack()
-struct Vec3 { f32 x, y, z; Vec3(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {} };
+
+#include "vec3.h"
+
 inline s64 f2l(f32 f) { return (s64)f; }
 struct PtrCnt { int num, max; PtrCnt(int n) : num(0), max(n) {} };
 struct PtrListBase : PtrCnt { void** ptr; PtrListBase(int n, void* b) : PtrCnt(n), ptr(0) { if (b) ptr = (void**)b; } };

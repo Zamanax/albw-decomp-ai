@@ -2,7 +2,9 @@
 
 // 0x1DDDE8: PlayerMgr (*data_0070FB60) forwarding wrapper, other TU; original is
 // 'ldr r0,[r0,#0x10]; b 0x1DDDF0' and armlink turned the branch-to-next into a NOP (KB #68).
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 class Player {
 public:
     bool setTarget(const Vec3* pos, s32 kind, f32 f);   // 0x1DDDF0

@@ -1,6 +1,8 @@
 typedef unsigned int u32;
 typedef int s32;
-struct Vec3 { u32 x, y, z; };
+
+#include "vec3.h"
+
 extern "C" void func_002DFF7C(void*);
 extern "C" u32 func_0019B04C(u32);
 extern "C" void func_004C43E0(void*, void*);

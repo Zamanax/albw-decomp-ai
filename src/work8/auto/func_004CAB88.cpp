@@ -28,7 +28,9 @@ struct Owner490 {char pad0[0x50];void* m50;};
 struct O4C1D {char pad0[0x989];u8 kind;};
 struct Base3D0E {char pad0[0x8bc];Base3D0E(bool);};
 struct O4C65:Base3D0E {u8 m8bc;O4C65();};
-struct Vec3 {f32 x,y,z;};
+
+#include "vec3.h"
+
 struct Vec4 {f32 x,y,z,w;};
 struct ActorPos {char pad0[0x3d0];Vec3 pos;};
 struct O4E56 {char pad0[0x3d0];Vec3 m3d0;char pad3dc[0xf8];Vec3 m4d4;char pad4e0[0x140];void* m620;char pad624[0x4d];u8 m671;};

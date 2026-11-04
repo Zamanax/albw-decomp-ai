@@ -5,7 +5,9 @@ typedef signed char s8;
 typedef unsigned short u16;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct Entry { u8 pad[0x4c]; s32 m4c; };
 

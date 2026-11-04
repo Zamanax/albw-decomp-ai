@@ -1,6 +1,8 @@
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct PlayerPositionMgr { char pad0[0x1c]; Vec3* position; };
 extern PlayerPositionMgr* data_0070FB60;

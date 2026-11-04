@@ -1,6 +1,8 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Timer {
     u32 cur, max; f32 rate;
     void start(u32 n, const u32& c = 0) { max = n; if (n) rate = 1.0f / (f32)n; else rate = 0.0f; cur = c; }

@@ -2,7 +2,9 @@ typedef unsigned char u8;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct Timer {
     u32 cur;

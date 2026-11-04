@@ -1,5 +1,7 @@
 #include "range.h"
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 extern const Vec3 vzero_7A9260;
 struct SVX { virtual void s0(); };
 struct P { P(u32 a, u32 b, u32 c, const Vec3* d, u32 e, u32 f);

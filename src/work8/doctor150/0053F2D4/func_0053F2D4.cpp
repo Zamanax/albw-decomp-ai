@@ -5,7 +5,9 @@ typedef int s32;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Ang { s32 v; Ang(s32 x) : v(x) {} };
 s32 func_004D80EC(const Vec3* pos, u32 a, s32 ang);
 s32 func_0068C690(const Vec3& v);

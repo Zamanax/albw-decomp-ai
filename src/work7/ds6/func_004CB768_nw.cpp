@@ -2,7 +2,9 @@ typedef unsigned char u8;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; void set(const Vec3& o){ x=o.x; y=o.y; z=o.z; } };
+
+#include "vec3.h"
+
 struct P { u8 _p[0x3d0]; Vec3 v; };
 
 extern void* func_004CADD8(void*, u32);

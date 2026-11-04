@@ -19,7 +19,9 @@ s32 func_00588BE4(Actor* a);
 void func_00150A84(Actor* a, const sead::SafeString& name, s32 v);  
 extern const s32 data_00693878;
 
-struct Vec3 { f32 x, y, z; void set(f32 a, f32 b, f32 c) { x = a; y = b; z = c; } };
+
+#include "vec3.h"
+
 struct Sub500 { char p0[8]; s16 m8; };
 struct Actor {
     char p0[0x3dc];

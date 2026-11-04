@@ -33,15 +33,9 @@ struct SEHandle {               // 0x60-byte stack object, ctor 0x10A464, dtor 0
     u8 buf[0x60];
 };
 
-struct Vec3 {
-    f32 x, y, z;
-    Vec3() {}
-    void set(const Vec3& o) { *this = o; }
-    void setAdd(const Vec3& a, const Vec3& b);   // 0x115C54 (non-weak, out-of-line)
-    Vec3& operator+=(const Vec3& o) { setAdd(*this, o); return *this; }
-    void setMul(const Vec3& a, f32 s);            // 0x115D70
-    Vec3(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-};
+
+#include "vec3.h"
+
 
 struct StateMgr4D4 {
     void func_0065C310(s32 st);   // 0x65C310 (StateMgr changeState; bl target in 001CD5DC)

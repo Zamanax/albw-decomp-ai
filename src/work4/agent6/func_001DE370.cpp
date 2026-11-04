@@ -1,5 +1,7 @@
 #include "a6.h"
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Cls {
     void setPos(const Vec3& pos, u32 w);  // 0x1DE378
 };

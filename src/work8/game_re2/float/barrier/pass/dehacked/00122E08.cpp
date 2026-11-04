@@ -6,7 +6,9 @@ extern "C" void func_002E1B70(void*);
 extern "C" void func_00115DC8(void*);
 extern "C" void* data_00708998;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct C {
     u8 pad[0x160];

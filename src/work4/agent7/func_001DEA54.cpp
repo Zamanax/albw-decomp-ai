@@ -31,11 +31,9 @@ public:
 }  // namespace RuntimeTypeInfo
 }  // namespace sead
 
-struct Vec3 {
-    Vec3() {}
-    Vec3(f32 ax, f32 ay, f32 az) : x(ax), y(ay), z(az) {}
-    f32 x, y, z;
-};
+
+#include "vec3.h"
+
 struct Word { u32 v; };
 struct Handle { Handle() : v(0) {} u32 v; };
 

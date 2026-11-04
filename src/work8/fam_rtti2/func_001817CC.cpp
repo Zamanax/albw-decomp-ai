@@ -1,5 +1,7 @@
 #include "rtti_cpp.h"
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Actor : Base { u8 pad[0x2cc - 4]; u32 m2CC; u8 pad1[0x2e0 - 0x2d0]; u32 m2E0; u8 pad2[0x3d0 - 0x2e4]; Vec3 m3D0; };
 struct A : Actor { SEAD_RTTI_OVERRIDE(A, Actor) };
 extern "C" char* data_00706E20;

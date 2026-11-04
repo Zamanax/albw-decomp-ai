@@ -1,6 +1,8 @@
 typedef unsigned int u32;
 typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 namespace sead { struct Vector3f { static const Vec3 zero; }; }
 struct HitResult {
     f32 m0; Vec3 m4; Vec3 m10; u32 m1c, m20, m24, m28, m2c;

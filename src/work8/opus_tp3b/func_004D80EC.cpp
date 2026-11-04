@@ -27,7 +27,9 @@ inline u32 atanXZ(f32* v) {
     }
 }
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 void func_00115C70(Vec3* out, const Vec3& a, const Vec3& b);
 u32 func_004D80EC(const Vec3& from, const Vec3& to, u32 def) {
     Vec3 d;

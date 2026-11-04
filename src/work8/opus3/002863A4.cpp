@@ -4,7 +4,9 @@ typedef unsigned int u32; typedef int s32; typedef float f32;
 struct Thing { virtual void vf0(); };
 typedef void (Thing::*PMF)();
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Obj430 { char pad0[0x61]; u8 m61; };
 struct Obj434 { char pad0[4]; Vec3 m4; char pad1[0x5c - 0x10]; f32 m5c; };
 struct Obj458 { char pad0[0x164]; u32 m164; };

@@ -4,7 +4,9 @@ typedef int s32;
 typedef unsigned char u8;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; void setZero() { for (int i = 0; i < 3; i++) (&x)[i] = 0.0f; } void set(f32 a, f32 b, f32 c) { x = a; y = b; z = c; } };
+
+#include "vec3.h"
+
 
 struct Timer {
     u32 cur;

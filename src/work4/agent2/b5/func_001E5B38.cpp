@@ -1,6 +1,8 @@
 // 0x1E5B38 / 0x1E5EDC: compare XZ of m478 with m490 (x first here; 0x1E5EDC tests z first)
 typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Obj1E5B38 {
     bool isAtTargetXZ() const;
     char pad[0x478];

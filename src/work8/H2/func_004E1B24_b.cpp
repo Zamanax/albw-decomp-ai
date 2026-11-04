@@ -1,9 +1,8 @@
 #include "range.h"
 extern "C" void func_00151148(void*, s32);
-struct Vec3 {
-    f32 x, y, z;
-    void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; }
-};
+
+#include "vec3.h"
+
 struct V {
     Vec3 v;
     f32 m0c;

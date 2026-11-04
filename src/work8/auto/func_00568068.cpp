@@ -2,7 +2,9 @@
 #define GPT21_RANGE_H
 // Recovered partial types for ladder list 7; descriptive names only.
 #include "albw_types.h"
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 struct VecCopy {
     f32 x,y,z;
     VecCopy& operator=(const VecCopy& o) { x=o.x; y=o.y; z=o.z; return *this; }

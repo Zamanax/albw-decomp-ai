@@ -9,10 +9,9 @@ typedef signed short s16;
 typedef unsigned int u32;
 typedef signed int s32;
 typedef float f32;
-struct Vec3 {
-    f32 x,y,z;
-    void setZero(){for(s32 i=0;i<3;++i)(&x)[i]=0.0f;}
-};
+
+#include "vec3.h"
+
 struct NpcControl30 {
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();

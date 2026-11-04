@@ -1,5 +1,7 @@
 #include "ds4.h"
-struct Vec3 { float x, y, z; };
+
+#include "vec3.h"
+
 extern "C" void func_0028BFC0(u32, void*, void*);
 
 extern "C" void func_003647C4(char* self) {

@@ -1,5 +1,7 @@
 typedef unsigned int u32; typedef float f32;
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 struct Bounds22 { Vec3 minimum; Vec3 maximum; u32 unk18; u32 count; f32 value; };
 inline f32 minimum22(f32 a, f32 b) { return a > b ? b : a; }
 inline f32 maximum22(f32 a, f32 b) { return a > b ? a : b; }

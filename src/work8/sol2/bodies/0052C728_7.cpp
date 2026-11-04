@@ -2,11 +2,9 @@ typedef unsigned char u8;
 typedef signed int s32;
 typedef float f32;
 
-struct Vec3 {
-  f32 x;
-  f32 y;
-  f32 z;
-};
+
+#include "vec3.h"
+
 
 struct Obj {
   u8 pad[0x3d0];

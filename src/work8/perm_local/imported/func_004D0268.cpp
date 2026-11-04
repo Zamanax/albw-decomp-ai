@@ -13,9 +13,9 @@ struct NoThrowTag {
 };
 void* operator new(unsigned int size, NoThrowTag) throw();
 
-struct Vec3 {
-f32 x, y, z;
-};
+
+#include "vec3.h"
+
 
 struct Req5C {
     char _pad[0x5c];

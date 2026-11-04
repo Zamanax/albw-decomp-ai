@@ -1,6 +1,8 @@
 // 0x1E5EDC (virtual): z first then x
 typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Obj1E5EDC {
     virtual bool isAtTargetXZ() const;
     char pad[0x478 - 4];

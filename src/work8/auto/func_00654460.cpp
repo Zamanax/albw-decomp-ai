@@ -1,6 +1,8 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef int s32; typedef unsigned int u32; typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct StateControl { u32 count; };
 struct Blk544 { u8 pad[0xc8]; f32 m8c8; u8 pad2[0xe0-0xcc]; u16 m8e0; u16 m8e2; u16 m8e4; };
 struct P544 {

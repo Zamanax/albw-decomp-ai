@@ -1,7 +1,7 @@
 typedef unsigned char u8; typedef unsigned int u32; typedef signed int s32; typedef float f32;
-struct Vec3 { float x, y, z; void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; }
 
-};
+#include "vec3.h"
+
 namespace sead { struct Random { u32 getU32();
 f32 getF32() { return getU32() * (1.0f / 4294967296.0f); } f32 getF32(f32 m);  f32 getF32Range(f32 a, f32 b) { return getF32(b - a) + a; }
 }; }

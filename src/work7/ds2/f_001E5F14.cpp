@@ -1,5 +1,7 @@
 #include "ds2.h"
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 extern const Vec3 zero3;
 struct ActorBaseA {
     virtual void v0(); virtual void v1(); virtual void v2(); virtual ~ActorBaseA();

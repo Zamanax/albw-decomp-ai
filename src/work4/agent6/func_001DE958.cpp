@@ -7,7 +7,9 @@ public:
     const char* mStringTop;
 };
 }
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Vec2 {
     Vec2(f32 x_, f32 y_) : x(x_), y(y_) {} void set(f32 x_, f32 y_) { y = y_; x = x_; }
     f32 x, y;

@@ -1,7 +1,9 @@
 
 
 typedef unsigned int u32; typedef int s32; typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16; typedef float f32;
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 struct ActorView { u8 pad[0x3a4]; s32 animId; };
 
 struct TaggedValue {u32 value;u8 kind;u8 pad5;union {u16 half;u8 byte;} small;u32 pad8,padC;u32 word;};

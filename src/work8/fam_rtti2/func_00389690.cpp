@@ -33,7 +33,9 @@ struct AnimArr {
     u8 pad[0xc]; s32 mNum; s32 mMax; Elem* mData;
     Elem& operator[](s32 i) { if ((u32)i < (u32)mNum) return mData[i]; return mData[0]; }
 };
-struct Vec3 { float x, y, z; };
+
+#include "vec3.h"
+
 struct A : Obj { u8 pad[0x3d0 - 4]; Vec3 m3d0; u8 pad2[0x3e8 - 0x3dc]; u32 m3e8; };
 extern "C" char* data_00706E20;
 extern "C" Obj* func_0052FBA0(void* mgr, u32 h);

@@ -1,6 +1,8 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x, y, z; Vec3(f32 a, f32 b, f32 c) { x = a; y = b; z = c; } };
+
+#include "vec3.h"
+
 struct BitFlag32 { u32 v; void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; } void set(u32 m) { change(m, true); } void reset(u32 m) { change(m, false); } };
 struct Timer {
     u32 cur, max; f32 rate;

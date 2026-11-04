@@ -10,7 +10,9 @@ typedef unsigned int u32;
 typedef signed int s32;
 typedef unsigned long long u64;
 
-struct Vec3 { float x, y, z; void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; } };
+
+#include "vec3.h"
+
 namespace sead { struct Random { u32 getU32(); }; }
 struct Actor;
 

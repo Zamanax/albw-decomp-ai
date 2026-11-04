@@ -2,10 +2,9 @@ typedef unsigned char u8;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec3 {
-  f32 x, y, z;
-  void setAdd(const Vec3& a, const Vec3& b);
-};
+
+#include "vec3.h"
+
 
 struct Obj {
   u8 p0[0x3d0];

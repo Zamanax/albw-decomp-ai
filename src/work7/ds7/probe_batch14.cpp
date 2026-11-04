@@ -21,7 +21,9 @@ s32 f5819C8(X5819* o) {
 }
 
 // 0x58D200
-struct Vec3 { f32 x, y, z; void setSub(const Vec3& a, const Vec3& b); };
+
+#include "vec3.h"
+
 struct G58D { char pad[0x1c]; Vec3 m1c; };
 extern G58D* data_0070FB60;
 struct X58D200 { char pad[0x3d0]; Vec3 m3d0; char pad2[0x548-0x3dc]; u8 m548; };

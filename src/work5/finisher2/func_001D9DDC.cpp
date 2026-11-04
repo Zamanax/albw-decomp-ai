@@ -4,7 +4,9 @@ typedef unsigned int u32;
 typedef signed int s32;
 typedef unsigned char u8;
 typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Mtx34 { f32 m[3][4]; };
 struct Ctr { u32 cur, max; bool isEnd() const { return cur >= max; } bool isEndC() const { Ctr c = *this; return c.cur >= c.max; }
  bool step2(u8& d) { Ctr c = *this; if (c.cur < c.max) { cur = c.cur + 1; return true; } d = c.cur >= c.max; return false; }

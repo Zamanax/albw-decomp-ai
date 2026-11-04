@@ -11,7 +11,9 @@ struct StateMgr {
         if (mTimeline) func_00352210(mTimeline, 1, (f32)c);
     }
 };
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 struct Act { u8 p0[0x80]; u8 m80[0x164-0x80]; u32 m164; };
 struct Owner { u8 pad[0x3d0]; Vec3 m3d0; u8 p3dc[0x3e8-0x3dc]; u32 m3e8; u8 p3ec[0x410-0x3ec]; Act* m410; void* m414; StateMgr mMgr; void func_0013C6D4(); };
 extern "C" void func_004D8AEC(void*, u32, Vec3*);

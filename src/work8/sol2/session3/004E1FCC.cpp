@@ -1,10 +1,9 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
 
-struct Vec3 {
-    f32 x, y, z;
-    void setAdd(const Vec3& a, const Vec3& b);
-};
+
+#include "vec3.h"
+
 
 struct Obj;
 void func_004E2030(Obj* self);

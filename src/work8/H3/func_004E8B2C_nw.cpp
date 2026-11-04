@@ -4,11 +4,9 @@
 
 typedef unsigned int u32;
 
-struct Vec3 {
-    u32 a;
-    u32 b;
-    u32 c;
-};
+
+#include "vec3.h"
+
 
 struct Self {
     char p0[0x3dc];

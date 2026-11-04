@@ -1,5 +1,7 @@
 #include "a6.h"
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 template <typename T>
 struct PtrArray {

@@ -3,7 +3,9 @@ typedef int s32;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 extern Vec3 data_007A9260;
 extern "C" Vec3* func_00520FC0(void*);
 extern "C" void func_00115C70(Vec3*, const Vec3&, const Vec3&);

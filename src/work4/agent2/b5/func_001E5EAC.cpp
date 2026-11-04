@@ -1,6 +1,8 @@
 // 0x1E5EAC: save previous m478.z into m48c, set m478.z = v, copy m478 into m40c->m4 via Vec3::set (member-wise)
 typedef float f32;
-struct Vec3 { f32 x, y, z; void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; } };
+
+#include "vec3.h"
+
 struct Obj40C { char pad[4]; Vec3 m4; };
 struct Obj1E5EAC {
     void setF480(f32 v);

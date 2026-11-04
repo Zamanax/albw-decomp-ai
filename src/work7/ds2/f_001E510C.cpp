@@ -1,6 +1,8 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Player { char pad0[0x1c]; Vec3* m1c; };
 extern Player* data_0070FB60;
 s32 func_00556E00(Player* p);           // 0x556E00

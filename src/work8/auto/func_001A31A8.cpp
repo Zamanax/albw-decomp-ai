@@ -1,9 +1,7 @@
 #include "albw_types.h"
-struct Vec3 {
-    f32 x, y, z;
-    Vec3() {}
-    Vec3(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-};
+
+#include "vec3.h"
+
 struct SinCosSample { f32 sin_val, sin_delta, cos_val, cos_delta; };
 extern const SinCosSample ro_006C3AB8[];
 inline void copyVec(Vec3* d, const Vec3& s) { *d = s; }

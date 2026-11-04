@@ -4,7 +4,9 @@ typedef unsigned short u16;
 typedef unsigned char u8;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct Npc;
 

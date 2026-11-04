@@ -8,7 +8,9 @@ typedef short s16;
 typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 struct VecCopy {
     f32 x,y,z;
     VecCopy& operator=(const VecCopy& o) { x=o.x; y=o.y; z=o.z; return *this; }

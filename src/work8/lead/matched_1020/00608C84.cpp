@@ -1,10 +1,9 @@
 typedef unsigned int u32;
 namespace std { struct nothrow_t {}; extern const nothrow_t nothrow; }
 void* operator new(unsigned int, std::nothrow_t) throw();
-struct Vec3 {
-    float x, y, z;
-    Vec3(float a, float b, float c) : x(a), y(b), z(c) {}
-};
+
+#include "vec3.h"
+
 extern "C" void func_003094A0(unsigned);
 struct Base_00309850 {
     Base_00309850(unsigned owner, unsigned a, unsigned b, const Vec3& vec,

@@ -3,9 +3,9 @@ typedef signed int s32;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec3 {
-    f32 x, y, z;
-};
+
+#include "vec3.h"
+
 
 struct StateMgr {
     u32 raw;

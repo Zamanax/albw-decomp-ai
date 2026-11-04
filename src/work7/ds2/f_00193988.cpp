@@ -1,7 +1,9 @@
 #include "ds2.h"
 #ifndef VEC3_DEFINED_D
 #define VEC3_DEFINED_D
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 #endif
 struct SpawnParam {
     SpawnParam() : m1c(0), m20(0), m24(0), m48(0), m4c(0), m2c0(0) { reset(); }

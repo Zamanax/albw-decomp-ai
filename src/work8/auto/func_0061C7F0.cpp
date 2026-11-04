@@ -5,7 +5,9 @@ typedef unsigned short u16;
 typedef short s16;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct Obj {
     u8 pad0[0x2cc];

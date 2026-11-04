@@ -17,7 +17,9 @@ struct VB {
     virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43(u32, s32);
 };
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Timer3 {
     u32 cur, max; f32 rate;
     void start(u32 n, u32 c = 0) { max = n; if (n) rate = 1.0f / n; else rate = 0; cur = c; }

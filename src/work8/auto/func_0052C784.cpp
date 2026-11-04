@@ -1,7 +1,9 @@
 typedef unsigned char u8;
 typedef unsigned int u32;
 typedef float f32;
-struct Vec3 { f32 x; f32 y; f32 z; };
+
+#include "vec3.h"
+
 struct Sub800 { u8 pad[0x38]; f32 m38; };
 struct Obj { u8 pad[0x3d0]; f32 m3d0; f32 m3d4; f32 m3d8; u8 pad2[0x800 - 0x3dc]; Sub800 m800; };
 struct Player70FB60 { char pad[0x24]; u32* m24; };

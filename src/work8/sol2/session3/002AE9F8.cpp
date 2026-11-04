@@ -18,7 +18,9 @@ struct Flag16 {
     void set(u16 mask){*this = Flag16((u16)(v | mask));}
 };
 
-struct Vec3 { f32 x,y,z; void setZero(){ for(s32 i=0;i<3;++i)(&x)[i]=0.f; } };
+
+#include "vec3.h"
+
 
 struct Flag32 {
     u32 v;

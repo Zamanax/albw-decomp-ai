@@ -28,7 +28,9 @@ static bool isDerived(const Obj* a)
     const TypeInfo* ti = getTI();
     return a && a->checkDerived(ti);
 }
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct D : Obj { u8 pad[0x3d0 - 4]; Vec3 m3D0; u8 pad1[0x3e8 - 0x3dc]; u32 m3E8; };
 struct IdT { u32 m0; s32 m4; };
 extern "C" char* data_00706E20;

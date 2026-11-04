@@ -2,7 +2,9 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct SP {
  SP():m1c(0),m20(0),m24(0),m48(0),m4c(0),m2c0(0){func_002DFF7C();}
  void func_002DFF7C();

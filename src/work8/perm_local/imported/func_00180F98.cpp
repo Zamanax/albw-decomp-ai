@@ -42,7 +42,9 @@ template <class D, class T> inline D* DynamicCast(T* o)
     return 0;
 }
 struct Base { public: static const sead::RuntimeTypeInfo::Interface* getRuntimeTypeInfoStatic() { static const sead::RuntimeTypeInfo::Root typeInfo; return &typeInfo; } static bool checkDerivedRuntimeTypeInfoStatic(const sead::RuntimeTypeInfo::Interface* typeInfo) { const sead::RuntimeTypeInfo::Interface* clsTypeInfo = Base::getRuntimeTypeInfoStatic(); return clsTypeInfo == typeInfo; } virtual bool checkDerivedRuntimeTypeInfo(const sead::RuntimeTypeInfo::Interface* typeInfo) const { return checkDerivedRuntimeTypeInfoStatic(typeInfo); } virtual const sead::RuntimeTypeInfo::Interface* getRuntimeTypeInfo() const { return getRuntimeTypeInfoStatic(); } };
-struct Vec3 { f32 x, y, z; void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; } };
+
+#include "vec3.h"
+
 struct Actor : Base { u8 pad[0x3d0 - 4]; Vec3 m3D0; };
 struct A : Actor { public: static const sead::RuntimeTypeInfo::Interface* getRuntimeTypeInfoStatic() { static const sead::RuntimeTypeInfo::Derive<Actor> typeInfo; return &typeInfo; } static bool checkDerivedRuntimeTypeInfoStatic(const sead::RuntimeTypeInfo::Interface* typeInfo) { const sead::RuntimeTypeInfo::Interface* clsTypeInfo = A::getRuntimeTypeInfoStatic(); return clsTypeInfo == typeInfo ? true : Actor::checkDerivedRuntimeTypeInfoStatic(typeInfo); } virtual bool checkDerivedRuntimeTypeInfo(const sead::RuntimeTypeInfo::Interface* typeInfo) const { return checkDerivedRuntimeTypeInfoStatic(typeInfo); } virtual const sead::RuntimeTypeInfo::Interface* getRuntimeTypeInfo() const { return getRuntimeTypeInfoStatic(); } };
 extern "C" char* data_00706E20;

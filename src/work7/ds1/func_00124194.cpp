@@ -4,7 +4,9 @@ typedef signed int s32;
 typedef float f32;
 typedef unsigned long long u64;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 extern "C" void func_0014EB3C(void*);
 extern "C" void func_00115D70(Vec3*, const Vec3*, f32);

@@ -1,5 +1,7 @@
 typedef unsigned int u32; typedef int s32; typedef unsigned short u16; typedef short s16; typedef unsigned char u8; typedef signed char s8; typedef float f32; typedef unsigned long long u64;
-struct Vec3 {f32 x,y,z; void setSub(const Vec3&,const Vec3&); void setZero(){for(int i=0;i<3;i++) (&x)[i]=0.f;} };
+
+#include "vec3.h"
+
 namespace sead {struct SafeString{SafeString(const char*s):mStringTop(s){} virtual void assureTerminationImpl_() const; const char* mStringTop;};}
 struct StateA {char p[0x24];void func_0065DC84(int) ;};
 struct StateB {char p[0x24];void func_0065DDC8(int) ;};

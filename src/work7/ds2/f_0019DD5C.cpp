@@ -1,5 +1,7 @@
 #include "ds2.h"
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 Vec3* func_00520FC0(void*);
 u32 func_0068C794(f32*, f32, f32, f32, f32);
 void func_0065A1EC(void*, u32);

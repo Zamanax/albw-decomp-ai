@@ -3,9 +3,9 @@
 
 typedef float f32;
 
-struct Vec3 {
-    f32 x, y, z;
-};
+
+#include "vec3.h"
+
 
 extern "C" float __sqrtf(float v);
 

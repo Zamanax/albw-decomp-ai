@@ -1,4 +1,6 @@
-struct Vec3 { float x, y, z; };
+
+#include "vec3.h"
+
 extern "C" void func_003E2298(Vec3* out, const Vec3* a, const Vec3* b) {
     Vec3 r;
     r.x = a->y * b->z - a->z * b->y;

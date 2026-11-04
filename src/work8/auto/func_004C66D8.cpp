@@ -1,5 +1,7 @@
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Player { char pad0[0x1c]; Vec3* m1c; };
 extern "C" {
 extern void* data_0070B728;

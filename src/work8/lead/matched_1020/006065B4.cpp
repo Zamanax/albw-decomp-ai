@@ -2,7 +2,9 @@ typedef unsigned int u32;
 typedef unsigned char u8;
 namespace std { struct nothrow_t {}; extern const nothrow_t nothrow; }
 void* operator new(unsigned int, std::nothrow_t) throw();
-struct Vec3 { u32 x, y, z; };
+
+#include "vec3.h"
+
 extern "C" Vec3 data_007A9260;
 struct Base_004ED00C {
     Base_004ED00C(unsigned p);

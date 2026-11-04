@@ -8,7 +8,9 @@ typedef short s16;
 typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
-struct Vec3 { f32 x,y,z; void setAdd(const Vec3&,const Vec3&); void setSub(const Vec3&,const Vec3&); };
+
+#include "vec3.h"
+
 // Address-based names denote recovered views, not original SDK names.
 struct Actor150 {
     u8 pad0[0x3a0]; u32 m3a0;

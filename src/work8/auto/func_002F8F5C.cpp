@@ -1,7 +1,9 @@
 typedef unsigned int u32;
 typedef unsigned short u16;
 
-struct Vec3 { u32 x, y, z; };
+
+#include "vec3.h"
+
 struct Global { u16 func_00581D60(); };
 struct Game;
 struct SpawnParam;

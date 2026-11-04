@@ -14,11 +14,9 @@ inline void diagnoseResult(u32 result,u32 pc) {
     u32 sign = result >> 31;
     if (sign) func_0010AC24(result,pc);
 }
-struct Vec3 {
-    f32 x, y, z;
-    void setDiv(const Vec3&, f32);
-    void setMul(const Vec3&, f32);
-};
+
+#include "vec3.h"
+
 struct ModelScale {
     char pad0[0x74];
     f32 scaleX, scaleY, scaleZ;

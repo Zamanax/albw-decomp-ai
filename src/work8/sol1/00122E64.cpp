@@ -3,7 +3,9 @@
 typedef unsigned char u8; typedef signed char s8;
 typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x,y,z; void setZero(){for(s32 i=0;i<3;++i)(&x)[i]=0.0f;} };
+
+#include "vec3.h"
+
 template<class T> struct ResourceEntry16 { T* object; u32 reserved[3]; };
 struct Flag32 {
     u32 value;

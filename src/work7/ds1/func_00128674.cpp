@@ -6,9 +6,9 @@ typedef float f32;
 
 extern "C" void func_004FABDC(void*, u32, s32, u32);
 
-struct Vec3 {
-    f32 x, y, z;
-};
+
+#include "vec3.h"
+
 
 struct S {
     u8 pad0[0x4e4];

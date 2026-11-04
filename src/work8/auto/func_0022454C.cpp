@@ -3,7 +3,9 @@ typedef int s32;
 typedef unsigned char u8;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 
 struct AnimElem {
     u32 m0, m4;

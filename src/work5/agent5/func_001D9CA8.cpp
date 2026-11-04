@@ -1,7 +1,9 @@
 typedef unsigned int u32;
 typedef signed int s32;
 typedef float f32;
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 extern const s32 ro_00693120;
 u32 func_0019B04C(s32 id);
 struct ActorMgr;

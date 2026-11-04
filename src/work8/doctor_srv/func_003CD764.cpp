@@ -10,7 +10,9 @@ typedef float f32;
 struct Triple3C2 {u32 a,b,c;};
 struct Obj3C2 {char pad[0x1fc]; Triple3C2 value;};
 struct Flag32 {u32 v; void change(u32 m,bool on){if(on)v|=m;else v&=~m;} void set(u32 m){change(m,true);} void reset(u32 m){change(m,false);}};
-struct Vec3 {f32 x,y,z;};
+
+#include "vec3.h"
+
 struct ActorPrimary19 {
  virtual void v0(); virtual void v1(); virtual void v2(); virtual ~ActorPrimary19();
  virtual void v5(); virtual void v6(); virtual void v7(); virtual void v8();

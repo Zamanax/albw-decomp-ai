@@ -1,6 +1,8 @@
 // MATCH (finisher2): update the by-value Vec3 member in place (p.x = ..; p.x += 8) instead of a separate f32 x copied into p.x -> vadd into s16 in place.
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x, y, z; Vec3() {} Vec3(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {} void set(f32 a, f32 b, f32 c) { x = a; y = b; z = c; } };
+
+#include "vec3.h"
+
 inline void copyVec(Vec3* d, const Vec3& s) { *d = s; }
 struct Timer {
     u32 cur;

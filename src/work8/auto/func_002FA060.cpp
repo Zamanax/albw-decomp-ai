@@ -26,9 +26,9 @@ struct BitFlag32 {
     void set(u32 b) { v |= b; }
 };
 
-struct Vec3 {
-    f32 x, y, z;
-};
+
+#include "vec3.h"
+
 
 struct En {
     char p0[0x3dc];

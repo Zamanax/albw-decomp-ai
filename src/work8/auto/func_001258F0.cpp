@@ -3,7 +3,9 @@ typedef int s32;
 typedef unsigned long long u64;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 void func_00115C70(Vec3* out, const Vec3& a, const Vec3& b);
 inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; func_00115C70(&r, a, b); return r; }
 s32 func_0068C690(const Vec3& v);

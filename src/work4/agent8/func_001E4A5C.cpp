@@ -4,7 +4,9 @@ typedef unsigned int u32;
 typedef signed int s32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; void set(const Vec3& o) { *this = o; } };
+
+#include "vec3.h"
+
 struct Vec2 { f32 x, y; };
 struct Word { u32 v; };
 
@@ -47,7 +49,7 @@ public:
 bool Actor4A5C::func_001E4A5C(s32 unused, const Vec3* pos) {
     if (!m4F1)
         return false;
-    m3DC.set(*pos);
+    m3DC.setCopy(*pos);
     if (m4DC) {
         ActorX* a = func_0052FBA0(&data_00706E20->handles, m4DC);
         if (a)

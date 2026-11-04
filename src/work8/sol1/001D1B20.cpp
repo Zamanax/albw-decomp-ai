@@ -13,7 +13,9 @@ public:
 };
 typedef SafeStringBase<char> SafeString;
 }
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct Sub2C { u8 m0; s8 m1; };
 struct Msg { char pad[0x2c]; Sub2C* m2c; };
 struct Act1D0;

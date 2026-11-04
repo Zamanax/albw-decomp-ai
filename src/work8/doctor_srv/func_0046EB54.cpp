@@ -10,7 +10,9 @@ typedef signed long long s64;
 typedef unsigned long long u64;
 typedef float f32;
 struct Vec2 {f32 x,y;};
-struct Vec3 { f32 x,y,z; };
+
+#include "vec3.h"
+
 struct Pair32 {u32 a,b;};
 struct RangeNode19 {RangeNode19* prev;RangeNode19* next;};
 struct CountedList19 {u32 count;RangeNode19 root;};

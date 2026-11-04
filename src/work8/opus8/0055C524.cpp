@@ -2,11 +2,9 @@ typedef unsigned char u8;
 typedef unsigned int u32;
 typedef int s32;
 
-struct Vec3 {
-    float x, y, z;
-    void setSub(const Vec3& a, const Vec3& b);
-    float dot(const Vec3& o) const { return x * o.x + y * o.y + z * o.z; }
-};
+
+#include "vec3.h"
+
 inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; r.setSub(a, b); return r; }
 inline Vec3 sub(const Vec3& a, const Vec3& b) { Vec3 r; r.setSub(a, b); return r; }
 inline Vec3 sub2(const Vec3& b, const Vec3& a) { Vec3 r; r.setSub(a, b); return r; }

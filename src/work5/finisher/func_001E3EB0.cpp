@@ -6,14 +6,9 @@ typedef float f32;
 struct NoThrowTag {};
 void* operator new(unsigned int size, NoThrowTag) throw();
 
-struct Vec3 {
-    f32 x, y, z;
-    void setScaleAdd(f32 s, const Vec3& a, const Vec3& b);   // 0x115DAC
-    void setMul(const Vec3& a, f32 s);                        // 0x115D70
-    void setAdd(const Vec3& a, const Vec3& b);                // 0x115C54
-    Vec3& operator+=(const Vec3& o) { setAdd(*this, o); return *this; }
-    void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; }
-};
+
+#include "vec3.h"
+
 inline Vec3 operator*(const Vec3& a, f32 s) { Vec3 r; r.setMul(a, s); return r; }
 
 struct Id16 {

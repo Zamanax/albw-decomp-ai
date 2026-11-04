@@ -14,20 +14,9 @@ struct SafeString {
     const char* mStringTop;
 };
 }
-struct Vec3 {
-    f32 x,y,z;
-    Vec3(){}
-    Vec3(f32 a,f32 b,f32 c):x(a),y(b),z(c){}
-    void set(f32 a,f32 b,f32 c){x=a;y=b;z=c;}
-    void set(const Vec3& v){*this=v;}
-    void setSub(const Vec3&,const Vec3&); // 0x115C70
-    void setAdd(const Vec3&,const Vec3&); // 0x115C54
-    void setMul(const Vec3&,f32); // 0x115D70
-    f32 normalize(); // 0x115DC8
-    void operator+=(const Vec3& v){setAdd(*this,v);}
-    void zero(){for(int i=0;i<3;i++) (&x)[i]=0.0f;}
-    f32 squaredLength()const{return x*x+y*y+z*z;}
-};
+
+#include "vec3.h"
+
 inline Vec3 operator+(const Vec3& a,const Vec3& b){Vec3 v;v.setAdd(a,b);return v;}
 inline Vec3 operator-(const Vec3& a,const Vec3& b){Vec3 v;v.setSub(a,b);return v;}
 inline Vec3 operator*(const Vec3& a,f32 b){Vec3 v;v.setMul(a,b);return v;}
@@ -146,6 +135,6 @@ void func_004D8AEC(void*,s32,const Vec3&);
 void func_004CEAF0(Model*);
 void func_001512B4(void*,const Vec3&);
 
-inline void En::impl(float z){Vec3 tr;(*m95c.begin()).model->md8.translation(&tr);float rate;if(func_00215F70())rate=0.85f;else rate=1.0f;Vec3 pos=m3d0;Vec3& p=pos;p+=(tr*0.6f)*rate;m368.set(pos);m3d0.set(pos);m3dc.set(z,z,z);m59c.reset(0x80);m59c.reset(0xc);m59c.reset(0x300);}
+inline void En::impl(float z){Vec3 tr;(*m95c.begin()).model->md8.translation(&tr);float rate;if(func_00215F70())rate=0.85f;else rate=1.0f;Vec3 pos=m3d0;Vec3& p=pos;p+=(tr*0.6f)*rate;m368.setCopy(pos);m3d0.setCopy(pos);m3dc.set(z,z,z);m59c.reset(0x80);m59c.reset(0xc);m59c.reset(0x300);}
 
 void En::target(){impl(0.0f);}

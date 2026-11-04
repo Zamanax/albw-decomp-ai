@@ -21,18 +21,9 @@ public:
 };
 }
 
-struct Vec3 {
-    f32 x, y, z;
-    Vec3() {
-}
-    Vec3(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {
-}
-    void set(f32 a, f32 b, f32 c) {
-x = a;
-y = b;
-z = c;
-}
-};
+
+#include "vec3.h"
+
 
 struct Timer {
     u32 cur;
