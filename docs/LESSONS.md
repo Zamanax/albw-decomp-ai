@@ -684,6 +684,10 @@ Open, recurring (not reproduced honestly yet):
 - **Repeated float→int cast** (003327FC): `(s32)self->value == 1 || (s32)self->value == 3`
   re-materialises with `vmovne r1,s0` inside the if-converted block; caching `s32 v = ...` stays
   at 13/15. Nested `if (!flag) { ... }` gives the `bxne lr` early-outs.
+- **Byte-store records without constant promotion** (003CD4B4, open at 18/28): only an inlined
+  helper parameter stops armcc from caching repeated literals, and the helper body picks the
+  scratch register: `put(u8* d, u8 v){ *d = v; }` uses r3, `{ u8 t = v; *d = t; }` uses r2.
+  Still unsolved: the original re-materialises 3/0xf in r1 and copies the tail zeros from r1.
 - **Register order from inlined-helper parameters**: float lerp `app(f32& v, f32 t, f32 k)` (0031A710),
   flag block taking the session by value (004A523C), `orFlag(a0, 0x1000)` (00125FE4),
   second basis vector via an inlined setter (0014E4B0).
