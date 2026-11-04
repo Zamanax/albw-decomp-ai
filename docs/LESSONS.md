@@ -28,8 +28,9 @@ All numbers below were measured with the byte-exact checker on this game.
 
 ## Measured compiler behaviour (armcc 4.1 b1049, from compiling test sources)
 - `--apcs=/fpic` never emits a tail call. It also makes global data addresses pc-relative.
-- A `weak` declaration of a callee stops tail calls to it. About 500 matches still need this. Their callees are never
-  tail-called anywhere in the game, so the original headers probably declared something that has the same effect.
+- A `weak` declaration of a callee stops tail calls to it. `-Ono_tailcall` (2026-11-04) replaced it honestly in
+  386 entries. Of the 131 weak-only hacks left, ~122 cannot use any per-file flag: the original tail-calls one
+  callee (`b func`, or a virtual `bx ip`) and not another in the same function, so the property is per-callee.
   We could not find a non-weak declaration that reproduces it. A systematic sweep of candidate constructs
   (2026-10-25, armcc -S, target shape `BL callee` + `POP` instead of tail `B`) eliminated: `__declspec(noinline)`
   (with or without `--apcs=/interwork`), discarded int return, variadic callee, `__softfp`, `--exceptions`,
