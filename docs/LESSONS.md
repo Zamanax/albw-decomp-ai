@@ -681,6 +681,9 @@ Open, recurring (not reproduced honestly yet):
   `return xv != yv;` stays at 9/15.
 - **`--cpu=Cortex-A9`** (0047F1CC): MPCore inserts an alignment NOP before a BL 8 bytes after
   another BL; the original has none. Cortex-A8/A9 produce the same code without it.
+- **Repeated float→int cast** (003327FC): `(s32)self->value == 1 || (s32)self->value == 3`
+  re-materialises with `vmovne r1,s0` inside the if-converted block; caching `s32 v = ...` stays
+  at 13/15. Nested `if (!flag) { ... }` gives the `bxne lr` early-outs.
 - **Register order from inlined-helper parameters**: float lerp `app(f32& v, f32 t, f32 k)` (0031A710),
   flag block taking the session by value (004A523C), `orFlag(a0, 0x1000)` (00125FE4),
   second basis vector via an inlined setter (0014E4B0).

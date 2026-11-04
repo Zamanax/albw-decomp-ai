@@ -68,6 +68,8 @@ Prefer an honest miss. Never claim a match you did not see printed.
   inequality tail `eor`/`orrs` with swapped pair regs: `u64 d = a ^ b; return d ? 1 : 0;`.
 - Instruction shapes plateau far below a twin's match: sweep `-O3` without `-Otime` and `-O2`
   before reshaping (003AA984 family plateaued at 27/44 with -Otime, exact without).
+- Float field compared against two ints (`vcvt` then `cmp`/`cmpne` with `vmovne r1,s0`): cast at
+  each comparison, `(s32)o->v == 1 || (s32)o->v == 3`, not a cached int local (003327FC).
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`
