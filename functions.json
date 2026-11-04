@@ -139,11 +139,9 @@
 "001013F8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/opus_tiny/f1013F8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_001013F8.cpp",
+"status": "honest"
 },
 "0010140C": {
 "cc": "4.1/b1049",
@@ -266,12 +264,10 @@
 },
 "001020F0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/001020F0/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/001020F0",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001020F0.cpp",
+"status": "honest"
 },
 "00102120": {
 "cc": "4.1/b1049",
@@ -331,12 +327,10 @@
 },
 "001029DC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/001029DC/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/001029DC",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001029DC.cpp",
+"status": "honest"
 },
 "00102A18": {
 "cc": "4.1/b1049",
@@ -480,30 +474,24 @@
 },
 "00102FB4": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/00102FB4/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/00102FB4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00102FB4.cpp",
+"status": "honest"
 },
 "001030B4": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_001030B4.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001030B4.cpp",
+"status": "honest"
 },
 "001030F0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_001030F0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001030F0.cpp",
+"status": "honest"
 },
 "00103198": {
 "cc": "4.1/b1049",
@@ -577,21 +565,17 @@
 },
 "0010412C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010412C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010412C.cpp",
+"status": "honest"
 },
 "00104198": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_00104198.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00104198.cpp",
+"status": "honest"
 },
 "001041E4": {
 "cc": "4.1/b1049",
@@ -633,12 +617,10 @@
 },
 "0010478C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010478C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010478C.cpp",
+"status": "honest"
 },
 "001047C4": {
 "cc": "4.1/b1049",
@@ -649,12 +631,10 @@
 },
 "001047C8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_001047C8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001047C8.cpp",
+"status": "honest"
 },
 "00104800": {
 "cc": "4.1/b1049",
@@ -672,21 +652,17 @@
 },
 "0010489C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/0010489C/v1.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/0010489C",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010489C.cpp",
+"status": "honest"
 },
 "001048D8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/001048D8/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/001048D8",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001048D8.cpp",
+"status": "honest"
 },
 "00104914": {
 "cc": "4.1/b1049",
@@ -865,30 +841,24 @@
 },
 "001058A8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/001058A8/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/001058A8",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001058A8.cpp",
+"status": "honest"
 },
 "001058EC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/001058EC/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/001058EC",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001058EC.cpp",
+"status": "honest"
 },
 "00105928": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_00105928.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00105928.cpp",
+"status": "honest"
 },
 "00105C24": {
 "cc": "4.1/b1049",
@@ -956,11 +926,9 @@
 "00106314": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/opus_tiny/f106314.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00106314.cpp",
+"status": "honest"
 },
 "00106388": {
 "cc": "4.1/b1049",
@@ -1064,12 +1032,10 @@
 },
 "00108784": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_00108784.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00108784.cpp",
+"status": "honest"
 },
 "00108A7C": {
 "cc": "4.1/b1049",
@@ -1080,12 +1046,10 @@
 },
 "00108AA4": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/00108AA4/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/00108AA4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00108AA4.cpp",
+"status": "honest"
 },
 "00108ADC": {
 "cc": "4.1/b1049",
@@ -1243,39 +1207,31 @@
 },
 "00109208": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/00109208/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/00109208",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00109208.cpp",
+"status": "honest"
 },
 "00109240": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_00109240.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00109240.cpp",
+"status": "honest"
 },
 "00109278": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_00109278.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00109278.cpp",
+"status": "honest"
 },
 "001092BC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/001092BC/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/001092BC",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001092BC.cpp",
+"status": "honest"
 },
 "0010939C": {
 "cc": "4.1/b1049",
@@ -1492,39 +1448,31 @@
 },
 "0010AE3C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010AE3C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010AE3C.cpp",
+"status": "honest"
 },
 "0010AE80": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010AE80.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010AE80.cpp",
+"status": "honest"
 },
 "0010AEA8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/0010AEA8/v4.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/0010AEA8",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010AEA8.cpp",
+"status": "honest"
 },
 "0010AED0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010AED0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010AED0.cpp",
+"status": "honest"
 },
 "0010AEF8": {
 "cc": "4.1/b1049",
@@ -1577,48 +1525,38 @@
 },
 "0010B240": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010B240.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010B240.cpp",
+"status": "honest"
 },
 "0010B278": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/0010B278/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/0010B278",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010B278.cpp",
+"status": "honest"
 },
 "0010B2B4": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/0010B2B4/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/0010B2B4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010B2B4.cpp",
+"status": "honest"
 },
 "0010B2F0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/0010B2F0/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/0010B2F0",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010B2F0.cpp",
+"status": "honest"
 },
 "0010B32C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/0010B32C/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/0010B32C",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010B32C.cpp",
+"status": "honest"
 },
 "0010B368": {
 "cc": "4.1/b1049",
@@ -1818,12 +1756,10 @@
 },
 "0010C0C0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010C0C0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010C0C0.cpp",
+"status": "honest"
 },
 "0010C160": {
 "cc": "4.1/b1049",
@@ -1848,12 +1784,10 @@
 },
 "0010C210": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt23/func_0010C210.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt23",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010C210.cpp",
+"status": "honest"
 },
 "0010C380": {
 "cc": "4.1/b1049",
@@ -1977,11 +1911,9 @@
 "0010CF70": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/opus_tiny/f10CF70.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010CF70.cpp",
+"status": "honest"
 },
 "0010CF7C": {
 "cc": "4.1/b1049",
@@ -2147,11 +2079,9 @@
 "0010E294": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/opus_tiny/f10E294.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010E294.cpp",
+"status": "honest"
 },
 "0010E3B0": {
 "cc": "4.1/b1049",
@@ -2163,11 +2093,9 @@
 "0010EDBC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/opus_tiny/f10EDBC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0010EDBC.cpp",
+"status": "honest"
 },
 "0010EE40": {
 "cc": "4.1/b1049",
@@ -2311,12 +2239,10 @@
 },
 "00110740": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt15/variants/00110740/v0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/00110740",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00110740.cpp",
+"status": "honest"
 },
 "00110AC0": {
 "cc": "4.1/b1049",
@@ -11617,11 +11543,9 @@
 "00129CF4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds1/func_00129CF4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00129CF4.cpp",
+"status": "honest"
 },
 "0012A0EC": {
 "cc": "4.1/b1049",
@@ -14128,11 +14052,9 @@
 "001531E0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds2/f_001531E0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_001531E0.cpp",
+"status": "honest"
 },
 "00153394": {
 "cc": "4.1/b1049",
@@ -14521,11 +14443,9 @@
 "00158C98": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt24/func_00158C98.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00158C98.cpp",
+"status": "honest"
 },
 "00158CD4": {
 "cc": "4.1/b1049",
@@ -14999,11 +14919,9 @@
 "0015E4BC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt16/func_0015E4BC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0015E4BC.cpp",
+"status": "honest"
 },
 "0015E4FC": {
 "cc": "4.1/b1049",
@@ -15057,20 +14975,16 @@
 "0015F848": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt16/func_0015F848.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0015F848.cpp",
+"status": "honest"
 },
 "0015F888": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt16/func_0015F888.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0015F888.cpp",
+"status": "honest"
 },
 "0015F8C8": {
 "cc": "4.1/b1049",
@@ -15236,11 +15150,9 @@
 "00163130": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/nm3/v_1631.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00163130.cpp",
+"status": "honest"
 },
 "0016318C": {
 "cc": "4.1/b1049",
@@ -15429,11 +15341,9 @@
 "001641E4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds2/f_001641E4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_001641E4.cpp",
+"status": "honest"
 },
 "00164AD8": {
 "cc": "4.1/b1049",
@@ -15473,11 +15383,9 @@
 "00165214": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds2/v165214_b.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00165214.cpp",
+"status": "honest"
 },
 "0016540C": {
 "cc": "4.1/b1049",
@@ -19417,11 +19325,9 @@
 "001A92F4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt24/func_001A92F4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_001A92F4.cpp",
+"status": "honest"
 },
 "001A93BC": {
 "cc": "4.1/b1049",
@@ -19904,11 +19810,9 @@
 "001B2660": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/sol2/session3/001B2660.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_001B2660.cpp",
+"status": "honest"
 },
 "001B26DC": {
 "cc": "4.1/b1049",
@@ -26863,11 +26767,9 @@
 "00216C60": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work6/gpt12/func_00216C60.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00216C60.cpp",
+"status": "honest"
 },
 "00217948": {
 "cc": "4.1/b1049",
@@ -27231,11 +27133,9 @@
 "0021BB4C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work6/gpt14/func_0021BB4C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0021BB4C.cpp",
+"status": "honest"
 },
 "0021BC14": {
 "cc": "4.1/b1049",
@@ -30226,11 +30126,9 @@
 "0024FE90": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt24/func_0024FE90.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0024FE90.cpp",
+"status": "honest"
 },
 "0025053C": {
 "status": "no_source"
@@ -32394,11 +32292,9 @@
 "00265454": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds3/func_00265454.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00265454.cpp",
+"status": "honest"
 },
 "00265608": {
 "cc": "4.1/b1049",
@@ -32501,11 +32397,9 @@
 "00266F10": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/ds_srv/ds3/func_00266F10.c",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00266F10.c",
+"status": "honest"
 },
 "00267498": {
 "cc": "4.1/b1049",
@@ -41303,11 +41197,9 @@
 "002EB5A8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/opus8/002EB5A8.c",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_002EB5A8.c",
+"status": "honest"
 },
 "002EB8F4": {
 "cc": "4.1/b1049",
@@ -41567,11 +41459,9 @@
 "002F653C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/sol2/variants/002F653C_0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_002F653C.cpp",
+"status": "honest"
 },
 "002F8DE4": {
 "cc": "4.1/b1049",
@@ -45337,11 +45227,9 @@
 "0033A310": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt18/func_0033A310.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0033A310.cpp",
+"status": "honest"
 },
 "0033A33C": {
 "cc": "4.1/b1049",
@@ -48761,11 +48649,9 @@
 "0037B254": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/H1/func_0037B254.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0037B254.cpp",
+"status": "honest"
 },
 "0037B2B8": {
 "status": "no_source"
@@ -54623,57 +54509,45 @@
 },
 "003C97C4": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003C97C4.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C97C4.cpp",
+"status": "honest"
 },
 "003C9A1C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003C9A1C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C9A1C.cpp",
+"status": "honest"
 },
 "003C9A4C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt26/func_003C9A4C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt26",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C9A4C.cpp",
+"status": "honest"
 },
 "003C9ADC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt26/func_003C9ADC.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt26",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C9ADC.cpp",
+"status": "honest"
 },
 "003C9B68": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt26/func_003C9B68.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt26",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C9B68.cpp",
+"status": "honest"
 },
 "003C9BA0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt26/func_003C9BA0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt26",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C9BA0.cpp",
+"status": "honest"
 },
 "003C9BCC": {
 "cc": "4.1/b1049",
@@ -54880,12 +54754,10 @@
 },
 "003CD8E8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3CD8E8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003CD8E8.cpp",
+"status": "honest"
 },
 "003CD92C": {
 "cc": "4.1/b1049",
@@ -55134,21 +55006,17 @@
 },
 "003D13DC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/audit_reloc/fix/src/003D13DC.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var -I src/work8/audit_reloc/fix/src",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D13DC.cpp",
+"status": "honest"
 },
 "003D1560": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/audit_reloc/fix/src/003D1560.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var -I src/work8/audit_reloc/fix/src",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1560.cpp",
+"status": "honest"
 },
 "003D159C": {
 "cc": "4.1/b1049",
@@ -55162,30 +55030,24 @@
 },
 "003D15EC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D15EC.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D15EC.cpp",
+"status": "honest"
 },
 "003D1624": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D1624.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1624.cpp",
+"status": "honest"
 },
 "003D16B8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3D16B8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D16B8.cpp",
+"status": "honest"
 },
 "003D1700": {
 "cc": "4.1/b1049",
@@ -55220,21 +55082,17 @@
 },
 "003D1890": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/audit_reloc/fix/src/003D1890.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var -I src/work8/audit_reloc/fix/src",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1890.cpp",
+"status": "honest"
 },
 "003D1A14": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/audit_reloc/fix/src/003D1A14.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var -I src/work8/audit_reloc/fix/src",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1A14.cpp",
+"status": "honest"
 },
 "003D1A50": {
 "cc": "4.1/b1049",
@@ -55248,30 +55106,24 @@
 },
 "003D1AA0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D1AA0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1AA0.cpp",
+"status": "honest"
 },
 "003D1AD8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D1AD8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1AD8.cpp",
+"status": "honest"
 },
 "003D1B6C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3D1B6C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D1B6C.cpp",
+"status": "honest"
 },
 "003D1BB4": {
 "cc": "4.1/b1049",
@@ -55376,12 +55228,10 @@
 },
 "003D2564": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/audit_reloc/fix/src/003D2564.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var -I src/work8/audit_reloc/fix/src",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2564.cpp",
+"status": "honest"
 },
 "003D25A0": {
 "cc": "4.1/b1049",
@@ -55494,84 +55344,66 @@
 },
 "003D2D08": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt26/func_003D2D08.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt26",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2D08.cpp",
+"status": "honest"
 },
 "003D2D40": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/auto/var/v_003D2D40_from_003E3D74.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2D40.cpp",
+"status": "honest"
 },
 "003D2D7C": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3D2D7C.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2D7C.cpp",
+"status": "honest"
 },
 "003D2DC0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt26/func_003D2DC0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt26",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2DC0.cpp",
+"status": "honest"
 },
 "003D2DF8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3D2DF8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2DF8.cpp",
+"status": "honest"
 },
 "003D2EA8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D2EA8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2EA8.cpp",
+"status": "honest"
 },
 "003D2EDC": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/auto/var/v_003D2EDC_from_003E3D74.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2EDC.cpp",
+"status": "honest"
 },
 "003D2F18": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3D2F18.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2F18.cpp",
+"status": "honest"
 },
 "003D2F54": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/ds4/f_3D2F54.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/ds4",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D2F54.cpp",
+"status": "honest"
 },
 "003D2F98": {
 "cc": "4.1/b1049",
@@ -55694,12 +55526,10 @@
 },
 "003D5608": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D5608.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D5608.cpp",
+"status": "honest"
 },
 "003D5638": {
 "cc": "4.1/b1049",
@@ -55724,12 +55554,10 @@
 },
 "003D56B8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt18/func_003D56B8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt18",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003D56B8.cpp",
+"status": "honest"
 },
 "003D56F0": {
 "cc": "4.1/b1049",
@@ -56167,12 +55995,10 @@
 },
 "003DB6A0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/audit_reloc/fix/src/003DB6A0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work8/auto/var -I src/work8/audit_reloc/fix/src",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003DB6A0.cpp",
+"status": "honest"
 },
 "003DB6DC": {
 "cc": "4.1/b1049",
@@ -56646,11 +56472,9 @@
 "003DE294": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/sol2/variants/003DE294_0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_003DE294.cpp",
+"status": "honest"
 },
 "003DE2D0": {
 "cc": "4.1/b1049",
@@ -57333,30 +57157,24 @@
 },
 "003E3D74": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt19/func_003E3D74.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt19",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003E3D74.cpp",
+"status": "honest"
 },
 "003E3DB0": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt19/func_003E3DB0.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt19",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003E3DB0.cpp",
+"status": "honest"
 },
 "003E3DD8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt19/func_003E3DD8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt19",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003E3DD8.cpp",
+"status": "honest"
 },
 "003E3F00": {
 "cc": "4.1/b1049",
@@ -57500,30 +57318,24 @@
 },
 "003E5AD8": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt27/func_003E5AD8.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt27",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003E5AD8.cpp",
+"status": "honest"
 },
 "003E5B08": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt19/func_003E5B08.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt19",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003E5B08.cpp",
+"status": "honest"
 },
 "003E5B40": {
 "cc": "4.1/b1049",
-"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work7/gpt27/func_003E5B40.cpp",
-"status": "hack"
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt27",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003E5B40.cpp",
+"status": "honest"
 },
 "003E60D4": {
 "cc": "4.1/b1049",
@@ -59587,11 +59399,9 @@
 "00412D48": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"asm"
-],
-"path": "src/work8/sol2/variants/00412D48_41.c",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00412D48.c",
+"status": "honest"
 },
 "00412E2C": {
 "cc": "4.1/b1049",
@@ -63471,11 +63281,9 @@
 "0044395C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds5/func_0044395C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0044395C.cpp",
+"status": "honest"
 },
 "00443A38": {
 "cc": "4.1/b1049",
@@ -65074,11 +64882,9 @@
 "0046175C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/opus6/0046175C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0046175C.cpp",
+"status": "honest"
 },
 "00461834": {
 "cc": "4.1/b1049",
@@ -72537,11 +72343,9 @@
 "004CAB88": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt20/func_004CAB88.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_004CAB88.cpp",
+"status": "honest"
 },
 "004CAD84": {
 "cc": "4.1/b1049",
@@ -88569,11 +88373,9 @@
 "00568068": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt21/func_00568068.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00568068.cpp",
+"status": "honest"
 },
 "005681C0": {
 "cc": "4.1/b1049",
@@ -106422,11 +106224,9 @@
 "0060E030": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0060E030.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0060E030.cpp",
+"status": "honest"
 },
 "0060E0A4": {
 "cc": "4.1/b1049",
@@ -106445,11 +106245,9 @@
 "0060E0B8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0060E0B8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0060E0B8.cpp",
+"status": "honest"
 },
 "0060E270": {
 "cc": "4.1/b1049",
@@ -106566,11 +106364,9 @@
 "0060EE28": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0060EE28.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0060EE28.cpp",
+"status": "honest"
 },
 "0060EE9C": {
 "cc": "4.1/b1049",
@@ -106589,11 +106385,9 @@
 "0060EEB0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0060EEB0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0060EEB0.cpp",
+"status": "honest"
 },
 "0060F068": {
 "cc": "4.1/b1049",
@@ -106717,11 +106511,9 @@
 "0060FCBC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0060FCBC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0060FCBC.cpp",
+"status": "honest"
 },
 "0060FD30": {
 "cc": "4.1/b1049",
@@ -106740,11 +106532,9 @@
 "0060FD44": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0060FD44.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0060FD44.cpp",
+"status": "honest"
 },
 "0060FEFC": {
 "cc": "4.1/b1049",
@@ -106882,11 +106672,9 @@
 "00610D48": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00610D48.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00610D48.cpp",
+"status": "honest"
 },
 "00610DBC": {
 "cc": "4.1/b1049",
@@ -106905,11 +106693,9 @@
 "00610DD0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00610DD0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00610DD0.cpp",
+"status": "honest"
 },
 "00610F88": {
 "cc": "4.1/b1049",
@@ -107184,11 +106970,9 @@
 "00612A70": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00612A70.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00612A70.cpp",
+"status": "honest"
 },
 "00612AE4": {
 "cc": "4.1/b1049",
@@ -107207,11 +106991,9 @@
 "00612AF8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00612AF8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00612AF8.cpp",
+"status": "honest"
 },
 "00612CB0": {
 "cc": "4.1/b1049",
@@ -107335,11 +107117,9 @@
 "00613904": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00613904.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00613904.cpp",
+"status": "honest"
 },
 "00613978": {
 "cc": "4.1/b1049",
@@ -107358,11 +107138,9 @@
 "0061398C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061398C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061398C.cpp",
+"status": "honest"
 },
 "00613B44": {
 "cc": "4.1/b1049",
@@ -107493,11 +107271,9 @@
 "006147AC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_006147AC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006147AC.cpp",
+"status": "honest"
 },
 "00614820": {
 "cc": "4.1/b1049",
@@ -107516,11 +107292,9 @@
 "00614834": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00614834.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00614834.cpp",
+"status": "honest"
 },
 "006149EC": {
 "cc": "4.1/b1049",
@@ -107644,11 +107418,9 @@
 "00615640": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00615640.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00615640.cpp",
+"status": "honest"
 },
 "006156B4": {
 "cc": "4.1/b1049",
@@ -107667,11 +107439,9 @@
 "006156C8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006156C8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006156C8.cpp",
+"status": "honest"
 },
 "00615880": {
 "cc": "4.1/b1049",
@@ -107795,11 +107565,9 @@
 "006164D4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_006164D4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006164D4.cpp",
+"status": "honest"
 },
 "00616548": {
 "cc": "4.1/b1049",
@@ -107818,11 +107586,9 @@
 "0061655C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061655C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061655C.cpp",
+"status": "honest"
 },
 "00616714": {
 "cc": "4.1/b1049",
@@ -107960,11 +107726,9 @@
 "00617370": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00617370.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00617370.cpp",
+"status": "honest"
 },
 "006173E4": {
 "cc": "4.1/b1049",
@@ -107983,11 +107747,9 @@
 "006173F8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006173F8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006173F8.cpp",
+"status": "honest"
 },
 "006175B0": {
 "cc": "4.1/b1049",
@@ -108262,11 +108024,9 @@
 "00619098": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00619098.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00619098.cpp",
+"status": "honest"
 },
 "0061910C": {
 "cc": "4.1/b1049",
@@ -108285,11 +108045,9 @@
 "00619120": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00619120.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00619120.cpp",
+"status": "honest"
 },
 "006192D8": {
 "cc": "4.1/b1049",
@@ -108413,11 +108171,9 @@
 "00619F2C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00619F2C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00619F2C.cpp",
+"status": "honest"
 },
 "00619FA0": {
 "cc": "4.1/b1049",
@@ -108436,11 +108192,9 @@
 "00619FB4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00619FB4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00619FB4.cpp",
+"status": "honest"
 },
 "0061A16C": {
 "cc": "4.1/b1049",
@@ -108564,11 +108318,9 @@
 "0061ADC0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0061ADC0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061ADC0.cpp",
+"status": "honest"
 },
 "0061AE34": {
 "cc": "4.1/b1049",
@@ -108587,11 +108339,9 @@
 "0061AE48": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061AE48.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061AE48.cpp",
+"status": "honest"
 },
 "0061B000": {
 "cc": "4.1/b1049",
@@ -108715,11 +108465,9 @@
 "0061BC54": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0061BC54.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061BC54.cpp",
+"status": "honest"
 },
 "0061BCC8": {
 "cc": "4.1/b1049",
@@ -108738,11 +108486,9 @@
 "0061BCDC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061BCDC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061BCDC.cpp",
+"status": "honest"
 },
 "0061BE94": {
 "cc": "4.1/b1049",
@@ -108880,11 +108626,9 @@
 "0061CBB8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0061CBB8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061CBB8.cpp",
+"status": "honest"
 },
 "0061CC2C": {
 "cc": "4.1/b1049",
@@ -108903,11 +108647,9 @@
 "0061CC40": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061CC40.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061CC40.cpp",
+"status": "honest"
 },
 "0061CDF8": {
 "cc": "4.1/b1049",
@@ -109031,11 +108773,9 @@
 "0061DA4C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0061DA4C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061DA4C.cpp",
+"status": "honest"
 },
 "0061DAC0": {
 "cc": "4.1/b1049",
@@ -109054,11 +108794,9 @@
 "0061DAD4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061DAD4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061DAD4.cpp",
+"status": "honest"
 },
 "0061DC8C": {
 "cc": "4.1/b1049",
@@ -109182,11 +108920,9 @@
 "0061E8E0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0061E8E0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061E8E0.cpp",
+"status": "honest"
 },
 "0061E954": {
 "cc": "4.1/b1049",
@@ -109205,11 +108941,9 @@
 "0061E968": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061E968.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061E968.cpp",
+"status": "honest"
 },
 "0061EB20": {
 "cc": "4.1/b1049",
@@ -109333,11 +109067,9 @@
 "0061F774": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0061F774.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061F774.cpp",
+"status": "honest"
 },
 "0061F7E8": {
 "cc": "4.1/b1049",
@@ -109356,11 +109088,9 @@
 "0061F7FC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0061F7FC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0061F7FC.cpp",
+"status": "honest"
 },
 "0061F9B4": {
 "cc": "4.1/b1049",
@@ -109484,11 +109214,9 @@
 "00620608": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00620608.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00620608.cpp",
+"status": "honest"
 },
 "0062067C": {
 "cc": "4.1/b1049",
@@ -109507,11 +109235,9 @@
 "00620690": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00620690.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00620690.cpp",
+"status": "honest"
 },
 "00620848": {
 "cc": "4.1/b1049",
@@ -109635,11 +109361,9 @@
 "0062149C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062149C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062149C.cpp",
+"status": "honest"
 },
 "00621510": {
 "cc": "4.1/b1049",
@@ -109658,11 +109382,9 @@
 "00621524": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00621524.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00621524.cpp",
+"status": "honest"
 },
 "006216DC": {
 "cc": "4.1/b1049",
@@ -109786,11 +109508,9 @@
 "00622330": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00622330.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00622330.cpp",
+"status": "honest"
 },
 "006223A4": {
 "cc": "4.1/b1049",
@@ -109809,11 +109529,9 @@
 "006223B8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006223B8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006223B8.cpp",
+"status": "honest"
 },
 "00622570": {
 "cc": "4.1/b1049",
@@ -109930,11 +109648,9 @@
 "00623128": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00623128.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00623128.cpp",
+"status": "honest"
 },
 "0062319C": {
 "cc": "4.1/b1049",
@@ -109953,11 +109669,9 @@
 "006231B0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006231B0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006231B0.cpp",
+"status": "honest"
 },
 "00623368": {
 "cc": "4.1/b1049",
@@ -110081,11 +109795,9 @@
 "00623FBC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00623FBC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00623FBC.cpp",
+"status": "honest"
 },
 "00624030": {
 "cc": "4.1/b1049",
@@ -110104,11 +109816,9 @@
 "00624044": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00624044.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00624044.cpp",
+"status": "honest"
 },
 "006241FC": {
 "cc": "4.1/b1049",
@@ -110225,11 +109935,9 @@
 "00624E04": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00624E04.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00624E04.cpp",
+"status": "honest"
 },
 "00624E78": {
 "cc": "4.1/b1049",
@@ -110241,11 +109949,9 @@
 "00624E88": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00624E88.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00624E88.cpp",
+"status": "honest"
 },
 "00625040": {
 "cc": "4.1/b1049",
@@ -110706,11 +110412,9 @@
 "00627A08": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00627A08.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00627A08.cpp",
+"status": "honest"
 },
 "00627A7C": {
 "cc": "4.1/b1049",
@@ -110729,11 +110433,9 @@
 "00627A90": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00627A90.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00627A90.cpp",
+"status": "honest"
 },
 "00627C48": {
 "cc": "4.1/b1049",
@@ -110871,11 +110573,9 @@
 "00628AA0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00628AA0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00628AA0.cpp",
+"status": "honest"
 },
 "00628B14": {
 "cc": "4.1/b1049",
@@ -110894,11 +110594,9 @@
 "00628B28": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00628B28.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00628B28.cpp",
+"status": "honest"
 },
 "00628CE0": {
 "cc": "4.1/b1049",
@@ -111022,11 +110720,9 @@
 "00629934": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00629934.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00629934.cpp",
+"status": "honest"
 },
 "006299A8": {
 "cc": "4.1/b1049",
@@ -111045,11 +110741,9 @@
 "006299BC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006299BC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006299BC.cpp",
+"status": "honest"
 },
 "00629B74": {
 "cc": "4.1/b1049",
@@ -111187,11 +110881,9 @@
 "0062A9C0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062A9C0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062A9C0.cpp",
+"status": "honest"
 },
 "0062AA34": {
 "cc": "4.1/b1049",
@@ -111210,11 +110902,9 @@
 "0062AA48": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0062AA48.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062AA48.cpp",
+"status": "honest"
 },
 "0062AC00": {
 "cc": "4.1/b1049",
@@ -111352,11 +111042,9 @@
 "0062BA8C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062BA8C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062BA8C.cpp",
+"status": "honest"
 },
 "0062BB00": {
 "cc": "4.1/b1049",
@@ -111375,11 +111063,9 @@
 "0062BB14": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0062BB14.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062BB14.cpp",
+"status": "honest"
 },
 "0062BCCC": {
 "cc": "4.1/b1049",
@@ -111510,11 +111196,9 @@
 "0062CB14": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062CB14.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062CB14.cpp",
+"status": "honest"
 },
 "0062CB88": {
 "cc": "4.1/b1049",
@@ -111533,11 +111217,9 @@
 "0062CB9C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0062CB9C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062CB9C.cpp",
+"status": "honest"
 },
 "0062CD54": {
 "cc": "4.1/b1049",
@@ -111661,11 +111343,9 @@
 "0062D9A8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062D9A8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062D9A8.cpp",
+"status": "honest"
 },
 "0062DA1C": {
 "cc": "4.1/b1049",
@@ -111684,11 +111364,9 @@
 "0062DA30": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0062DA30.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062DA30.cpp",
+"status": "honest"
 },
 "0062DBE8": {
 "cc": "4.1/b1049",
@@ -111812,11 +111490,9 @@
 "0062E83C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062E83C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062E83C.cpp",
+"status": "honest"
 },
 "0062E8B0": {
 "cc": "4.1/b1049",
@@ -111835,11 +111511,9 @@
 "0062E8C4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0062E8C4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062E8C4.cpp",
+"status": "honest"
 },
 "0062EA7C": {
 "cc": "4.1/b1049",
@@ -111963,11 +111637,9 @@
 "0062F6D0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0062F6D0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062F6D0.cpp",
+"status": "honest"
 },
 "0062F744": {
 "cc": "4.1/b1049",
@@ -111986,11 +111658,9 @@
 "0062F758": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0062F758.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0062F758.cpp",
+"status": "honest"
 },
 "0062F910": {
 "cc": "4.1/b1049",
@@ -112121,11 +111791,9 @@
 "00630758": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00630758.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00630758.cpp",
+"status": "honest"
 },
 "006307CC": {
 "cc": "4.1/b1049",
@@ -112144,11 +111812,9 @@
 "006307E0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006307E0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006307E0.cpp",
+"status": "honest"
 },
 "00630998": {
 "cc": "4.1/b1049",
@@ -112279,11 +111945,9 @@
 "006317E0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_006317E0.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006317E0.cpp",
+"status": "honest"
 },
 "00631854": {
 "cc": "4.1/b1049",
@@ -112302,11 +111966,9 @@
 "00631868": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00631868.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00631868.cpp",
+"status": "honest"
 },
 "00631A20": {
 "cc": "4.1/b1049",
@@ -112430,11 +112092,9 @@
 "00632674": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00632674.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00632674.cpp",
+"status": "honest"
 },
 "006326E8": {
 "cc": "4.1/b1049",
@@ -112453,11 +112113,9 @@
 "006326FC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/006326FC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006326FC.cpp",
+"status": "honest"
 },
 "006328B4": {
 "cc": "4.1/b1049",
@@ -112581,11 +112239,9 @@
 "00633508": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00633508.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00633508.cpp",
+"status": "honest"
 },
 "0063357C": {
 "cc": "4.1/b1049",
@@ -112604,11 +112260,9 @@
 "00633590": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00633590.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00633590.cpp",
+"status": "honest"
 },
 "00633748": {
 "cc": "4.1/b1049",
@@ -112739,11 +112393,9 @@
 "006343E4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_006343E4.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_006343E4.cpp",
+"status": "honest"
 },
 "00634458": {
 "cc": "4.1/b1049",
@@ -112762,11 +112414,9 @@
 "0063446C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0063446C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0063446C.cpp",
+"status": "honest"
 },
 "00634624": {
 "cc": "4.1/b1049",
@@ -113213,11 +112863,9 @@
 "00636FCC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00636FCC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00636FCC.cpp",
+"status": "honest"
 },
 "00637040": {
 "cc": "4.1/b1049",
@@ -113236,11 +112884,9 @@
 "00637054": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00637054.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00637054.cpp",
+"status": "honest"
 },
 "0063720C": {
 "cc": "4.1/b1049",
@@ -113371,11 +113017,9 @@
 "00637F54": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00637F54.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00637F54.cpp",
+"status": "honest"
 },
 "00637FC8": {
 "cc": "4.1/b1049",
@@ -113394,11 +113038,9 @@
 "00637FDC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00637FDC.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00637FDC.cpp",
+"status": "honest"
 },
 "00638194": {
 "cc": "4.1/b1049",
@@ -113522,11 +113164,9 @@
 "00638DE8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00638DE8.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00638DE8.cpp",
+"status": "honest"
 },
 "00638E5C": {
 "cc": "4.1/b1049",
@@ -113545,11 +113185,9 @@
 "00638E70": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00638E70.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00638E70.cpp",
+"status": "honest"
 },
 "00639028": {
 "cc": "4.1/b1049",
@@ -113673,11 +113311,9 @@
 "00639C7C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_00639C7C.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00639C7C.cpp",
+"status": "honest"
 },
 "00639CF0": {
 "cc": "4.1/b1049",
@@ -113696,11 +113332,9 @@
 "00639D04": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/00639D04.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00639D04.cpp",
+"status": "honest"
 },
 "00639EBC": {
 "cc": "4.1/b1049",
@@ -113824,11 +113458,9 @@
 "0063AB10": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/gpt22/func_0063AB10.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0063AB10.cpp",
+"status": "honest"
 },
 "0063AB84": {
 "cc": "4.1/b1049",
@@ -113847,11 +113479,9 @@
 "0063AB98": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -g",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work8/audit_reloc/fix/src/0063AB98.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_0063AB98.cpp",
+"status": "honest"
 },
 "0063AD50": {
 "cc": "4.1/b1049",
@@ -114388,11 +114018,9 @@
 "00654460": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds8/func_00654460.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00654460.cpp",
+"status": "honest"
 },
 "00654550": {
 "cc": "4.1/b1049",
@@ -114519,11 +114147,9 @@
 "00655414": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
-"hack_reasons": [
-"weak"
-],
-"path": "src/work7/ds8/func_00655414.cpp",
-"status": "hack"
+"hack_reasons": [],
+"path": "src/work8/auto/func_00655414.cpp",
+"status": "honest"
 },
 "00655504": {
 "cc": "4.1/b1049",

@@ -29,9 +29,9 @@ All numbers below were measured with the byte-exact checker on this game.
 ## Measured compiler behaviour (armcc 4.1 b1049, from compiling test sources)
 - `--apcs=/fpic` never emits a tail call. It also makes global data addresses pc-relative.
 - A `weak` declaration of a callee stops tail calls to it. `-Ono_tailcall` (2026-11-04) replaced it honestly in
-  386 entries. Of the 131 weak-only hacks left, ~122 cannot use any per-file flag: the original tail-calls one
-  callee (`b func`, or a virtual `bx ip`) and not another in the same function, so the property is per-callee.
-  We could not find a non-weak declaration that reproduces it. A systematic sweep of candidate constructs
+  386 entries. The remaining weak-only hacks mix tail and non-tail calls in one function (per-callee), and
+  `__attribute__((notailcall))` on the callee prototype reproduces that (see "Five-problem DeepSeek pass";
+  112 converted under the callee-consistency rule). No other non-weak declaration does: a systematic sweep of candidate constructs
   (2026-10-25, armcc -S, target shape `BL callee` + `POP` instead of tail `B`) eliminated: `__declspec(noinline)`
   (with or without `--apcs=/interwork`), discarded int return, variadic callee, `__softfp`, `--exceptions`,
   `--no_rtti`, `--Ospace`, `--no_inline`, `--no_autoinline`, `--no_early_inlining`, `--split_ldm`, `--no_split_ldm`,
@@ -795,11 +795,14 @@ What wasted money and what replaced it:
 
 One agent per cross-cutting blocker, no check budget. Reports and sources: `logs/manual/P1..P5_*/`.
 
-- **P1, per-callee tail call (SOLVED, honesty pending).** armcc b1049 accepts
+- **P1, per-callee tail call (SOLVED; 112 registered).** armcc b1049 accepts
   `__attribute__((notailcall))` on a callee prototype: calls to it become `bl f; pop {..,pc}` while
   other callees in the same function still tail-call (verified with `--asm`: `c(){k(x); h(x);}` gives
-  `BL k ... B h`). It replaces `weak` in 129 of the 131 weak-only hacks (all verified MATCH + 0
-  MISMATCH); 001064D0 and 0054F3AC use weak to stop inlining of a same-TU callee instead.
+  `BL k ... B h`). It replaced `weak` in 129 of the 131 weak-only hacks; 001064D0 and 0054F3AC use weak to
+  stop inlining of a same-TU callee instead. Owner decision: honest only when the callee is never
+  tail-called anywhere in the game (`tools/notailcall.py`). 8 of 73 callees fail that test (tail-called
+  1-6 times elsewhere), so 16 entries stay hacks; 00248280 stays one because its callee is a member
+  function with no address in its name.
 - **P2, `__schedule_barrier` (87 converted and registered, 64 open).** Three causes: (a) an inlined
   virtual call whose argument load was hoisted past the object load — an explicit function-pointer
   local fixes it, `void (*fp)(Npc*,s32,s32) = *(void(**)(Npc*,s32,s32))((char*)(*(void**)q) + 0xac);
@@ -808,10 +811,13 @@ One agent per cross-cutting blocker, no check budget. Reports and sources: `logs
   002FE86C); (c) the barrier was redundant or only masked the TU's real -O level (`-O2 -Otime`,
   `-O2`). Open: pure load-load swaps and mixed branch/load/store swaps
   (`logs/manual/P2_schedule_barrier/remaining_final.json`).
-- **P3, TLS `mrc p15` (SOLVED, honesty pending).** The armcc named register variable
+- **P3, system registers (SOLVED; 75 registered).** The armcc named register variable
   `register unsigned int tp __asm("cp15:0:c13:c0:3");` (a declaration, not an asm statement) emits
-  `mrc` on read and `mcr` on write, re-read every use; `cp15:0:c7:c10:4/5` gives DSB/DMB. It matches 83
-  of the 94 asm hacks; the other 11 are per-function instruction nudges (`moveq rX,rX`, etc.).
+  `mrc` on read and `mcr` on write, re-read every use; `cp15:0:c7:c10:4/5` gives DSB/DMB, `"fpscr"` gives
+  vmrs/vmsr. Owner decision: honest when declared only in `shared/include/cp15.h` and logged. 75 entries
+  converted; 5 more still carry other hacks (weak, barrier). Not converted: two `__nop()` entries (00217E58,
+  0051AEA4; a nop padding call is undecided), 00503324 (its `__asm("func_...")` is a symbol-name alias,
+  misclassified as asm), and 11 per-function instruction nudges (`moveq rX,rX`, etc.).
   `__nop()` is an intrinsic in b1049; `__dmb/__dsb/__isb/__mrc` are not.
 - **P4, family 0060BE24 (OPEN, 107/120).** Not the blx blocker. A case-0 body written as a member
   helper with a u32 parameter (`p->run0(tgt, 0)`) places the zero constant in r5. Remaining 13 words are

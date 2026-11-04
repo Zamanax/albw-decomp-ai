@@ -1,0 +1,464 @@
+{
+ "_doc": "Compiler constructs accepted as honest only under a condition, by project-owner decision. Every honest entry using one is listed here so it can be re-audited or reverted as a group. tools/audit.py enforces the lists; tools/notailcall.py update refreshes the callee registry from code.bin.",
+ "named_register": {
+  "decided": "2026-11-04",
+  "entries": [
+   "001013F8",
+   "001020F0",
+   "001029DC",
+   "00102FB4",
+   "001030B4",
+   "001030F0",
+   "0010412C",
+   "00104198",
+   "0010478C",
+   "001047C8",
+   "0010489C",
+   "001048D8",
+   "001058A8",
+   "001058EC",
+   "00105928",
+   "00106314",
+   "00108784",
+   "00108AA4",
+   "00109208",
+   "00109240",
+   "00109278",
+   "001092BC",
+   "0010AE3C",
+   "0010AE80",
+   "0010AEA8",
+   "0010AED0",
+   "0010B240",
+   "0010B278",
+   "0010B2B4",
+   "0010B2F0",
+   "0010B32C",
+   "0010C0C0",
+   "0010C210",
+   "0010CF70",
+   "0010E294",
+   "0010EDBC",
+   "00110740",
+   "003C97C4",
+   "003C9A1C",
+   "003C9A4C",
+   "003C9ADC",
+   "003C9B68",
+   "003C9BA0",
+   "003CD8E8",
+   "003D13DC",
+   "003D1560",
+   "003D15EC",
+   "003D1624",
+   "003D16B8",
+   "003D1890",
+   "003D1A14",
+   "003D1AA0",
+   "003D1AD8",
+   "003D1B6C",
+   "003D2564",
+   "003D2D08",
+   "003D2D40",
+   "003D2D7C",
+   "003D2DC0",
+   "003D2DF8",
+   "003D2EA8",
+   "003D2EDC",
+   "003D2F18",
+   "003D2F54",
+   "003D5608",
+   "003D56B8",
+   "003DB6A0",
+   "003DE294",
+   "003E3D74",
+   "003E3DB0",
+   "003E3DD8",
+   "003E5AD8",
+   "003E5B08",
+   "003E5B40",
+   "00412D48"
+  ],
+  "header": "shared/include/cp15.h",
+  "rule": "armcc named register variables for system registers (`register unsigned int x __asm(\"cp15:...\")`, fpscr), declared only in shared/include/cp15.h. A declaration, not an inline-asm statement: it cannot emit arbitrary instructions. Needed because armcc 4.1 has no coprocessor intrinsic."
+ },
+ "notailcall": {
+  "callees": {
+   "00324A1C": {
+    "bl_calls": 4,
+    "tail_calls": 0
+   },
+   "0060D3F8": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "0060E480": {
+    "bl_calls": 9,
+    "tail_calls": 0
+   },
+   "0060F278": {
+    "bl_calls": 12,
+    "tail_calls": 0
+   },
+   "0061010C": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0061202C": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00612EC0": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00613D54": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "00614BFC": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00615A90": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00616924": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00618654": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "006194E8": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0061A37C": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0061B210": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "0061C0A4": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "0061D008": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "0061DE9C": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "0061ED30": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0061FBC4": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00620A58": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "006218EC": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00622780": {
+    "bl_calls": 13,
+    "tail_calls": 0
+   },
+   "00623578": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062440C": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00626FA4": {
+    "bl_calls": 12,
+    "tail_calls": 0
+   },
+   "00627E58": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00628EF0": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "00629D84": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062AE54": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062BEDC": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062CF64": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062DDF8": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062EC8C": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0062FB20": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00630BA8": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00631C30": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "00632AC4": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "006339A0": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00636588": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "0063741C": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "006383A4": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "00639238": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0063A0CC": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "00656A1C": {
+    "bl_calls": 13,
+    "tail_calls": 0
+   },
+   "00657BD4": {
+    "bl_calls": 13,
+    "tail_calls": 0
+   },
+   "006580E4": {
+    "bl_calls": 6,
+    "tail_calls": 0
+   },
+   "0065836C": {
+    "bl_calls": 56,
+    "tail_calls": 0
+   },
+   "00658604": {
+    "bl_calls": 25,
+    "tail_calls": 0
+   },
+   "00658748": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0065A984": {
+    "bl_calls": 12,
+    "tail_calls": 0
+   },
+   "0065B158": {
+    "bl_calls": 31,
+    "tail_calls": 0
+   },
+   "0065D9FC": {
+    "bl_calls": 21,
+    "tail_calls": 0
+   },
+   "0065DF78": {
+    "bl_calls": 16,
+    "tail_calls": 0
+   },
+   "0065FBB4": {
+    "bl_calls": 6,
+    "tail_calls": 0
+   },
+   "006605D4": {
+    "bl_calls": 11,
+    "tail_calls": 0
+   },
+   "00660718": {
+    "bl_calls": 29,
+    "tail_calls": 0
+   },
+   "00660B50": {
+    "bl_calls": 16,
+    "tail_calls": 0
+   },
+   "006640EC": {
+    "bl_calls": 60,
+    "tail_calls": 0
+   },
+   "0066777C": {
+    "bl_calls": 10,
+    "tail_calls": 0
+   },
+   "0066A284": {
+    "bl_calls": 40,
+    "tail_calls": 0
+   },
+   "0066C9D0": {
+    "bl_calls": 3,
+    "tail_calls": 0
+   },
+   "0066DB6C": {
+    "bl_calls": 15,
+    "tail_calls": 0
+   },
+   "0068C794": {
+    "bl_calls": 143,
+    "tail_calls": 0
+   },
+   "00690E0C": {
+    "bl_calls": 1,
+    "tail_calls": 0
+   }
+  },
+  "decided": "2026-11-04",
+  "entries": [
+   "00129CF4",
+   "001531E0",
+   "00158C98",
+   "0015E4BC",
+   "0015F848",
+   "0015F888",
+   "00163130",
+   "001641E4",
+   "00165214",
+   "001A92F4",
+   "001B2660",
+   "00216C60",
+   "0024FE90",
+   "00265454",
+   "00266F10",
+   "002EB5A8",
+   "002F653C",
+   "0033A310",
+   "0037B254",
+   "0044395C",
+   "0046175C",
+   "004CAB88",
+   "00568068",
+   "0060E030",
+   "0060E0B8",
+   "0060EE28",
+   "0060EEB0",
+   "0060FCBC",
+   "0060FD44",
+   "00610D48",
+   "00610DD0",
+   "00612A70",
+   "00612AF8",
+   "00613904",
+   "0061398C",
+   "006147AC",
+   "00614834",
+   "00615640",
+   "006156C8",
+   "006164D4",
+   "0061655C",
+   "00617370",
+   "006173F8",
+   "00619098",
+   "00619120",
+   "00619F2C",
+   "00619FB4",
+   "0061ADC0",
+   "0061AE48",
+   "0061BC54",
+   "0061BCDC",
+   "0061CBB8",
+   "0061CC40",
+   "0061DA4C",
+   "0061DAD4",
+   "0061E8E0",
+   "0061E968",
+   "0061F774",
+   "0061F7FC",
+   "00620608",
+   "00620690",
+   "0062149C",
+   "00621524",
+   "00622330",
+   "006223B8",
+   "00623128",
+   "006231B0",
+   "00623FBC",
+   "00624044",
+   "00624E04",
+   "00624E88",
+   "00627A08",
+   "00627A90",
+   "00628AA0",
+   "00628B28",
+   "00629934",
+   "006299BC",
+   "0062A9C0",
+   "0062AA48",
+   "0062BA8C",
+   "0062BB14",
+   "0062CB14",
+   "0062CB9C",
+   "0062D9A8",
+   "0062DA30",
+   "0062E83C",
+   "0062E8C4",
+   "0062F6D0",
+   "0062F758",
+   "00630758",
+   "006307E0",
+   "006317E0",
+   "00631868",
+   "00632674",
+   "006326FC",
+   "00633508",
+   "00633590",
+   "006343E4",
+   "0063446C",
+   "00636FCC",
+   "00637054",
+   "00637F54",
+   "00637FDC",
+   "00638DE8",
+   "00638E70",
+   "00639C7C",
+   "00639D04",
+   "0063AB10",
+   "0063AB98",
+   "00654460",
+   "00655414"
+  ],
+  "rule": "`__attribute__((notailcall))` on a callee prototype is honest only if that callee is never tail-called (`b callee` from another function) anywhere in the game, i.e. it describes the callee, not a call site. Callees must be named func_XXXXXXXX/FUN_XXXXXXXX. Replaces `weak` used to stop a tail call."
+ }
+}

@@ -51,6 +51,11 @@ Prefer an honest miss. Never claim a match you did not see printed.
   starts right after this one — end the source by calling it with the right args in r0-r3.
 - Original `bl X; pop {…,pc}` but armcc emits a tail `b X`: add `-Ono_tailcall` before
   `--split_sections` (keeps everything else identical), or `--apcs=/fpic` (never tail-calls).
+  If another call in the same function must stay a tail call, declare only X with
+  `extern "C" void func_XXXXXXXX(...) __attribute__((notailcall));` — allowed only when
+  `uv run python tools/notailcall.py check <your file>` prints `ok` (X never tail-called anywhere).
+- `mrc/mcr p15` (thread pointer, DSB/DMB) or `vmrs/vmsr fpscr`: `#include "cp15.h"` and read/write
+  `tls_tp` / `dsb_tp` / `dmb_tp` / `fpscr_reg`. Never write `__asm` yourself.
 - Value/constant in the wrong register: pass it through an inlined helper's *parameter*, a
   pointer/reference local (`T* s = &p->m; s->f();`), or a named local right before the call.
   Parameterised `inline`/member helpers are inlined late (after constant promotion), parameterless

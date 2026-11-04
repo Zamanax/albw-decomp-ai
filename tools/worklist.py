@@ -27,6 +27,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fn
+import notailcall
 import synth
 from permuter import check_one, kill_tree
 from sweep import DEFAULT_FLAGS
@@ -262,6 +263,11 @@ def register(addr, src=None, flags=None, as_json=False):
         state["attempted"][key] = {"status": "identity-mismatch", "detail": bad[0] if bad else "no IDENTITY line"}
         save_state(state)
         return
+    refusal = notailcall.gate_and_log(key, text)
+    if refusal:
+        print("REFUSED: %s" % refusal)
+        print("  source kept (unregistered) at %s" % dest)
+        return
     rel = os.path.relpath(dest, ROOT).replace(os.sep, "/")  # functions.json paths are repo-style on every host
     print("RESULT: MATCH %d/%d words, identity %s verified / %s unverifiable  ->  %s" % (
         r["words"], r["total"], ident.group(1), ident.group(2), rel))
@@ -281,7 +287,7 @@ def register(addr, src=None, flags=None, as_json=False):
     if as_json:
         print(json.dumps({"addr": key, "path": rel, "status": "honest", "flags": flags}))
     print("functions.json: %s -> honest" % key)
-    print("NEXT  git add %s functions.json && git commit -m \"Match %s (auto refine)\"" % (
+    print("NEXT  git add %s functions.json shared/construct_exceptions.json && git commit -m \"Match %s (auto refine)\"" % (
         rel, key))
 
 

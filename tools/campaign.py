@@ -372,7 +372,7 @@ def cmd_harvest(a):
     plan["harvested"] = True
     json.dump(plan, open(PLAN, "w"), indent=1)
     if a.commit and total and clean:
-        run(["git", "add", "functions.json", "src/work8/auto"])
+        run(["git", "add", "functions.json", "src/work8/auto", "shared/construct_exceptions.json"])
         msg = "Campaign round %d: %d matches (haiku %d, deepseek %d, famclone %d)" % (
             rnd, total, got["haiku"], got["deepseek"], cloned)
         body = "Registered via tools/campaign.py harvest (worklist.py register re-verifies each: " \

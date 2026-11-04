@@ -39,6 +39,17 @@ The workflow lives in the tools, not in this file — every tool prints a
    - permuter-only `perm_t` types
    Prefer an honest miss over a hack. If you cannot match honestly,
    stop, record what you tried, and move on.
+
+   Two constructs are honest **only under a condition**. They are decided by the
+   project owner (2026-11-04), logged in `shared/construct_exceptions.json`, and
+   enforced by `worklist.py register` (refuses) and `audit.py` (errors):
+   - `__attribute__((notailcall))` on a callee prototype, only if that callee is
+     never tail-called anywhere in the game (`tools/notailcall.py check <src>`).
+     The callee must be named `func_XXXXXXXX`. A callee that is tail-called
+     elsewhere makes the attribute per-call-site steering, which is a hack.
+   - System registers through `#include "cp15.h"` (`tls_tp`, `dsb_tp`, `dmb_tp`,
+     `fpscr_reg`: armcc named register variables). Never write `__asm` in a
+     source; add a register to `shared/include/cp15.h` only with evidence.
 3. **Legal boundaries.** Never commit the game binary (`code.bin`), any
    compiler file, any SDK material, or any third-party library source
    you don't have redistribution rights for. String literals referenced
