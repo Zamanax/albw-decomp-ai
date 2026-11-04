@@ -672,8 +672,12 @@ Open, recurring (not reproduced honestly yet):
 - **pmf dispatch r1/r2 swap** (00311DE0): take the state through a pointer local first
   (`NpcExecState30* s = &p->state; s->execute();`). Not sufficient for 004D9508.
 - **Whole TU at another optimisation level**: 002F8F5C/0049E74C `-O2`, 00457FC0 `-O2 -Otime`,
-  0048E398/00323D3C/0034B674 `-O3` without `-Otime`. A flag sweep on the best source is cheap
+  0048E398/00323D3C/0034B674/003AA984/003BC8F4 `-O3` without `-Otime`. A flag sweep on the best source is cheap
   (~0.1 s/check) and should precede source-shape sweeps.
+- **Unaligned u64 field** (00429F14): `__packed u64* q = &x->v; u64 xv = *q;` gives the split
+  `ldr r3,[r0,#0x78]!; ldr r2,[r0,#4]` (a raw `&x->v` is merged into `ldrd`). The `eor`/`orrs`
+  inequality tail with reversed pair registers needs `u64 d = yv ^ xv; return d ? 1 : 0;`;
+  `return xv != yv;` stays at 9/15.
 - **`--cpu=Cortex-A9`** (0047F1CC): MPCore inserts an alignment NOP before a BL 8 bytes after
   another BL; the original has none. Cortex-A8/A9 produce the same code without it.
 - **Register order from inlined-helper parameters**: float lerp `app(f32& v, f32 t, f32 k)` (0031A710),

@@ -62,6 +62,11 @@ Prefer an honest miss. Never claim a match you did not see printed.
 - Stored value re-read through the same slot (`u32& s = c->v; s = x; u32 b = s;`) reproduces
   load orders and `vmov` core/VFP transfers.
 - Bool normalisation `u32 b = v; if (b) b = 1;` gives `movne r1,#1; cmp r1,#0`.
+- Two `ldr` (one with writeback `ldr r3,[r0,#0x78]!`) where you emit `ldrd`: the field is an
+  unaligned 64-bit value — read it through a `__packed u64* q = &x->v;` local (00429F14). A u64
+  inequality tail `eor`/`orrs` with swapped pair regs: `u64 d = a ^ b; return d ? 1 : 0;`.
+- Instruction shapes plateau far below a twin's match: sweep `-O3` without `-Otime` and `-O2`
+  before reshaping (003AA984 family plateaued at 27/44 with -Otime, exact without).
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`
