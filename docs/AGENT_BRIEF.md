@@ -42,7 +42,7 @@ differ in register allocation or store order.
 
 | Header | Provides |
 |---|---|
-| `sead_string.h`, `sead_heap.h` | `SafeString` (global, `sead::` alias), `BufferedSafeString`, `FixedSafeString<N>`, `NoThrow`/`nothrow_t`, engine `operator new`/`new[]` (Heap-like tag, 0x10BAB4/0x10CEE0) |
+| `sead_string.h`, `sead_heap.h` | `SafeString` (global, `sead::` alias; default ctor = cNullChar, plus `cstr`/`calcLength`/`compare`), `BufferedSafeString` (ctor/copy/`formatV`), `FixedSafeStringBase<N>` → `FixedSafeString<N>` (three-level tree, byte-proven), `FormatFixedSafeString<N>`, `NoThrow`/`nothrow_t`, engine `operator new`/`new[]` (Heap-like tag, 0x10BAB4/0x10CEE0) |
 | `vec3.h`, `sead_math.h` | `Vec3` (both copy helpers: `set` memberwise, `setCopy` = `*this = o`), `Vec2`, `Vec4`, `Mtx33/34`, `Angle`, `SinCosSample`, `sinCos` |
 | `statemgr.h`, `actor.h`, `model.h` | `StateMgrT<Owner>` (`exec` vs `execute` forms, `StateMgrBase`), `ActorBase`/`ActorBaseExt`/`ActorBaseA/B`, `Npc`, `EnemyBase`, `Delegate<T>`, `ActorParam`, `Model` |
 | `static_init.h`, `sead_container.h` | `PtrCnt`/`PtrList*`/`Factory` (+ `…Named`, `…Assign` forms), `Id64`, `ListNode`/`ListImpl`, `PtrArray`, `Buffer<T>` |
@@ -119,6 +119,14 @@ Prefer an honest miss. Never claim a match you did not see printed.
   copy through a pointer local, `Vec3* q = &p->v; Vec3 t = *q;` (002A0714).
 - Field loaded into r0 where the original loads into another reg and masks into a fresh one: read
   the field twice (`if (s->m == 0) …; u32 c = (u8)s->m;`) so the base stays live (00542AE4).
+- **String code is sead's reference three-level tree** (`SafeStringBase` → `BufferedSafeStringBase` →
+  `FixedSafeStringBase<N>` → `FixedSafeString<N>`), each level with its own virtual destructor. Use
+  the header types: `sead::SafeString s;` (points at cNullChar, never null), `dst.copy(src)` (pass the
+  source through a pointer local when a direct call differs in registers, 0010BEC4),
+  `sead::FormatFixedSafeString<N> f("fmt", ...)` (variadic ctor; `formatV` takes the va_list by value).
+- Lists keep their node helpers out of line: `list.pushBack(o)` / `list.erase(o)` are thin wrappers
+  over `ListNode::insertFront_` (0x0010F1DC) and `erase_` (0x0010F1F8). Reach the list through a
+  pointer local (`OffsetList<T>* l = &m; l->pushBack(o);`) for the game's register order (0029757C).
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`

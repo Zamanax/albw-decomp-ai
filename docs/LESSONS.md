@@ -1022,3 +1022,45 @@ What the failures teach:
   sense that the bytes are the original's.
 - **Retry per family, not per function.** `famclone` cloned 6 more functions from the mutator's
   matches as soon as the queue was re-scored; one match per shape is what matters.
+
+## sead audit: the string family was the missing form (2026-11-05)
+
+Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
+Wii U era; [open-ead/sead](https://github.com/open-ead/sead), Switch era) against `shared/include/`,
+ranked by how many unmatched functions contain each type's inlined form (measured over the whole
+binary). Both references are unlicensed: used as documentation only, every line in `shared/include`
+is ours.
+
+| form | functions | matched before |
+|---|---|---|
+| Buffered/Fixed/Format string vtable | 255 | 3 (1%) |
+| `cmp rX, #0x40000` (calcLength/copy/comparen loop cap) | 368 | 5 (1%) |
+| cNullChar 0x006C57E0 reference | 138 | 3 (2%) |
+| `ListNode::insertFront_`/`erase_` caller | 233 | 69 (30%) |
+| `PtrArrayImpl::erase`/`setBuffer` caller | 92 | 8 (9%) |
+| RuntimeTypeInfo guarded static init | 1,429 | 1,163 (81%) |
+| IDisposer ctor/dtor caller | 93 | 31 (33%) |
+| out-of-line Vec3 helper caller | 1,381 | 172 (12%) |
+
+- **ALBW's string classes are the reference three-level tree**, not the flattened two-level one the
+  header had: `SafeStringBase` → `BufferedSafeStringBase` → `FixedSafeStringBase<N>` →
+  `FixedSafeString<N>`, every level with its own virtual destructor. Proof: 0010BDF0/00688F10/00689024
+  emit three vtable literal loads, two of them dead — which only happens when the intermediate
+  constructor stores the buffer terminator through `mStringTop` (a store that can alias the vptr).
+- The out-of-line `BufferedSafeString(char*, s32)` (00689A2C) reads `mStringTop`/`mBufferSize` through
+  a `const_cast` pointer; calling `getMutableStringTop_()` instead drops the inlined 0010BDF0 from
+  18/18 to 7/18.
+- `SafeString()` default-constructs to **cNullChar**, not null (001097A4); `calcLength` caps at 0x40000
+  and returns 0 above it; `copy` is MemUtil::copy + clamp to `mBufferSize - 1` + terminator (0010BEC4).
+- `FormatFixedSafeString<N>`'s variadic constructor must be defined out of line (armcc accepts a
+  variadic member of a class template only there) and `formatV` takes the `va_list` **by value**.
+- Lists: the node helpers are out of line (`insertFront_` 0x0010F1DC, `erase_` 0x0010F1F8) and the
+  inline ops are thin wrappers; `pushBack` needs the list through a pointer local (0029757C).
+- **No gap at all** in `sead_rtti.h` (81% matched), `vec3.h`/`sead_math.h` and `sead_heap.h`: their
+  unmatched users only call out-of-line helpers the headers already declare.
+- Unproven and left alone: `SafeString::comparen` (26/53 — needs signed-char compares), the PtrArray
+  `at()`/`erase()` loop (3/23 — the original reloads `mPtrNum` through `this` in the loop; every
+  spelling hoists the base), `OffsetList::pushBack` beside a FixedSafeString<64> member (5/33).
+
+14 functions matched straight from the audit (13 string, 1 list); `headercheck` after the merges:
+`sead_string.h (+ 3 including headers): 684 entries, 0 failing`.

@@ -39,12 +39,52 @@
 // also forward-declares `struct SafeString;` there. A global-scope `using` of a namespaced class
 // cannot be combined with that declaration, so the class lives at global scope and the namespace
 // gets the alias instead.
+namespace sead {
+
+// sead::MemUtil, declared only. Its copy() is the game's out-of-line copy routine 0x0010E3C4
+// (size switch, `cmp r2,#8` / ldrh/ldrb tails), which SafeString::copy inlines a call to.
+class MemUtil {
+public:
+    static void* copy(void* dst, const void* src, u32 size);  // 0x0010E3C4
+};
+
+}  // namespace sead
+
+// sead::SafeStringBase<char>::cNullChar (0x006C57E0, the one 0x00 byte the empty-string object
+// points at). Written by `SafeString()`: 0x001097A4 stores ro_006C57E0 into the mStringTop of an
+// embedded default-constructed SafeString. Named after its address so the identity check verifies
+// the reference (the original name is a private static member of the class template). Declared at
+// global scope because SafeString is a global-scope class here.
+extern "C" const char ro_006C57E0[];
+
 class SafeString {
 public:
-    SafeString() : mStringTop(0) {}
+    static const s32 cMaximumLength = 0x40000;   // sead::SafeStringBase<char>::cMaximumLength
+
+    // Default construction points at cNullChar, not at null (0x001097A4, 0x001BAABC, 0x001FEFBC).
+    SafeString() : mStringTop(ro_006C57E0) {}
     SafeString(const char* s) : mStringTop(s) {}
     virtual ~SafeString() {}                     // 0x00688D9C (no-op); vtable slot +0x00
     virtual void assureTerminationImpl_() const;  // 0x006916EC (no-op); vtable slot +0x08
+
+    // cstr(): assure, then the top pointer. calcLength(): assure, then the 0x40000-capped scan that
+    // yields 0 when the cap is exceeded. Both are inlined by the game; 0x0010BEC4
+    // (StateMgrBase::setStateName -> FixedSafeString<24>::copy) is their byte proof.
+    const char* cstr() const {
+        assureTerminationImpl_();
+        return mStringTop;
+    }
+    s32 calcLength() const {
+        assureTerminationImpl_();
+        s32 n = 0;
+        for (;;) {
+            if (n > cMaximumLength || mStringTop[n] == 0) break;
+            ++n;
+        }
+        if (n > cMaximumLength) return 0;
+        return n;
+    }
+
     const char* mStringTop;                      // +0x04
 };
 
@@ -56,6 +96,13 @@ using ::SafeString;
 // The base step of the FixedSafeString<24> constructor 0x0010BDF0 stores, in this order,
 // mStringTop = mBuffer, mBufferSize = N, mBuffer[N-1] = 0 (as `sub r1,mStringTop,#1` then
 // `strb 0,[r2,r1]` with r2 = N), and installs the derived vtable last.
+//
+// The constructor and assureTerminationImpl_() below are the reference class tree's bodies:
+// 0x00689A2C (the out-of-line BufferedSafeString(char*, s32)) matches the constructor word for
+// word, and the overload of assureTerminationImpl_ with the explicit `char* p` local is what the
+// three FixedSafeString constructor sites (0x0010BDF0 / 0x00688F10 / 0x00689024) and the two
+// inlined ones (0x0048D854 member, 0x0048D7DC stack local) reproduce. A body that calls
+// getMutableStringTop_() inline instead compiles to the same bytes only in the out-of-line copy.
 class BufferedSafeString : public SafeString {
 public:
     BufferedSafeString() : mBufferSize(0) {}
@@ -63,34 +110,85 @@ public:
         if (size <= 0) {
             mStringTop = 0;
             mBufferSize = 0;
-        } else {
-            buffer[size - 1] = 0;
+            return;
         }
+        assureTerminationImpl_();
     }
-    virtual void assureTerminationImpl_() const;  // 0x00691BD0
-    void formatV(const char* fmt, va_list& args);  // 0x00111A20: vsnprintf into the own buffer
+    virtual ~BufferedSafeString() {}
+    virtual void assureTerminationImpl_() const {  // 0x00691BD0
+        BufferedSafeString* self = const_cast<BufferedSafeString*>(this);
+        char* p = const_cast<char*>(self->mStringTop);
+        p[self->mBufferSize - 1] = 0;
+    }
+
+    s32 getBufferSize() const { return mBufferSize; }
+    void clear() { getMutableStringTop_()[0] = 0; }
+    // The reference copy(): the destination top first, then the 0x40000-capped length of src, the
+    // clamp to the own buffer, MemUtil::copy and the terminator. 0x0010BEC4 is the byte proof.
+    s32 copy(const SafeString& src, s32 size = -1) {
+        char* dst = getMutableStringTop_();
+        if (size < 0) size = src.calcLength();
+        if (size >= mBufferSize) size = mBufferSize - 1;
+        MemUtil::copy(dst, src.cstr(), size);
+        dst[size] = 0;
+        return size;
+    }
+    // 0x00111A20 takes the va_list by value (r2 = the ap word), so the parameter is not a reference.
+    s32 formatV(const char* fmt, va_list args);
     // The variadic form lives here, in the non-template base: armcc 4.1 exits silently (code 5) on
     // a variadic member defined inside a class template.
-    void format(const char* fmt, ...) {
+    s32 format(const char* fmt, ...) {
         va_list args;
         va_start(args, fmt);
-        formatV(fmt, args);
+        s32 r = formatV(fmt, args);
         va_end(args);
+        return r;
     }
+
+    char* getMutableStringTop_() { return const_cast<char*>(mStringTop); }
+
     s32 mBufferSize;  // +0x08
 };
 
-// FixedSafeString<N>: sizeof == 0x0C + N (0x24 for N = 24, which is what the state-name tables of
+// FixedSafeStringBase<N>: the buffer and the clear() a fixed-size string does after its own
+// constructor ran. sizeof == 0x0C + N (0x24 for N = 24, which is what the state-name tables of
 // StateMgr use: element size in the array cookie at 0x002072B4 and stride 0x24 in
-// StateMgrBase::setStateName 0x0010BEC4). The constructor is 0x0010BDF0.
+// StateMgrBase::setStateName 0x0010BEC4). 0x0010BDF0 (N = 24), 0x00688F10 (N = 32) and
+// 0x00689024 (N = 64) are the game's out-of-line constructors of FixedSafeString<N>.
 template <int N>
-class FixedSafeString : public BufferedSafeString {
+class FixedSafeStringBase : public BufferedSafeString {
 public:
-    FixedSafeString() : BufferedSafeString(mBuffer, N) { mBuffer[0] = 0; }
+    FixedSafeStringBase() : BufferedSafeString(mBuffer, N) { clear(); }
+    virtual ~FixedSafeStringBase() {}
 
 private:
     char mBuffer[N];  // +0x0C
 };
+
+template <int N>
+class FixedSafeString : public FixedSafeStringBase<N> {
+public:
+    FixedSafeString() : FixedSafeStringBase<N>() {}
+};
+
+// FormatFixedSafeString<N>: construction formats into the buffer. The variadic constructor is a
+// template member and armcc rejects it inside the class, but accepts this out-of-line definition;
+// 0x00689650 (N = 256) matches it: the vtable chain, buffer 0xC + N, then formatV with sp+0x10 as
+// the argument list. Same shape at 0x00689578 (0x80), 0x006896BC (0x20), 0x00689728 (0x24),
+// 0x00689794 (0x40), 0x006895E4 (0x10).
+template <int N>
+class FormatFixedSafeString : public FixedSafeStringBase<N> {
+public:
+    FormatFixedSafeString(const char* fmt, ...);
+};
+
+template <int N>
+FormatFixedSafeString<N>::FormatFixedSafeString(const char* fmt, ...) : FixedSafeStringBase<N>() {
+    va_list args;
+    va_start(args, fmt);
+    this->formatV(fmt, args);
+    va_end(args);
+}
 
 }  // namespace sead
 

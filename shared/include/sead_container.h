@@ -33,6 +33,9 @@ public:
     ListNode* next() const { return mNext; }
     ListNode* prev() const { return mPrev; }
     void erase_();
+    // 0x0010F1DC: link n between this->mPrev and this (this->mPrev = n; n->mNext = this;
+    // n->mPrev = the old prev; old prev's mNext = n). Called by every inlined pushBack.
+    void insertFront_(ListNode* n);
     ListNode* mPrev;
     ListNode* mNext;
 };
@@ -61,6 +64,12 @@ public:
     ListNode* front() const { return mCount > 0 ? mStartEnd.mNext : 0; }
     s32 indexOf(const ListNode* n) const;
     void erase(ListNode* n) { n->erase_(); --mCount; }
+    // 0x0029757C / 0x004A0988 inline exactly this: the sentinel's insertFront_ (0x10F1DC), then
+    // the count increment through the list's own count word.
+    void pushBack(ListNode* n) {
+        mStartEnd.insertFront_(n);
+        ++mCount;
+    }
     ListNode mStartEnd;
     s32 mCount;
 };
@@ -97,6 +106,9 @@ public:
         return listNodeToObj(n);
     }
     s32 indexOf(T* o) const { return ListImpl::indexOf(objToListNode(o)); }
+    // 0x0029757C: `OffsetList<T>* l = &mList; l->pushBack(obj);` is exactly the game's body
+    // (offset from the list's mOffset, node = obj + mOffset, then ListImpl::pushBack).
+    void pushBack(T* o) { ListImpl::pushBack(objToListNode(o)); }
     void erase(T* o) {
         s32 off = mOffset;
         ListImpl::erase((ListNode*)((char*)o + off));
