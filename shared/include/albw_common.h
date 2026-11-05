@@ -26,15 +26,7 @@ public:
 };
 }
 
-struct Vec3 {
-    f32 x, y, z;
-    Vec3() {}
-    Vec3(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-    void set(f32 a, f32 b, f32 c) { x = a; y = b; z = c; }
-    void set(const Vec3& o) { x = o.x; y = o.y; z = o.z; }
-    void setZero() { for (int i = 0; i < 3; i++) (&x)[i] = 0.0f; }
-    void setSub(const Vec3& a, const Vec3& b);   // outlined: 0x115C70
-};
+#include "vec3.h"
 
 struct Timer {
     u32 cur;
