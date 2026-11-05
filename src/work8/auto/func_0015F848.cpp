@@ -15,7 +15,9 @@ struct Param169 { u8 pad0[0x1c8]; void* m1c8; };
 struct Actor169 { u8 pad0[0x2d0]; Param169* m2d0; u8 pad2d4[0x1b8]; void* m48c; void* m490; void* m494; };
 struct CounterPair { u32 cur,max; void start(u32 n) { cur=0;max=n; } };
 struct Obj171 { u8 pad0[0x2cc]; CounterPair timer; };
-struct Vec4 { f32 x,y,z,w; };
+
+#include "sead_math.h"
+
 struct Obj178 { u8 pad0[0x10]; Vec4 value; };
 struct Obj17E { u8 pad0[0xbee]; u8 mbee; };
 struct Obj197 { u8 pad0[0x498]; u8 m498; };

@@ -19,7 +19,9 @@ struct Game {
 };
 extern Game* data_00706E20;
 Actor* func_004C4AF4(Game* g, const SpawnParam& p, s32 z);
-struct Mtx34 { f32 m[3][4]; };
+
+#include "sead_math.h"
+
 struct Model600;
 Mtx34* func_0053ED3C(Model600* m);
 void func_004D80A4(Vec3* out, u32 angle, f32 len);

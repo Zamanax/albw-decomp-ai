@@ -3,7 +3,9 @@ typedef unsigned char u8;
 typedef int s32;
 typedef float f32;
 
-struct Vec3 { f32 x, y, z; };
+
+#include "vec3.h"
+
 struct EffChild { char p0[4]; s32 m4; char p8[4]; u32 mc; char p10[0x280 - 0x10]; u8 m280; };
 struct Eff {
     char p0[0x1c];
@@ -50,7 +52,7 @@ struct En208 {
 void En208::f() {
     if (m1c4.isValid() && m1c4.p->isPlaying()) {
         Ent48* e = &m4->m8d4->m24->m14[m4->m8e8];
-        Vec3 pos = { e->x, e->y, e->z };
+        Vec3 pos; pos.x=e->x; pos.y=e->y; pos.z=e->z;
         f32 r = func_0051E8AC(data_0070B960, &pos, 1.0f, 0.5f);
         Sub8c0* s = (Sub8c0*)((char*)m4 + 0x8c0);
         s->m40 = r;

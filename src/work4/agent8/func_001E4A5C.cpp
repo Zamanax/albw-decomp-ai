@@ -7,7 +7,9 @@ typedef float f32;
 
 #include "vec3.h"
 
-struct Vec2 { f32 x, y; };
+
+#include "sead_math.h"
+
 struct Word { u32 v; };
 
 struct HandleMgr {};

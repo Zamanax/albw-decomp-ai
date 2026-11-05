@@ -7,14 +7,11 @@ namespace sead {
 
 #include "vec3.h"
 
-struct Vec2 {
-    Vec2(f32 x_, f32 y_) : x(x_), y(y_) {} void set(f32 x_, f32 y_) { y = y_; x = x_; }
-    f32 x, y;
-};
 
-struct Mtx34 {
-    f32 m[3][4];
-};
+#include "sead_math.h"
+
+
+
 
 struct Model600 {
     Mtx34* getJointMtx();  // 0x53ED74

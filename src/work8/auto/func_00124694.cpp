@@ -66,8 +66,10 @@ struct Actor138 {
     void* model;
     FlagChild44* child;
 };
-struct Matrix33 { f32 v[9]; };
-struct Matrix34 { f32 v[12]; };
+
+#include "sead_math.h"
+
+
 struct SafeStringView {
     virtual ~SafeStringView();
     virtual void assureTermination() const;

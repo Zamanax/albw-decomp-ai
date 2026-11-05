@@ -5,7 +5,9 @@ typedef float f32;
 
 #include "vec3.h"
 
-struct AngleT { s32 v; AngleT(s32 n) : v(n) {} };
+
+#include "sead_math.h"
+
 struct Obj { char p0[0x3d0]; Vec3 m3d0; char p3dc[0x3e8-0x3dc]; s32 m3e8; };
 
 static inline unsigned l2c_fbits(float x) { union { float f; unsigned u; } v; v.f = x; return v.u; }

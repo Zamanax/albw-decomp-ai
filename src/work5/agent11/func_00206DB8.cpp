@@ -1,7 +1,9 @@
 #define M4FC_STRUCT
 #define EN_EXTRA void f();
 #include "en206.h"
-struct AngleT { s32 v; AngleT(s32 x) : v(x) {} };
+
+#include "sead_math.h"
+
 u32 func_0058E2B8(const AngleT& a);
 void En::f() {
 StateMgr& sm = mState;

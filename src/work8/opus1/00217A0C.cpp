@@ -3,7 +3,9 @@ extern "C" f32 sqrtf(f32);
 
 #include "sead_string.h"
 namespace sead{}
-struct Vec3{void set(f32 a,f32 b,f32 c){x=a;y=b;z=c;}void set(const Vec3& d){x=d.x;y=d.y;z=d.z;}f32 x,y,z;Vec3(){}void func_00115C70(const Vec3&,const Vec3&);f32 length()const;};
+
+#include "vec3.h"
+
 inline f32 distSqXZ(const Vec3& a,const Vec3& b){f32 dx=b.x-a.x;f32 dz=b.z-a.z;return dx*dx+dz*dz;}
 struct B;
 struct Timeline{void func_00352210(bool,f32);};
@@ -20,7 +22,7 @@ struct Player{void func_00291FE0(const Vec3&,f32);void func_002917A4(const Vec3&
 struct Area{char p[0x4a];short type;char p4c[0x3c0-0x4c];s32 id;};struct AreaMgr{Area* func_00581C5C();};extern AreaMgr* data_0070C8E0;
 struct Stage{char p[0x18];s8 type;};extern Stage* data_00709DF8;
 
-inline Vec3 sub(const Vec3& a,const Vec3& b){Vec3 r;Vec3* p=&r;const Vec3* x=&a;const Vec3* y=&b;p->func_00115C70(*x,*y);return r;}
+inline Vec3 sub(const Vec3& a,const Vec3& b){Vec3 r;Vec3* p=&r;const Vec3* x=&a;const Vec3* y=&b;p->setSub(*x,*y);return r;}
 inline bool positive(f32 n){return n>0.0f;}
 f32 Vec3::length()const{f32 sq=x*x+y*y+z*z;return sqrtf(sq);}
 void B::sound(){Area* a=data_0070C8E0->func_00581C5C();if(!a)return;if(area!=a->id){playing=1;return;}

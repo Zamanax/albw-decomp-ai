@@ -1,7 +1,9 @@
 typedef unsigned int u32;
 typedef int s32;
 
-struct Vec2 { float x; float y; };
+
+#include "sead_math.h"
+
 struct Tmp { char p[0x34]; };
 struct Inner { char p0[0x2cc]; u32 m2cc; };
 struct Owner {

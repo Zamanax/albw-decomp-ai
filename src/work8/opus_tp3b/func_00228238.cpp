@@ -1,6 +1,8 @@
 #include "../../work6/gpt13/en218.h"
 #include "../../work6/gpt13/atan.h"
-struct Angle{s32 v;Angle(s32 n):v(n){}};struct Hit{u32 m0;Vec3 v;u8 p10[0x10];u16 m20;};struct Obj{char p[0x6a4];Angle a;s32 b;char p6ac[0x749-0x6ac];u8 hit;};
+
+#include "sead_math.h"
+struct Hit{u32 m0;Vec3 v;u8 p10[0x10];u16 m20;};struct Obj{char p[0x6a4];Angle a;s32 b;char p6ac[0x749-0x6ac];u8 hit;};
 bool func_001507A8(Obj*,const Hit&);
 Angle angleSub(Angle a,Angle b){return Angle(a.v-b.v);}
 inline f32 Abs(f32 v){return v>0.f?v:-v;}

@@ -53,7 +53,8 @@ def main():
     ap.add_argument("headers", nargs="+")
     ap.add_argument("--jobs", type=int, default=16)
     a = ap.parse_args()
-    names = includers({os.path.basename(h) for h in a.headers})
+    asked = {os.path.basename(h) for h in a.headers}
+    names = includers(asked)
     data = json.load(open(os.path.join(ROOT, "functions.json")))
     ents = []
     for key, ent in sorted(data.items()):
@@ -69,7 +70,7 @@ def main():
         res = list(ex.map(lambda kv: check(*kv), ents))
     bad = [(k, d) for k, ok, d in res if not ok]
     print("%s (+ %d including headers): %d entries, %d failing" % (
-        ",".join(a.headers), len(names) - len(a.headers), len(res), len(bad)))
+        ",".join(a.headers), len(names) - len(asked), len(res), len(bad)))
     for k, d in bad:
         print("  FAIL %s %s" % (k, d))
     sys.exit(1 if bad else 0)

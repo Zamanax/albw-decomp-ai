@@ -3,14 +3,9 @@ typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
 extern "C" float sqrtf(float);
-struct Vec3 {
-    f32 x, y, z;
-    void setSub(const Vec3& a, const Vec3& b);
-    f32 length() const { return sqrtf(x * x + y * y + z * z); }
-    Vec3& setTo(const Vec3& v) { x = v.x; y = v.y; z = v.z; return *this; }
-    void set(f32 a, f32 b, f32 c) { x = a; y = b; z = c; }
-    f32 setLength(f32 t) { const f32 len = length(); if (len > 0.0f) { const f32 s = t / len; x *= s; y *= s; z *= s; } return len; }
-};
+
+#include "vec3.h"
+
 struct Random {
     u32 getU32();
     f32 getF32();

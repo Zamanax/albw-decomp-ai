@@ -2,7 +2,9 @@ typedef unsigned int u32;
 typedef unsigned char u8;
 typedef float f32;
 
-struct Vec2 { f32 x, y; };
+
+#include "sead_math.h"
+
 struct Inner { u8 pad[0x2cc]; u32 m2cc; };
 struct Obj { u8 pad[0x28]; Inner* m28; };
 struct Tmp { u8 buf[0x34]; };

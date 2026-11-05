@@ -1,7 +1,9 @@
 // MATCH (finisher2): this+0x400 base kept in r5 for the late vstr [r5,#0x1c4] = POINTER to a 0x400 sub-block (Blk400* b) declared after the call args (s32 t / f32 rr locals); store b->m1c4.
 #define A1D2_EXTRA void func_001D2A74();
 struct Mgr70FB60; struct Vec3;
-struct AngleT { int v; AngleT(int x) : v(x) {} };
+
+#include "sead_math.h"
+
 unsigned int func_0058E2B8(const AngleT& a); extern unsigned int data_0070F69C;
 #include "a2_1d2.h"
 void func_001DDDE8(Mgr70FB60* m, const Vec3* pos, s32 kind, f32 f);

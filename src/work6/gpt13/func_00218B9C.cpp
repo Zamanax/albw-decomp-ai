@@ -1,6 +1,8 @@
 #include "en218.h"
 #include "atan.h"
-struct Angle{s32 v;Angle(s32 n):v(n){}};struct Hit{u32 m0;Vec3 v;};struct Obj{char p[0x8f4];s32 a,b;u8 hit;};
+
+#include "sead_math.h"
+struct Hit{u32 m0;Vec3 v;};struct Obj{char p[0x8f4];s32 a,b;u8 hit;};
 void func_004F4A68(Obj*,const Hit&);
 Angle angleSub(Angle a,Angle b){return Angle(a.v-b.v);}
 inline f32 Abs(f32 v){return v>0.f?v:-v;}

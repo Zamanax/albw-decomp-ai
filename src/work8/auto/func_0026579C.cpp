@@ -1,5 +1,7 @@
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct SinCosSample { f32 sin_val, sin_delta, cos_val, cos_delta; };
+
+#include "sead_math.h"
+
 extern const SinCosSample ro_006C3AB8[];
 struct Parts { u32 low; u32 high; f32 r; const SinCosSample* table;
   Parts(const u32& idx) : low(idx & 0xffffff), high(idx >> 24), r((f32)low * (1.0f / 0x1000000)), table(ro_006C3AB8) {}

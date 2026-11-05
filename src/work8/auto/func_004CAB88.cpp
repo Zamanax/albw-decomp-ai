@@ -22,14 +22,16 @@ struct O4C65:Base3D0E {u8 m8bc;O4C65();};
 
 #include "vec3.h"
 
-struct Vec4 {f32 x,y,z,w;};
+
+#include "sead_math.h"
+
 struct ActorPos {char pad0[0x3d0];Vec3 pos;};
 struct O4E56 {char pad0[0x3d0];Vec3 m3d0;char pad3dc[0xf8];Vec3 m4d4;char pad4e0[0x140];void* m620;char pad624[0x4d];u8 m671;};
 struct O4EA1 {char pad0[0x34];void* m34;char pad38[0x14];void* m4c;char pad50[8];void* m58;u32 pad5c;Flag32 flags60;};
 struct PosBC {char pad0[0xbc];Vec3 pos;};
 struct OwnerB0 {char pad0[0xb0];PosBC* child;};
 struct O5237 {char pad0[0x2c8];u32 frames;char pad2cc[0xc];u32 frames2d8;};
-struct Mtx34 {f32 m[12];};
+
 struct Buffer5308 {char pad0[0x14];Mtx34* data;};
 struct Model5308 {char pad0[0x24];Buffer5308* buffer;};
 struct Owner5308 {char pad0[8];Model5308* model;};

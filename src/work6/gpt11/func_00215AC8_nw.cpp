@@ -12,20 +12,9 @@ typedef unsigned long long u64;
 namespace sead {
 
 }
-struct Vec3 {
-    f32 x,y,z;
-    Vec3(){}
-    Vec3(f32 a,f32 b,f32 c):x(a),y(b),z(c){}
-    void set(f32 a,f32 b,f32 c){x=a;y=b;z=c;}
-    void set(const Vec3& v){*this=v;}
-    void setSub(const Vec3&,const Vec3&); // 0x115C70
-    void setAdd(const Vec3&,const Vec3&); // 0x115C54
-    void setMul(const Vec3&,f32); // 0x115D70
-    f32 normalize(); // 0x115DC8
-    void operator+=(const Vec3& v){setAdd(*this,v);}
-    void zero(){for(int i=0;i<3;i++) (&x)[i]=0.0f;}
-    f32 squaredLength()const{return x*x+y*y+z*z;}
-};
+
+#include "vec3.h"
+
 inline Vec3 operator+(const Vec3& a,const Vec3& b){Vec3 v;v.setAdd(a,b);return v;}
 inline Vec3 operator-(const Vec3& a,const Vec3& b){Vec3 v;v.setSub(a,b);return v;}
 inline Vec3 operator*(const Vec3& a,f32 b){Vec3 v;v.setMul(a,b);return v;}
@@ -45,7 +34,9 @@ struct ActorMgr {void* func_0052FBA0(u32);};
 struct Game {char pad[0x3dbbc];ActorMgr mgr;};
 extern Game* data_00706E20;
 extern s32 data_0070AA74;
-struct Mtx34 {f32 m[12];void translation(Vec3* p)const{p->x=m[3];p->y=m[7];p->z=m[11];}};
+
+#include "sead_math.h"
+
 
 #include "model.h"
 

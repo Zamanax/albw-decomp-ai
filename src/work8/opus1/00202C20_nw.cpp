@@ -50,7 +50,9 @@ u32 func_00111A64(Random* r);
 inline u32 randU32(Random* r, u32 max) { return ((u64)func_00111A64(r) * max) >> 32; }
 Random* func_0058A7D4(En202* e);
 Vec3* func_00520FC0(En202* e);      
-struct Angle { s32 v; };
+
+#include "sead_math.h"
+
 void func_0014FAFC(En202* e, Angle ang, f32 rate);
 void func_00150A84(En202* e, const sead::SafeString& name, s32 v);   
 void func_004FAD90(En202* e);
@@ -68,7 +70,7 @@ bool func_004F8998(En202* e, s32 a, s32 b);
 void func_004F48F0(En202* e);
 void func_004F5588(En202* e);
 void func_004F5BD8(En202* e, s32 a, s32 b);
-struct AngleT { s32 v; AngleT(s32 x) : v(x) {} };
+
 u32 func_0058E2B8(const AngleT& a);   
 struct Hit2035 { char pad[4]; Vec3 m4; };
 void func_004F4A68(En202* e, Hit2035* h);
@@ -78,15 +80,7 @@ s32 func_002AB1CC(s32 a, s32 b, s32 c);
 #include "flags.h"
 
 struct Sub510 { char pad[4]; u8 m4; };
-struct Mtx34 {
-    f32 m[3][4];
-    void makeT(const Vec3& t) {
-        m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f;
-        m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f;
-        m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;
-        m[0][3] = t.x;  m[1][3] = t.y;  m[2][3] = t.z;
-    }
-};
+
 void func_001157FC(Mtx34* out, const Mtx34& a, const Mtx34& b);   
 struct Model40C {
     char pad[0x80];
@@ -97,7 +91,7 @@ struct Model40C {
     Mtx34& mtxW() { setDirty(); return mMtx; }
 };
 void func_004CEAF0(Model40C* m);
-struct SinCosSample { f32 sin_val, sin_delta, cos_val, cos_delta; };
+
 extern const SinCosSample ro_006C3AB8[];
 inline f32 sinIdx(u32 idx) {
     u32 i = idx >> 24;

@@ -6,9 +6,9 @@ typedef float f32;
 
 #include "vec3.h"
 
-struct Mtx34 {
-    f32 m[3][4];
-};
+
+#include "sead_math.h"
+
 void func_00491E80(Mtx34* m, s32 x, s32 y, s32 z);
 void func_001157FC(Mtx34* out, const Mtx34* a, const Mtx34* b);
 

@@ -7,7 +7,9 @@ typedef long long s64; typedef float f32;
 #include "static_init.h"
 
 struct Pair { s64 v; Pair() : v(0) {} };
-struct Vec2 { f32 x, y; Vec2(f32 a, f32 b) : x(a), y(b) {} };
+
+#include "sead_math.h"
+
 s64 data_0070BD48 = Id64().v;
 Pair data_0070BD50;
 SafeString data_0074FAB0[4] = { "N_ArrowT_00", "N_ArrowB_00", "N_ArrowL_00", "N_ArrowR_00" };

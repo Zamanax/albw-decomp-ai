@@ -5,7 +5,9 @@ typedef int s32;
 typedef unsigned char u8;
 typedef float f32;
 typedef unsigned short u16;
-struct Vec4 { f32 x, y, z, w; };
+
+#include "sead_math.h"
+
 struct Bits { u32 v; u16 hi() const { return v >> 16; } };
 struct Bits2 { u32 lo:16; u32 hi:16; };
 struct Elem3C { char pad[0xc]; Bits mC; char pad2[0x3c - 0x10]; };

@@ -5,17 +5,14 @@
 // inline members generate no code, so the helpers are a superset. Types are spelled with plain C
 // types (like vec3.h) so that a file's own typedefs cannot collide with a shared typedef.
 //
-// Free Vec3 operators (operator+, operator-, operator*) are NOT declared here: the game's
-// 0x115C54/0x115C70/0x115D70 functions are exposed as the Vec3 members setAdd/setSub/setMul in
-// vec3.h, and the 15 matched sources that want the operator spelling define inline wrappers in
-// their own TU (e.g. src/work8/opus8/001B00E4.cpp); a non-inline declaration here would collide
-// with those inline definitions. nn::math's MTX34 inverse at 0x11558C is hand-written VFP asm and
-// likewise stays out.
+// This header deliberately does NOT include vec3.h: several matched sources reach Vec3 through a
+// local actor header of their own (src/work7/gpt21/range.h, src/work6/gpt13/en218.h, ...), and a
+// Vec3 definition here would collide with it. The two Mtx34 helpers that take a vector therefore
+// take it as a template parameter, which instantiates identically for the shared Vec3 and for a
+// file-local one. A file that needs Vec3 as well includes "vec3.h" (vec3.h stays standalone).
 
 #ifndef SEAD_MATH_H
 #define SEAD_MATH_H
-
-#include "vec3.h"
 
 // sead::Vector2f (stand-in name Vec2). The plain 8-byte struct ({x, y}) is what 6 matched sources
 // write; three more add a default ctor, a 2-arg ctor and set(). The y-then-x store order in set()
@@ -47,10 +44,10 @@ struct Mtx33 {
     };
 };
 
-// 3x4 matrix: 12 floats. The majority of sources spell it `m[3][4]` (6 sources + makeT user),
-// four spell it as a flat array named `m`, one as `a[12]`, and the Matrix34 sources use `e`, `v`
-// or `m`. A union keeps every spelling over the same 48 bytes; the flat array is reached as `a`
-// (a source that indexes a flat `m` needs the rename m[idx] -> a[idx]).
+// 3x4 matrix: 12 floats. Most sources spell it `m[3][4]`; four spell it as a flat array named `m`,
+// one as `a[12]`, and the Matrix34 sources use `e`, `v` or `m`. A union keeps every spelling over
+// the same 48 bytes. A source that indexes the flat array as `m[idx]` gets the rename
+// m[idx] -> a[idx] (only one spelling can be called `m`).
 struct Mtx34 {
     union {
         float m[3][4];
@@ -60,8 +57,10 @@ struct Mtx34 {
         float data[12];
     };
 
-    // Identity rotation + translation column (00202C20, byte-verified store order).
-    void makeT(const Vec3& t) {
+    // Identity rotation + translation column (00202C20, byte-verified store order). The vector type
+    // is a template parameter so this header needs no Vec3 definition.
+    template <class V>
+    void makeT(const V& t) {
         m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f;
         m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f;
         m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;
@@ -69,14 +68,16 @@ struct Mtx34 {
     }
 
     // Translation getter as two matched sources write it (002158D8, 00215F70): flat indices 3, 6, 9.
-    void translation(Vec3* p) const { p->x = a[3]; p->y = a[6]; p->z = a[9]; }
+    template <class V>
+    void translation(V* p) const { p->x = a[3]; p->y = a[6]; p->z = a[9]; }
     // The third source (00215AC8) writes the same helper with flat indices 3, 7, 11 and calls it;
     // the two forms produce different loads, so both are kept under distinct names and that file
     // gets the rename translation( -> translationRM(.
-    void translationRM(Vec3* p) const { p->x = a[3]; p->y = a[7]; p->z = a[11]; }
+    template <class V>
+    void translationRM(V* p) const { p->x = a[3]; p->y = a[7]; p->z = a[11]; }
 };
 
-// Alternate spellings of the same 12-float matrix in the matched sources (Matrix33/Matrix34 in
+// Alternate spellings of the same matrices in the matched sources (Matrix33/Matrix34 in
 // 001151CC/001151EC/00124694/002FCAC0, Mtx in 003639D0/0038B25C/0039F998/0055693C).
 typedef Mtx33 Matrix33;
 typedef Mtx34 Matrix34;

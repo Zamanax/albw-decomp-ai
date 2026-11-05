@@ -1,12 +1,9 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
 
-struct Vec3 {
-    Vec3() {}
-    Vec3(const Vec3& a, const Vec3& b) { setSub(a, b); }
-    f32 x, y, z;
-    void setSub(const Vec3& a, const Vec3& b);
-};
+
+#include "vec3.h"
+
 
 struct Sub900 {
     char pad0[0x4c];
@@ -31,7 +28,9 @@ extern u32 data_0070AA48;
 f32 func_00521298(Self* s);
 Vec3* func_00520FC0(Self* s);
 bool func_001A5458(Self* s, Vec3* p);
-struct AngleT { s32 v; AngleT(s32 x):v(x){} };
+
+#include "sead_math.h"
+
 s32 func_0068C690(const Vec3& v);
 u32 func_0058E2B8(const AngleT& p);
 

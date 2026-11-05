@@ -9,7 +9,9 @@ typedef int s32;
 typedef signed long long s64;
 typedef unsigned long long u64;
 typedef float f32;
-struct Vec2 {f32 x,y;};
+
+#include "sead_math.h"
+
 
 #include "vec3.h"
 

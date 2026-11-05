@@ -2,7 +2,9 @@ typedef unsigned char u8; typedef unsigned int u32; typedef int s32; typedef flo
 
 #include "vec3.h"
 
-struct AngleT { s32 v; AngleT(s32 n) : v(n) {} };
+
+#include "sead_math.h"
+
 extern "C" void* data_0070FB60;
 extern "C" Vec3* func_00520FC0(void* self);
 extern "C" void func_00115C70(Vec3* o, const Vec3* a, const Vec3* b);

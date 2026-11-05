@@ -70,10 +70,12 @@ extern Mgr70FB60* data_0070FB60;
 bool func_00392E48(const Vec3* pos, s32 a, s32 b, s32 c);  // 0x392E48 (pos, 1, 0, 0)
 void func_00115C54(Vec3* out, const Vec3* a, const Vec3* b);  // Vec3 setAdd
 
+
+#include "sead_math.h"
 namespace sead {
-struct SinCosSample { f32 sin_val, sin_delta, cos_val, cos_delta; };
+
 }
-extern const sead::SinCosSample ro_006C3AB8[];
+extern const SinCosSample ro_006C3AB8[];
 inline f32 sinIdx(u32 a) {
     u32 idx = a >> 24;
     f32 frac = (a & 0xffffff) * (1.0f / 0x1000000);

@@ -34,7 +34,9 @@ struct ActorMgr {void* func_0052FBA0(u32);};
 struct Game {char pad[0x3dbbc];ActorMgr mgr;};
 extern Game* data_00706E20;
 extern s32 data_0070AA74;
-struct Mtx34 {f32 m[12];void translation(Vec3* p)const{p->x=m[3];p->y=m[6];p->z=m[9];}};
+
+#include "sead_math.h"
+
 struct Model {
     char p0[0x74];Vec3 m74;char p80[0xd8-0x80];Mtx34 md8;
     char p108[0x164-0x108];BitFlag32 m164;

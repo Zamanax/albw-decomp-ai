@@ -5,7 +5,9 @@ typedef int s32;
 typedef unsigned int u32;
 typedef float f32;
 
-struct Vec2 { f32 x, y; };
+
+#include "sead_math.h"
+
 
 #include "vec3.h"
 

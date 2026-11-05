@@ -8,7 +8,9 @@ typedef float f32;
 
 #include "vec3.h"
 
-struct Mtx34 { f32 m[3][4]; };
+
+#include "sead_math.h"
+
 struct Skel { u8 pad[0x14]; Mtx34* mtx; };
 struct Model { u8 pad[0x24]; Skel* skel; };
 

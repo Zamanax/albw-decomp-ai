@@ -1,9 +1,13 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
-struct Vec3 { f32 x, y, z; void setSub(const Vec3& a, const Vec3& b); Vec3& operator-=(const Vec3& o); void sub(const Vec3& o); };
+
+#include "vec3.h"
+
 Vec3& Vec3::operator-=(const Vec3& o) { setSub(*this, o); return *this; }
 void Vec3::sub(const Vec3& o) { setSub(*this, o); }
-struct Angle { s32 v; Angle(s32 x) : v(x) {} };
+
+#include "sead_math.h"
+
 
 #include "sead_rtti.h"
 

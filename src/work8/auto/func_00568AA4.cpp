@@ -1,7 +1,9 @@
 typedef unsigned char u8;
 typedef unsigned int u32;
 typedef float f32;
-struct Vec4 { f32 x, y, z, w; };
+
+#include "sead_math.h"
+
 struct Owner {
     u8 pad0[0x3c];
     f32 m3c;

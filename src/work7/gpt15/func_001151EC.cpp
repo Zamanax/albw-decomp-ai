@@ -1,5 +1,7 @@
 #include "range.h"
-struct Matrix34 { float e[12]; };
+
+#include "sead_math.h"
+
 extern "C" void func_001151EC(Matrix34* dst,const Matrix34* src) {
 float v0=src->e[0];
 float v1=src->e[1];

@@ -1,6 +1,8 @@
 #define EN_EXTRA void squash();
 #include "en200.h"
-struct SinCosSample { f32 sin_val, sin_delta, cos_val, cos_delta; };
+
+#include "sead_math.h"
+
 extern const SinCosSample ro_006C3AB8[];
 inline void copyVec(Vec3* d, const Vec3& s) { *d = s; }
 struct Parts { u32 low; u32 high; f32 r; const SinCosSample* table;

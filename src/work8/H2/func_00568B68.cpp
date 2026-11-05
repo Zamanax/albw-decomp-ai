@@ -1,5 +1,7 @@
 #include "range.h"
-struct Vec2 { f32 x, y; };
+
+#include "sead_math.h"
+
 struct Owner {
     u8 pad0[0x3c];
     f32 m3c;

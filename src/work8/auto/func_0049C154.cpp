@@ -1,4 +1,6 @@
-struct Vec4 { float x, y, z, w; };
+
+#include "sead_math.h"
+
 static inline float clampf(float v, float hi, float lo){ if (v < lo) return lo; if (v > hi) return hi; return v; }
 void func_0049C154(Vec4* out, const Vec4* a, const Vec4* b, float t) {
     t = clampf(t, 1.0f, 0.0f);
