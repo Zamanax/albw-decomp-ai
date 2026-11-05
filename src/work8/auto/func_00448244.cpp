@@ -4,10 +4,9 @@ struct Item {
     char pad[0xd]; u8 b0d; u8 b0e; char pad0f[0x6c - 0xf]; u8 b6c;
     bool isDone() const { return b0d == 3 && b0e == 3; }
 };
-template <class T> struct PtrArray {
-    s32 mSize; s32 mCap; T** mPtrs;
-    T* at(s32 i) const { if ((u32)i < (u32)mSize) return mPtrs[i]; return 0; }
-};
+
+#include "sead_container.h"
+
 
 extern void* data_007142C8;
 extern "C" u32 func_0058DA7C(void*);

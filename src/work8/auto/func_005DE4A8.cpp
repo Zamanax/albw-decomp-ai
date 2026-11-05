@@ -3,7 +3,9 @@
 typedef float f32;
 typedef long long s64;
 
-struct Id64 { s64 v; Id64() : v(-1) {} };
+
+#include "static_init.h"
+
 struct Pair { s64 v; Pair() : v(0) {} };
 
 // 16-byte object whose s64 sits at +8: the built-in aggregate initializer is what makes

@@ -1,5 +1,7 @@
 #pragma pack(4)
-struct Id64 { long long v; Id64(): v(-1) {} };
+
+#include "static_init.h"
+
 struct A_t { char pad[8]; long long v; };
 A_t A = { {0}, Id64().v };
 struct Pair { long long v; Pair(): v(0) {} };

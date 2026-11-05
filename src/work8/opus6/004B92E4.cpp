@@ -22,12 +22,9 @@ struct LayerD : Layer { LayerD(); char pad[0x90 - 4]; };          // 0x3A1098
 struct Owner { char pad[0x1c]; u32 m1c; };
 void func_004B948C(Owner* o, Layer* l);
 
-template <typename T> struct PtrArray {
-    s32 mNum;
-    s32 mMax;
-    T** mPtrs;
-    void pushBack(T* p) { if (mNum < mMax) { mPtrs[mNum] = p; ++mNum; } }
-};
+
+#include "sead_container.h"
+
 
 struct Obj {
     char pad[0x30];

@@ -3,7 +3,9 @@ typedef long long s64; typedef float f32;
 
 #include "sead_string.h"
 
-struct Id64 { s64 v; Id64() : v(-1) {} };
+
+#include "static_init.h"
+
 struct Pair { s64 v; Pair() : v(0) {} };
 struct Vec2 { f32 x, y; Vec2(f32 a, f32 b) : x(a), y(b) {} };
 s64 data_0070BD48 = Id64().v;

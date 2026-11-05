@@ -5,14 +5,9 @@ struct Obj {
     virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
     virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
 };
-template <typename T>
-struct PtrArray {
-    s32 mPtrNum;
-    s32 mPtrNumMax;
-    T** mPtrs;
-    T** begin() const { return mPtrs; }
-    T** end() const { return mPtrs + mPtrNum; }
-};
+
+#include "sead_container.h"
+
 class X {
 public:
     void func_001E36CC();

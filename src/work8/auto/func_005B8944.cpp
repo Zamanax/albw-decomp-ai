@@ -8,18 +8,16 @@ typedef unsigned int u32; typedef long long s64; typedef float f32; typedef unsi
 #include "sead_string.h"
 
 #pragma pack(4)
-struct Id64 { s64 v; Id64() : v(-1) {} };
+
 struct Pair { s64 v; Pair() : v(0) {} };
 #pragma pack()
-struct PtrCnt { int num, max; PtrCnt(int n) : num(0), max(n) {} };
-struct PtrListBase : PtrCnt { void** ptr; PtrListBase(int n, void* b) : PtrCnt(n), ptr(0) { if (b) ptr = (void**)b; } };
-template<int N> struct PtrList : PtrListBase { void* buffer[N]; PtrList() : PtrListBase(N, buffer) {} };
+
+#include "static_init.h"
+
+
+
 typedef void* (*CreateFn)();
-struct Factory {
-    char storage[0x248];
-    Factory(CreateFn, u32, const SafeString&, PtrListBase*, const SafeString&, const char*, int);
-    ~Factory();
-};
+
 struct Vec3f { f32 x, y, z; Vec3f() : x(0.0f), y(1.5f), z(1.0f) {} };
 extern void* func_0060456C();
 extern const u32 ro_006930E0;

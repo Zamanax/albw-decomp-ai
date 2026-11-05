@@ -1,45 +1,13 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32;
 
+
+#include "sead_container.h"
 namespace sead {
 namespace PtrUtil { inline void* addOffset(const void* p, s32 off) { return (void*)((u32)p + off); } }
-class ListNode {
-public:
-    ListNode* next() const { return mNext; }
-    void erase_();
-    ListNode* mPrev;
-    ListNode* mNext;
-};
-class ListImpl {
-public:
-    void erase(ListNode* n) { n->erase_(); --mCount; }
-    ListNode mStartEnd;
-    s32 mCount;
-    s32 mOffset;
-};
-template <typename T>
-class OffsetList : public ListImpl {
-public:
-    class robustIterator {
-    public:
-        robustIterator(T* ptr, s32 offset) : mPtr(ptr), mNextNode(0), mOffset(offset) {
-            mNextNode = static_cast<ListNode*>(PtrUtil::addOffset(mPtr, mOffset))->next();
-        }
-        robustIterator& operator++() {
-            mPtr = static_cast<T*>(PtrUtil::addOffset(mNextNode, -mOffset));
-            mNextNode = mNextNode->next();
-            return *this;
-        }
-        bool operator!=(const robustIterator& o) const { return mPtr != o.mPtr; }
-        T& operator*() const { return *mPtr; }
-        T* mPtr;
-        ListNode* mNextNode;
-        s32 mOffset;
-    };
-    robustIterator robustBegin() const { return robustIterator(static_cast<T*>(PtrUtil::addOffset(mStartEnd.next(), -mOffset)), mOffset); }
-    robustIterator robustEnd() const { return robustIterator(static_cast<T*>(PtrUtil::addOffset(&mStartEnd, -mOffset)), mOffset); }
-    void erase(T* obj) { s32 off = mOffset; ListImpl::erase(static_cast<ListNode*>(PtrUtil::addOffset(obj, off))); }
-};
+
+
+
 
 
 

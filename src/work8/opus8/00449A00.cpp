@@ -5,15 +5,11 @@ struct Item {
     bool isIdle() const { return b0d == 0 && b0e == 0; }
     bool isDone() const { return b0d == 3 && b0e == 3; }
 };
-template <class T> struct PtrArray {
-    s32 mSize; s32 mCap; T** mPtrs;
-    T* at(s32 i) const { if ((u32)i < (u32)mSize) return mPtrs[i]; return 0; }
-};
+
+#include "sead_container.h"
+
 struct Elem38 { char pad[0x35]; u8 b35; char pad36[2]; };
-template <class T> struct Buffer {
-    s32 mSize; T* mBuffer;
-    T& operator()(s32 i) const { if ((u32)i < (u32)mSize) return mBuffer[i]; return mBuffer[0]; }
-};
+
 struct Res { char pad[8]; Buffer<Elem38> buf; };
 void func_0012C718(Item* it);
 void func_0046A1D4(Item* it, s32 n);

@@ -4,19 +4,17 @@ typedef unsigned int u32; typedef long long s64; typedef float f32; typedef unsi
 #include "sead_string.h"
 
 #pragma pack(4)
-struct Id64 { s64 v; Id64() : v(-1) {} };
+
 struct Pair { s64 v; Pair() : v(0) {} };
 #pragma pack()
 inline s64 f2l(f32 f) { return (s64)f; }
-struct PtrCnt { int num, max; PtrCnt(int n) : num(0), max(n) {} };
-struct PtrListBase : PtrCnt { void** ptr; PtrListBase(int n, void* b) : PtrCnt(n), ptr(0) { if (b) ptr = (void**)b; } };
-template<int N> struct PtrList : PtrListBase { void* buffer[N]; PtrList() : PtrListBase(N, buffer) {} };
+
+#include "static_init.h"
+
+
+
 typedef void* (*CreateFn)();
-struct Factory {
-    char storage[0x248];
-    Factory(CreateFn, u32, const SafeString&, PtrListBase*, const SafeString&, const char*, int);
-    ~Factory();
-};
+
 static s64 data_0070F750 = Id64().v;
 static Pair data_0070F758;
 static u32 data_0070F740 = (u32)f2l(0.0f);

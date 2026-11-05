@@ -33,10 +33,9 @@ static bool isDerived(const Obj* a)
 }
 struct X : Obj {};
 struct G { u8 pad[0x44]; Obj* m44; };
-template <class T> struct PtrArray {
-    s32 mNum; s32 mMax; T** mPtrs;
-    T* at(s32 i) const { if ((u32)i < (u32)mNum) return mPtrs[i]; return 0; }
-};
+
+#include "sead_container.h"
+
 template <class T, s32 N> struct SafeArray {
     T mBuf[N];
     T& operator[](s32 i) { if ((u32)i < N) return mBuf[i]; return mBuf[0]; }

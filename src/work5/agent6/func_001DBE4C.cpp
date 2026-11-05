@@ -3,18 +3,9 @@
 #include "vec3.h"
 
 
-template <typename T>
-struct PtrArray {
-    s32 size() const { return mPtrNum; }
-    T* at(s32 i) const {
-        if ((u32)i < (u32)mPtrNum)
-            return mPtrs[i];
-        return 0;
-    }
-    s32 mPtrNum;
-    s32 mPtrMax;
-    T** mPtrs;
-};
+
+#include "sead_container.h"
+
 
 struct Follower {
     void setTarget(const Vec3* pos);  // 0x3879AC

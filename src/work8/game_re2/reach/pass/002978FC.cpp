@@ -43,14 +43,9 @@ ObjectNode*prev;
 ObjectNode*next;
 void*object;
 };
-template<class T> struct PtrArray {
- s32 num,capacity;
- T** data;
- T* at(s32 i)const{
-if((u32)i<(u32)num)return data[i];
-return 0;
-}
-};
+
+#include "sead_container.h"
+
 struct CounterPair {
 u32 cur,max;
 bool step(){

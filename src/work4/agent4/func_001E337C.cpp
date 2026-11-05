@@ -1,30 +1,10 @@
 typedef unsigned char u8;
 typedef int s32;
 
-struct PtrArrayImpl {
-    s32 mPtrNum;
-    s32 mPtrNumMax;
-    void** mPtrs;
-    void erase(s32 position, s32 num);   // 0x48C320
-};
-template <typename T>
-struct PtrArray : public PtrArrayImpl {
-    s32 indexOf(const T* p) const {
-        for (s32 i = 0; i < mPtrNum; ++i) {
-            if (mPtrs[i] == p)
-                return i;
-        }
-        return -1;
-    }
-    bool isEmpty() const { return mPtrNum == 0; }
-    void pushBack(T* p) {
-        if (mPtrNum < mPtrNumMax) {
-            mPtrs[mPtrNum] = p;
-            ++mPtrNum;
-        }
-    }
-    void erase(s32 position) { PtrArrayImpl::erase(position, 1); }
-};
+
+
+#include "sead_container.h"
+
 
 struct Item {
     char pad[0xe];

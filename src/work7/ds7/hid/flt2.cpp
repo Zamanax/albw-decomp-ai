@@ -7,7 +7,9 @@ typedef short s16;
 typedef unsigned char u8;
 typedef unsigned short u16;
 #pragma pack(4)
-struct Id64 { long long v; Id64() : v(-1) {} };
+
+#include "static_init.h"
+
 struct Pair { long long v; Pair() : v(0) {} };
 long long A = Id64().v;
 Pair B;

@@ -2,17 +2,15 @@ struct Heap;
 extern "C" Heap *data_00715210;
 extern "C" Heap *func_0010E2A4(Heap *cur, const void *addr);
 extern "C" void func_0010DEF0(Heap *heap, void *disposer);
-struct ListNode {
-    ListNode *mPrev;
-    ListNode *mNext;
-    ListNode() : mPrev(0), mNext(0) {}
-};
+
+#include "sead_container.h"
+
 class IDisposer_006F7DE8 {
 public:
     IDisposer_006F7DE8();
     virtual ~IDisposer_006F7DE8();
     Heap *mDisposerHeap;
-    ListNode mListNode;
+    ListNodeZero mListNode;
 };
 IDisposer_006F7DE8::IDisposer_006F7DE8() : mDisposerHeap(0)
 {

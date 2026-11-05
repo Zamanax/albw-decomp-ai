@@ -2,14 +2,12 @@ typedef unsigned char u8;
 typedef unsigned int u32;
 typedef signed int s32;
 
+
+#include "sead_container.h"
 namespace sead {
-struct ListNode { ListNode* mPrev; ListNode* mNext; void erase_(); };
-struct ListImpl { ListNode mStartEnd; s32 mCount; };
-template <class T> struct OffsetList : ListImpl {
-  s32 mOffset;
-  ListNode* objToListNode(T* o) const { return (ListNode*)((char*)o + mOffset); }
-  T* listNodeToObj(ListNode* n) const { return (T*)((char*)n - mOffset); }
-};
+
+
+
 }
 
 struct Obj;

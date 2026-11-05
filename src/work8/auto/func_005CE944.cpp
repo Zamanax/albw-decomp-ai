@@ -1,6 +1,8 @@
 typedef unsigned int u32; typedef long long s64;
 #pragma pack(4)
-struct Id64 { s64 v; Id64() : v(-1) {} };
+
+#include "static_init.h"
+
 struct Pair { s64 v; Pair() : v(0) {} };
 #pragma pack()
 extern char g_00725970;

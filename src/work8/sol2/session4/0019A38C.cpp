@@ -7,7 +7,9 @@ void func_001E01A8(T* t, s32 a);
 void ctx_0019A38C_2(T* a0,s32 a1);
                   
 extern void* data_00711F50;
-struct ListNode { ListNode* mPrev; ListNode* mNext; };
+
+#include "sead_container.h"
+
 struct Ring{ListNode node;u32 count;s32 offset;};
 struct C {
     char pad0[0x28];

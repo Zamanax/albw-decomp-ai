@@ -109,20 +109,12 @@ struct Actor {
     Mdl m75c;                 
 };
 
-struct ListNode { ListNode* mPrev; ListNode* mNext; };
-struct ListImpl {
-    ListNode mStartEnd; s32 mCount;
-    ListNode* front() const { return mCount > 0 ? mStartEnd.mNext : 0; }
-};
+
+#include "sead_container.h"
+
+
 struct Item { u8 pad[0x18]; Mdl* m18; };
-template <class T> struct OffsetList : ListImpl {
-    s32 mOffset;
-    ListNode* objToListNode(T* o) const { return (ListNode*)((u32)o + mOffset); }
-    T* listNodeToObj(ListNode* n) const { return (T*)((u32)n - mOffset); }
-    T* front() const { ListNode* n = mCount > 0 ? mStartEnd.mNext : 0; return n ? listNodeToObj(n) : 0; }
-    T* toObj(ListNode* n) const { if (!n) return 0; return listNodeToObj(n); }
-    T* next(T* o) const { ListNode* node = objToListNode(o); ListNode* n = node->mNext; if (n == &mStartEnd) return 0; return listNodeToObj(n); }
-};
+
 struct Obj30D {
     u8    pad[0x1c];
     Mdl*  m1c;                
