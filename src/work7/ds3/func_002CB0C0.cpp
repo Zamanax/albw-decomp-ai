@@ -1,5 +1,7 @@
 #include "ds3.h"
-struct SafeString { virtual void vf(); const char* str; SafeString(const char* s) : str(s) {} };
+
+#include "sead_string.h"
+
 struct S2CB0C0 { char pad[0x10]; u32 m10; char pad2[0x18-0x14]; u8 b18; };
 extern "C" u32 func_0010B954(u32, const SafeString&, int, int, int);
 static const char kMsgFlowHeap[] = "MsgFlowHeap";

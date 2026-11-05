@@ -9,13 +9,10 @@ typedef signed char s8;
 typedef float f32;
 typedef unsigned long long u64;
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 
@@ -23,21 +20,9 @@ public:
 
 extern const Vec3 data_007A9260;   
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-    bool step() {
-        if (cur < max) { cur++; return true; }
-        return false;
-    }
-};
+
+#include "timer.h"
+
 
 struct En202;
 struct Timeline { void func_00352210(bool b, f32 frame); };
@@ -89,12 +74,9 @@ struct Hit2035 { char pad[4]; Vec3 m4; };
 void func_004F4A68(En202* e, Hit2035* h);
 s32 func_002AB1CC(s32 a, s32 b, s32 c);
 
-struct BitFlag32 {
-    u32 v;
-    void set(u32 m) { v |= m; }
-    void reset(u32 m) { v &= ~m; }
-    bool isOn(u32 m) const { return (v & m) != 0; }
-};
+
+#include "flags.h"
+
 struct Sub510 { char pad[4]; u8 m4; };
 struct Mtx34 {
     f32 m[3][4];

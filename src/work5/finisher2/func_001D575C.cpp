@@ -4,17 +4,9 @@ typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; ty
 #include "vec3.h"
 
 inline void copyVec(Vec3* d, const Vec3& s) { *d = s; }
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(const u32& n, const u32& c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-};
+
+#include "timer.h"
+
 struct Mgr708998;
 extern Mgr708998* data_00708998;
 Vec3* func_00588F08(Mgr708998* m);
@@ -49,7 +41,7 @@ void A3::func_001D575C() {
     }
     copyVec(&m468, p);
     m4c2 = 0;
-    m4a8.start(0x23);
+    m4a8.startRef(0x23);
     m4b6 = 0;
     m4c1 = 2;
 }

@@ -81,7 +81,9 @@ struct Obj253 {u8 pad0[0x3d0];Vec3 pos;u8 pad3dc[0x278];u8 sub654[0x30];u8 sub68
 struct Obj2551 {u8 pad0[0x94];u32 entries[32];};
 struct Obj2553 {u8 pad0[0x2c];u32 flag;};
 struct Obj166C {u8 pad0[0xa4];u8 current,pending;};
-struct BitFlag8{u8 v;void set(u8 n){v|=n;}};
+
+#include "flags.h"
+
 struct Obj168 {u32 m0;Obj168* child;u8 pad8[0x68];BitFlag8 flags;};
 struct Global171 {u8 pad0[0x44];void* field;};
 struct Sub174 {u8 pad0[0x28];u16 id;};
@@ -94,7 +96,7 @@ struct Sub61 {u8 pad0[0x61];u8 flag;void set(u8 n){flag=n;} };
 struct Obj1AE {u8 pad0[0x909];u8 m909;u8 pad90a[0x96];Sub61* m9a0;u8 pad9a4[0x3c];u8 m9e0;};
 struct Obj1B03 {u8 pad0[0x90c];u8 state[4];};
 struct Obj1B6B {u8 pad0[0x38];u32 state;s8 m3c;};
-struct Flag16{u16 v;Flag16(){}Flag16(u16 n):v(n){}void reset(u16 n){*this=Flag16(v&~n);}};
+
 struct Sub1B6D{u8 pad0[0x16];Flag16 flags;};
 struct Obj1B6D{u8 pad0[0x14];Sub1B6D* child;u8 pad18[0x46];u8 m5e,m5f;};
 struct Obj1C2D {u8 pad0[0x84c];u16 id;};

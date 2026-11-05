@@ -47,7 +47,9 @@ struct EffHandle {
 f32 func_004F898C();
 void func_004F8964(f32* vy, bool clamp, f32 g);
 
-struct BitFlag32 { u32 v; void reset(u32 b) { v &= ~b; } };
+
+#include "flags.h"
+
 struct Obj {
     virtual void v0();
     char pad4[0x3e0 - 4];

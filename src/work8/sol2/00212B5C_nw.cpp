@@ -10,66 +10,23 @@ typedef signed char s8;
 typedef float f32;
 typedef unsigned long long u64;
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 
 #include "vec3.h"
 
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
+
+#include "timer.h"
 
 
 
-    void start(u32 n, u32 c = 0) {
+#include "flags.h"
 
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-    bool step() {
-        Timer t = *this;
-        if (t.cur < t.max) { cur = t.cur + 1; return true; }
-        return false;
-    }
-    bool step2b() {
-        if (cur < max) { cur++; return true; }
-        return false;
-    }
-    bool step3() {
-        Timer t = *this;
-        if (t.max > t.cur) { cur = t.cur + 1; return true; }
-        return false;
-    }
-    bool step2() {
-        if (max > cur) { cur++; return true; }
-        return false;
-    }
-};
-
-struct BitFlag32 {
-    u32 v;
-
-
-
-
-    
-    void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u32 m) { change(m, true); }
-    void reset(u32 m) { change(m, false); }
-
-    bool isOn(u32 m) const { return (v & m) != 0; }
-};
 
 
 

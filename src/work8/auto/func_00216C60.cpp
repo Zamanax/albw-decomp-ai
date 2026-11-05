@@ -6,12 +6,9 @@ typedef float f32;
 
 #include "vec3.h"
 
-struct Timer { u32 cur,max; f32 rate;
- void start(u32 n,u32 c=0){max=n;if(n)rate=1.0f/n;else rate=0;cur=c;}
- bool step(){Timer t=*this;if(t.cur<t.max){cur=t.cur+1;return true;}return false;}
- bool stepReverse(){Timer t=*this;if(t.max>t.cur){cur=t.cur+1;return true;}return false;}
- f32 progress()const{if(max==0||cur==0)return 0;if(max<=cur)return 1;return cur*rate;}
-};
+
+#include "timer.h"
+
 struct State { char p[0x24]; void func_0065D9FC(s32) __attribute__((notailcall)); };
 struct En { char p0[0x3d0]; Vec3 pos; Vec3 vel; s32 angle; char p3ec[0x8bc-0x3ec]; State state;
  char p8e0[0xa3c-0x8e0]; f32 a3c; char pa40[4]; Vec3 quad; char pa50[0xa64-0xa50]; s32 a64;

@@ -6,17 +6,9 @@ typedef float f32;
 #include "vec3.h"
 
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(const u32& n, const u32& c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-};
+
+#include "timer.h"
+
 
 class Obj1D6 {
 public:
@@ -39,7 +31,7 @@ void Obj1D6::func_002880F0() {
     m3dc.x = z;
     m3dc.y = z;
     m3dc.z = z;
-    m500.start(80);
+    m500.startRef(80);
     m514 = z;
     m530 = 1;
 }

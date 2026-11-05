@@ -1,6 +1,8 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32; typedef float f32;
-namespace sead { struct SafeString { SafeString(const char* s) : mStringTop(s) {} virtual void assureTerminationImpl_() const; const char* mStringTop; }; }
+
+#include "sead_string.h"
+namespace sead {  }
 f32 func_004F898C();
 void func_004F8964(f32* vy, bool clamp, f32 g);
 struct Obj8E4 { char pad[0x61]; u8 b61; };

@@ -63,33 +63,9 @@ struct Mgr70FB60 {
 };
 extern Mgr70FB60* data_0070FB60;
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    // agent4: const& params needed (1D6924 MATCH; by-value start gave swapped r1/r2 for the 3 and the 0)
-    void start(const u32& n, const u32& c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-    bool step() {
-        if (cur < max) { cur++; return true; }
-        return false;
-    }
-    f32 progress() const {
-        f32 r;
-        if (max == 0 || cur == 0) r = 0.0f;
-        else if (max <= cur) r = 1.0f;
-        else r = cur * rate;
-        return r;
-    }
-    bool step2() {   // 'cmp max,cur; addhi' form (KB #153)
-        if (max > cur) { cur++; return true; }
-        return false;
-    }
-};
+
+#include "timer.h"
+
 
 bool func_00392E48(const Vec3* pos, s32 a, s32 b, s32 c);  // 0x392E48 (pos, 1, 0, 0)
 void func_00115C54(Vec3* out, const Vec3* a, const Vec3* b);  // Vec3 setAdd

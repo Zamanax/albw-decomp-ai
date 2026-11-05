@@ -1,5 +1,7 @@
 #include "ds3.h"
-struct SafeString { virtual void vf(); const char* str; SafeString(const char* s) : str(s) {} };
+
+#include "sead_string.h"
+
 struct Obj29D1 { char pad[0x4c]; u8 b4C; };
 struct S29D104 { char pad[0xec]; Obj29D1* mEC; };
 extern "C" char data_00712940[];

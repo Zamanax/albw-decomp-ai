@@ -14,25 +14,9 @@ template<class T> struct ResourceEntry16 {
 T* object;
 u32 reserved[3];
 };
-struct Flag32 {
-    u32 value;
-    void set(u32 mask) {
-value |= mask;
-}
-    void reset(u32 mask) {
-value &= ~mask;
-}
-    void change(u32 mask, bool on) {
-if (on) value |= mask;
-else value &= ~mask;
-}
-    void setB(u32 mask) {
-change(mask,true);
-}
-    void resetB(u32 mask) {
-change(mask,false);
-}
-};
+
+#include "flags.h"
+
 struct FloatPair {
 f32 first,second;
 };

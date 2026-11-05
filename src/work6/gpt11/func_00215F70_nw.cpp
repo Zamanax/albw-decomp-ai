@@ -7,12 +7,10 @@ typedef unsigned short u16;
 typedef short s16;
 typedef float f32;
 typedef unsigned long long u64;
+
+#include "sead_string.h"
 namespace sead {
-struct SafeString {
-    SafeString(const char* s):mStringTop(s){}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 #include "vec3.h"
@@ -20,17 +18,12 @@ struct SafeString {
 inline Vec3 operator+(const Vec3& a,const Vec3& b){Vec3 v;v.setAdd(a,b);return v;}
 inline Vec3 operator-(const Vec3& a,const Vec3& b){Vec3 v;v.setSub(a,b);return v;}
 inline Vec3 operator*(const Vec3& a,f32 b){Vec3 v;v.setMul(a,b);return v;}
-struct BitFlag32 {
-    u32 v;
-    void change(u32 m,bool on){if(on)v|=m;else v&=~m;}
-    void set(u32 m){change(m,true);}
-    void reset(u32 m){change(m,false);}
-};
-struct Timer {
-    u32 cur,max; f32 rate;
-    void start(u32 n,u32 c=0){max=n;if(n)rate=1.0f/n;else rate=0.0f;cur=c;}
-    bool step(){Timer t=*this;if(t.cur<t.max){cur=t.cur+1;return true;}return false;}
-};
+
+#include "flags.h"
+
+
+#include "timer.h"
+
 struct En;
 struct StateMgr {
     s32 mCounter;s8 mCur,mNext;u8 mNum;char pad[0x24-7];

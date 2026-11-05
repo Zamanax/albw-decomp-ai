@@ -1,5 +1,7 @@
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef int s32;
-struct SafeString { virtual void assure() const; const char* mStr; SafeString(const char* s) : mStr(s) {} };
+
+#include "sead_string.h"
+
 struct Pair { u32 a, b; };
 struct Tbl { u8 pad[0x28]; Pair m28; Pair m30; };
 extern "C" const Tbl ro_006A57DC;

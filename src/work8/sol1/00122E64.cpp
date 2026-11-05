@@ -7,14 +7,9 @@ typedef unsigned int u32; typedef int s32; typedef float f32;
 #include "vec3.h"
 
 template<class T> struct ResourceEntry16 { T* object; u32 reserved[3]; };
-struct Flag32 {
-    u32 value;
-    void set(u32 mask) { value |= mask; }
-    void reset(u32 mask) { value &= ~mask; }
-    void change(u32 mask, bool on) { if (on) value |= mask; else value &= ~mask; }
-    void setB(u32 mask) { change(mask,true); }
-    void resetB(u32 mask) { change(mask,false); }
-};
+
+#include "flags.h"
+
 struct FloatPair { f32 first,second; };
 struct IpcCommand { u32 header,result; };
 struct CleanupOwner12 { u8 pad14[0x14]; void*receiver; u32 reserved18; void*argument; };

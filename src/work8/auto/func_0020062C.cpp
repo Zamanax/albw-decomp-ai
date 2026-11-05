@@ -7,34 +7,19 @@ typedef signed char s8;
 typedef float f32;
 typedef unsigned long long u64;
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 
 #include "vec3.h"
 
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-    bool step() {
-        if (cur < max) { cur++; return true; }
-        return false;
-    }
-};
+
+#include "timer.h"
+
 
 struct StateMgr { void changeState(int s); };
 

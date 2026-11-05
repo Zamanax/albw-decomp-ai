@@ -27,13 +27,10 @@ struct AnimArr {
     AnimElem* mData;
     AnimElem& operator[](s32 i) { if ((u32)i < (u32)mNum) return mData[i]; return mData[0]; }
 };
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 void func_00150A84(void* self, const sead::SafeString& s, s32 v);
 extern "C" void func_00665B80(void*, s32);

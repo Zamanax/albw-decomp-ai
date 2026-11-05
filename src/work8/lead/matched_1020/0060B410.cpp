@@ -1,7 +1,9 @@
 typedef unsigned int u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
-namespace std { struct nothrow_t {}; extern const nothrow_t nothrow; }
+
+#include "sead_heap.h"
+namespace std {  extern const nothrow_t nothrow; }
 void* operator new(unsigned int, std::nothrow_t) throw();
 extern "C" char data_0070E6DC[];
 extern "C" char bss_0077D0E0[];
@@ -10,7 +12,9 @@ extern "C" void func_004BD280(unsigned, unsigned, unsigned);
 extern "C" void func_00169A80(unsigned);
 extern "C" void func_00168E9C(unsigned, unsigned, unsigned);
 extern "C" void func_004BDB2C(unsigned, unsigned, float);
-struct Flag32 { u32 v; void set(u32 m) { v |= m; } };
+
+#include "flags.h"
+
 struct Base_00339CC4 {
     Base_00339CC4(unsigned owner, unsigned tag, void* data, int reserved);
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
@@ -52,7 +56,7 @@ struct C_006EF034 : Base_00339CC4, SV {
             u8 level = 3;
             m853 = level;
             m855 = level;
-            m8AC.set(0x14);
+            m8AC.set2(0x14);
             func_004BD280((unsigned)this, level, 0);
             func_00169A80(m7AC);
             unsigned node = m7AC;

@@ -3,10 +3,9 @@ typedef unsigned int u32; typedef int s32; typedef float f32;
 
 #include "vec3.h"
 
-struct Timer {
-    u32 cur, max; f32 rate;
-    void start(u32 n, const u32& c = 0) { max = n; if (n) rate = 1.0f / (f32)n; else rate = 0.0f; cur = c; }
-};
+
+#include "timer.h"
+
 struct Sub1200 { char pad[0x25]; u8 m25; };
 extern Vec3 bss_0073A3FC;
 void func_00115C54(Vec3* out, const Vec3* a, const Vec3* b);
@@ -38,5 +37,5 @@ void C::f() {
     m9bc = 2;
     m8f0 = &m11a8;
     func_0036BFD0(m8c8, -1, -1);
-    mTimer2.start(3);
+    mTimer2.startRef(3);
 }

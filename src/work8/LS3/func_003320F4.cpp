@@ -1,12 +1,10 @@
 typedef unsigned int u32;
 typedef unsigned char u8;
 typedef unsigned short u16;
+
+#include "sead_string.h"
 namespace sead {
-struct SafeString {
-    SafeString(const char* s) : text(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* text;
-};
+
 }
 extern "C" void func_0014E2A0(void*, void*, void*, u32, u32, u32);
 extern "C" void func_00150A84(void*, const sead::SafeString&, u32);

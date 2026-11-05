@@ -1,20 +1,11 @@
 #ifndef GPT20_LADDER_TYPES_H
 #define GPT20_LADDER_TYPES_H
 #include "albw_types.h"
-struct Flag32 {
-    u32 v;
-    void change(u32 mask,bool on){if(on)v|=mask;else v&=~mask;}
-    void set(u32 mask){change(mask,true);}
-    void reset(u32 mask){change(mask,false);}
-};
+
+#include "flags.h"
+
 struct Request499 { u32 m0, m4; void* heap; char padC[0x20]; void* m2c; };
-struct Flag16 {
-    u16 v;
-    Flag16() {}
-    Flag16(u16 n):v(n) {}
-    void set(u16 b) {*this=Flag16(v|b);}
-    void reset(u16 b) {*this=Flag16(v&~b);}
-};
+
 struct Sub510 {char pad0[0x38];Flag16 m38;char pad3A[0x22a];u8 m264,m265;};
 struct Owner510 {char pad0[0x510];Sub510* m510;};
 struct ManagerFB60 {char pad0[0x10];void* m10;void* m14;void* m18;void* m1c;};

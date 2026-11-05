@@ -1,23 +1,12 @@
 #include "../../../shared/include/albw_types.h"
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n == 0) rate = 0.0f;
-        else rate = 1.0f / n;
-        cur = c;
-    }
-};
 
-struct BitFlag32 {
-    u32 v;
-    void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u32 m) { change(m, true); }
-    void reset(u32 m) { change(m, false); }
-};
+#include "timer.h"
+
+
+
+#include "flags.h"
+
 
 struct Random;
 struct En;

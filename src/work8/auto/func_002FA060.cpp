@@ -9,22 +9,13 @@ Random* func_0058A7D4(En* e);
 f32 func_0051CD84(Random* r, f32 x);
 void func_004FABDC(En* e, s32 a, s32 b, s32 c);
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-};
 
-struct BitFlag32 {
-    u32 v;
-    void set(u32 b) { v |= b; }
-};
+#include "timer.h"
+
+
+
+#include "flags.h"
+
 
 
 #include "vec3.h"

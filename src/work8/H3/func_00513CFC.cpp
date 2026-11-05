@@ -4,12 +4,10 @@
 typedef unsigned int u32;
 typedef int s32;
 
+
+#include "sead_string.h"
 namespace sead {
-struct SafeString {
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 struct Self {

@@ -1,9 +1,7 @@
 typedef unsigned int u32; typedef int s32; typedef float f32; typedef unsigned char u8;
-struct SafeString {
-    virtual void assureTermination();
-    const char* mStr;
-    SafeString(const char* s) : mStr(s) {}
-};
+
+#include "sead_string.h"
+
 struct Obj;
 void func_0010A464(void*);
 u32 func_00150A84(Obj*, const SafeString&, void*);

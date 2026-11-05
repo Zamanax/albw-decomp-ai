@@ -2,13 +2,10 @@ typedef unsigned int u32;
 typedef int s32;
 typedef short s16;
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 struct Actor;

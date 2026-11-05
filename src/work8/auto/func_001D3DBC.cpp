@@ -55,15 +55,9 @@ struct BaseB {
     char padB3dc[0x40c - 0x3dc];
 };
 
-struct Timer {
-    u32 cur, max;
-    f32 rate;
 
-    void start(u32 n, u32 c = 0) { max = n; if (n) rate = 1.0f / n; else rate = 0.0f; cur = c; }
+#include "timer.h"
 
-
-
-};
 
 
 

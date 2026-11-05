@@ -3,17 +3,9 @@ typedef int s32;
 typedef float f32;
 struct En;
 void func_004FC07C(En* e, s32 a, s32 b, s32 c);
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n == 0) rate = 0.0f;
-        else rate = 1.0f / n;
-        cur = c;
-    }
-};
+
+#include "timer.h"
+
 struct Ctr {
     u32 v;
     u32 add(u32 d) { v += d; return v; }

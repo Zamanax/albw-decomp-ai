@@ -11,19 +11,11 @@ typedef float f32;
 typedef double f64;
 typedef unsigned long ulong;
 
-struct BitFlag32 {
-    u32 v;
-    void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u32 m) { change(m, true); }
-    void reset(u32 m) { change(m, false); }
-};
 
-struct BitFlag16 {
-    u16 v;
-    void change(u16 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u16 m) { change(m, true); }
-    void reset(u16 m) { change(m, false); }
-};
+#include "flags.h"
+
+
+
 
 struct Sub9A0 { char pad[0x61]; u8 m61; };
 struct Obj1AE5E4 {

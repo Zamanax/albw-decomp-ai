@@ -8,43 +8,23 @@
 #define A10_EN204_H
 #include "albw_types.h"
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 
 #include "vec3.h"
 
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-    bool step() {
-        if (cur < max) { cur++; return true; }
-        return false;
-    }
-    bool stepC() { Timer c = *this; if (c.cur < c.max) { cur = c.cur + 1; return true; } return false; }
-    bool stepC2() { Timer c = *this; if (c.max > c.cur) { cur = c.cur + 1; return true; } return false; }
-};
 
-struct BitFlag32 {
-    u32 v;
-    void set(u32 b) { v |= b; }
-    void reset(u32 b) { v &= ~b; }
-    bool isOn(u32 b) const { return (v & b) != 0; }
-};
+#include "timer.h"
+
+
+
+#include "flags.h"
+
 
 struct StateMgr { void changeState(int s); };
 

@@ -1,6 +1,8 @@
 typedef unsigned int u32;
 typedef unsigned char u8;
-namespace std { struct nothrow_t {}; extern const nothrow_t nothrow; }
+
+#include "sead_heap.h"
+namespace std {  extern const nothrow_t nothrow; }
 void* operator new(unsigned int, std::nothrow_t) throw();
 extern "C" char data_0070E850[];
 extern "C" char bss_0077D3B0[];
@@ -9,7 +11,9 @@ extern "C" void func_004BD280(unsigned, unsigned, unsigned);
 extern "C" void func_00169A80(unsigned);
 extern "C" void func_00168E9C(unsigned, unsigned, unsigned);
 extern "C" void func_004C03B8(unsigned, unsigned);
-struct Flag32 { u32 v; void set(u32 m) { v |= m; } };
+
+#include "flags.h"
+
 struct Base_00339CC4 {
     Base_00339CC4(unsigned owner, unsigned tag, void* data, int reserved);
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();

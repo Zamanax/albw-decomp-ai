@@ -10,24 +10,15 @@ typedef float f32;
 
 struct Control2317 { u16 current, max; u32 pad4, param; };
 
-struct Flag16 {
-    u16 v;
-    Flag16(){}
-    Flag16(u16 n):v(n){}
-    void reset(u16 mask){*this = Flag16((u16)(v & ~mask));}
-    void set(u16 mask){*this = Flag16((u16)(v | mask));}
-};
+
 
 
 #include "vec3.h"
 
 
-struct Flag32 {
-    u32 v;
-    void change(u32 mask, bool on) { if (on) v |= mask; else v &= ~mask; }
-    void set(u32 mask) { change(mask, true); }
-    void reset(u32 mask) { change(mask, false); }
-};
+
+#include "flags.h"
+
 struct Req5C4 { char p[0x5c]; };
 struct S2F2474 { char pad[0x59c]; u32 m59C; char pad2[0xb7c-0x5a0]; u32 mB7C; char pad3[0xdb4-0xb80]; void* mDB4; char pad4[0xe0e-0xdb8]; u8 bE0E; };
 extern "C" void func_002EEB98(S2F2474*);

@@ -11,12 +11,10 @@ extern "C" void func_00457510(void*);
 extern "C" void func_0066D544(void*, u32);
 extern "C" void func_00587F74(void*, void*, void*);
 
+
+#include "sead_string.h"
 namespace sead {
-struct SafeString {
-    SafeString(const char* s) : text(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* text;
-};
+
 }
 
 extern "C" void func_00457FC0(void* self) {

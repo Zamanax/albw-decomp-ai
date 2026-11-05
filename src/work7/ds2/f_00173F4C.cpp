@@ -1,12 +1,9 @@
 #include "ds2.h"
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 extern void func_00658B14(void*, int);
 extern void func_00150A84(void*, const sead::SafeString&, s32);

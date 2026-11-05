@@ -11,28 +11,17 @@ typedef float f32;
 typedef double f64;
 typedef unsigned long ulong;
 
-struct BitFlag32 {
-    u32 v;
-    void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u32 m) { change(m, true); }
-    void reset(u32 m) { change(m, false); }
-};
 
-struct BitFlag16 {
-    u16 v;
-    void change(u16 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u16 m) { change(m, true); }
-    void reset(u16 m) { change(m, false); }
-};
+#include "flags.h"
+
+
+
 extern void func_0014F4EC(void*);
 extern void func_00150688(void*, void*, u32);
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 extern void func_00150A84(void*, const sead::SafeString&, s32);
 void func_001C643C(void* self) {

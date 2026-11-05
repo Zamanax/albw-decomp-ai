@@ -1,6 +1,8 @@
 typedef unsigned int u32;
 typedef unsigned char u8;
-namespace std { struct nothrow_t {}; extern const nothrow_t nothrow; }
+
+#include "sead_heap.h"
+namespace std {  extern const nothrow_t nothrow; }
 void* operator new(unsigned int, std::nothrow_t) throw();
 
 extern "C" {
@@ -26,7 +28,9 @@ struct Base_00339CC4 {
 };
 
 struct SV { virtual void s0(); };
-struct Flag32 { u32 value; void set(u32 mask) { value |= mask; } };
+
+#include "flags.h"
+
 struct FourWords { u32 a; u32 b; u32 c; u32 d; };
 
 struct C_006C93B4 : Base_00339CC4, SV {

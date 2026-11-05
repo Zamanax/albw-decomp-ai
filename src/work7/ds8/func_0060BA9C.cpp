@@ -6,11 +6,9 @@ extern "C" bool func_00547B20(void*);
 extern "C" void func_003521F0(void*, s32);
 extern "C" char ro_vt5988;
 
-struct SafeString {
-    virtual void assureTermination() const;
-    const char* text;
-    SafeString(const char* s) : text(s) {}
-};
+
+#include "sead_string.h"
+
 
 struct Npc {
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();

@@ -5,12 +5,10 @@ extern void* data_00711F50;
 struct EffRet2{u32 a,b;};
 extern EffRet2 func_004A1B9C(void*,const char*);
 extern "C" void func_00587F74(void*, void*, void*);
+
+#include "sead_string.h"
 namespace sead {
-struct SafeString {
-    SafeString(const char* s) : text(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* text;
-};
+
 }
 struct ActiveOwner30{u32 pad0;s32 count;u32 pad8,id;u8 gap10[0x270];u8 active;};
 struct TrackedObject30{u8 pad0[0x1c];u32 id;ActiveOwner30*owner;u32 ownerId;u8 pad28[0x14];u32 flags;void activate(u8 value){if(owner&&ownerId==owner->id&&owner->count>0)owner->active=value;}};

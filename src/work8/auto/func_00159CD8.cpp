@@ -3,11 +3,12 @@ typedef unsigned int u32; typedef int s32; typedef float f32;
 
 #include "vec3.h"
 
-struct BitFlag32 { u32 v; void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; } void set(u32 m) { change(m, true); } void reset(u32 m) { change(m, false); } };
-struct Timer {
-    u32 cur, max; f32 rate;
-    void start(u32 n, u32 c = 0) { max = n; if (n) rate = 1.0f / (f32)n; else rate = 0.0f; cur = c; }
-};
+
+#include "flags.h"
+
+
+#include "timer.h"
+
 void func_004FABDC(void* self, s32 a, s32 b, s32 c);   // 0x4FABDC
 void func_003C240C(void* self, s32 a);                 // 0x3C240C
 struct C {

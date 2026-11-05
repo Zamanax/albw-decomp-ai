@@ -11,19 +11,11 @@ typedef float f32;
 typedef double f64;
 typedef unsigned long ulong;
 
-struct BitFlag32 {
-    u32 v;
-    void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u32 m) { change(m, true); }
-    void reset(u32 m) { change(m, false); }
-};
 
-struct BitFlag16 {
-    u16 v;
-    void change(u16 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u16 m) { change(m, true); }
-    void reset(u16 m) { change(m, false); }
-};
+#include "flags.h"
+
+
+
 extern s32 func_0058ACC8(void*, f32);
 static s32 ctx_0022AEEC_0(void* a0,f32 a1){return func_0058ACC8(a0,a1);}
 

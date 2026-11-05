@@ -1,6 +1,8 @@
 typedef unsigned int u32;typedef int s32;typedef signed char s8;typedef unsigned char u8;typedef float f32;
 extern "C" f32 sqrtf(f32);
-namespace sead{struct SafeString{const char* str;SafeString(const char* s):str(s){}virtual void assureTerminationImpl_()const;};}
+
+#include "sead_string.h"
+namespace sead{}
 struct Vec3{void set(f32 a,f32 b,f32 c){x=a;y=b;z=c;}void set(const Vec3& d){x=d.x;y=d.y;z=d.z;}f32 x,y,z;Vec3(){}void func_00115C70(const Vec3&,const Vec3&);f32 length()const;};
 inline f32 distSqXZ(const Vec3& a,const Vec3& b){f32 dx=b.x-a.x;f32 dz=b.z-a.z;return dx*dx+dz*dz;}
 struct B;

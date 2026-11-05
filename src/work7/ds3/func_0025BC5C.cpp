@@ -1,9 +1,7 @@
 #include "ds3.h"
-struct SafeString {
-    virtual void vf();
-    const char* str;
-    SafeString(const char* s) : str(s) {}
-};
+
+#include "sead_string.h"
+
 struct SoundMgr;
 extern "C" SoundMgr* data_00711F50;
 extern "C" void func_00407880(SoundMgr*, void*);

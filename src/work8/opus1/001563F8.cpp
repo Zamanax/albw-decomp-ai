@@ -5,13 +5,10 @@ typedef float f32;
 typedef unsigned char u8;
 typedef unsigned long long u64;
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 struct Actor;

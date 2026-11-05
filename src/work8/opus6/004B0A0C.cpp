@@ -3,11 +3,9 @@ typedef signed char s8;
 typedef int s32;
 typedef unsigned int u32;
 
-struct SafeString {
-    SafeString(const char* s) : mStr(s) {}
-    virtual void assure() const;
-    const char* mStr;
-};
+
+#include "sead_string.h"
+
 struct EvInfo { s8 kind; char pad[3]; u32 id; };
 struct GEv { char _0[0x18]; EvInfo info; };
 extern GEv* data_00709DF8;

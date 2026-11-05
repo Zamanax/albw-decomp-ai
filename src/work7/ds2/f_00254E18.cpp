@@ -1,6 +1,8 @@
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32;
-struct SafeString { virtual ~SafeString() {} const char* str; SafeString(const char* s) : str(s) {} };
+
+#include "sead_string.h"
+
 struct Sub { char pad0[0x16]; u16 m16; };
 struct C {
     char pad0[0x14];

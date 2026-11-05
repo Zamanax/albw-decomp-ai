@@ -4,7 +4,9 @@ const Color* func_002AF840();
 const Color* func_002AF830();
 struct Elem { u16 m0; u8 pad[0x154 - 2]; };
 struct Arr { Elem* data; s32 num; };
-struct BitFlag32 { u32 v; void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; } void set(u32 m) { change(m, true); } void set2(const u32& m) { v |= m; } };
+
+#include "flags.h"
+
 struct Obj;
 void func_004D00E4(Obj* o, s32 i, s32 k, Color* c);
 struct Obj { u8 pad[0x20]; Arr* m20; u8 pad24[0x164 - 0x24]; BitFlag32 m164; };

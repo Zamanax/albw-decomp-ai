@@ -6,7 +6,9 @@ typedef unsigned int u32; typedef int s32; typedef float f32;
 extern "C" void func_00231524(void*);
 extern "C" void func_00231448(void*);
 extern "C" void func_002C00A8(void*);
-struct Flag16{u16 v;Flag16(){}Flag16(u16 n):v(n){}void set(u16 mask){*this=Flag16(v|mask);}};struct Rec{u8 pad0[0x16];Flag16 m16;};
+
+#include "flags.h"
+struct Rec{u8 pad0[0x16];Flag16 m16;};
 struct Obj {
     u8 pad0[0x14];
     Rec* m14;

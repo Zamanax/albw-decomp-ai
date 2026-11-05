@@ -8,13 +8,10 @@ struct Game;
 #include "vec3.h"
 
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 extern Game* data_00706E20;

@@ -1,8 +1,12 @@
 #include "albw_types.h"
 struct En210;
 struct StateMgr { void changeState(int s); };
-struct Timer { u32 cur; u32 max; f32 rate; };
-struct BitFlag32 { u32 v; void set(u32 m) { v |= m; } };
+
+#include "timer.h"
+
+
+#include "flags.h"
+
 void func_004F87F8(En210* e, s32 a);
 bool func_0058A8F0(En210* e);
 struct En210 {

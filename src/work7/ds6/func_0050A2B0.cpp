@@ -1,12 +1,9 @@
 #include "ds6.h"
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 struct AEntry { u32 m0, m4; f32 m8; u32 mC; f32 m10; };

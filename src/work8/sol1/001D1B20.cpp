@@ -34,11 +34,9 @@ struct StateMgrK {
     Func* mExit;         
     inline void execute();
 };
-struct Timer {
-    bool isEnd() const { return cur >= max; }
-    u32 cur, max; f32 rate;
-    void start(u32 n, u32 c = 0) { max = n; if (n) rate = 1.0f / n; else rate = 0.0f; cur = c; }
-};
+
+#include "timer.h"
+
 struct Sub570 { char pad[0x61]; u8 m61; void setM61(u8 v) { m61 = v; } };
 struct Act1D0;
 void func_0034C8F0(void* a, void* b, int c);

@@ -11,22 +11,16 @@ typedef float f32;
 typedef double f64;
 typedef unsigned long ulong;
 
-struct BitFlag32 {
-    u32 v;
-    void change(u32 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u32 m) { change(m, true); }
-    void reset(u32 m) { change(m, false); }
-};
 
-struct BitFlag16 {
-    u16 v;
-    void change(u16 m, bool on) { if (on) v |= m; else v &= ~m; }
-    void set(u16 m) { change(m, true); }
-    void reset(u16 m) { change(m, false); }
-};
+#include "flags.h"
+
+
+
 extern char ro_006F5988[];
 extern void* data_00711F50;
-struct SafeString{virtual void vf();const char* c;SafeString(const char* s):c(s){}};
+
+#include "sead_string.h"
+
 void func_0034C8F0(u32, u32, void*);
 u32 func_004EA9E4(void*, const SafeString&, void*);
 struct This1B06 {

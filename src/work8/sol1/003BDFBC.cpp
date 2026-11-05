@@ -9,7 +9,9 @@ typedef int s32;
 typedef float f32;
 struct Triple3C2 {u32 a,b,c;};
 struct Obj3C2 {char pad[0x1fc]; Triple3C2 value;};
-struct Flag32 {u32 v; void change(u32 m,bool on){if(on)v|=m;else v&=~m;} void set(u32 m){change(m,true);} void reset(u32 m){change(m,false);}};
+
+#include "flags.h"
+
 
 #include "vec3.h"
 

@@ -1,6 +1,8 @@
 // 0x691BD0: sead::BufferedSafeString::assureTerminationImpl_() (vtable slot; 3 vtables point here)
 typedef int s32;
-struct SafeString { virtual ~SafeString(); const char* mStringTop; };
+
+#include "sead_string.h"
+
 struct BufferedSafeString : SafeString {
     s32 mBufferSize;
     char* getMutableStringTop() { return const_cast<char*>(mStringTop); }

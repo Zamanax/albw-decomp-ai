@@ -11,15 +11,9 @@ struct StateMgr {
     u32 raw;
 };
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    bool step() {
-        if (cur < max) { cur++; return true; }
-        return false;
-    }
-};
+
+#include "timer.h"
+
 
 class Obj1D6;
 bool func_00392E48(const Vec3* pos, s32 a, s32 b, s32 c);

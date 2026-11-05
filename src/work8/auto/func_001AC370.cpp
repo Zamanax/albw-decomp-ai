@@ -3,11 +3,9 @@ typedef int s32;
 typedef unsigned char u8;
 typedef float f32;
 struct Control {u32 opaque;};
-struct BitFlag32 {
- u32 v;
- void change(u32 mask, bool on) {if (on) v |= mask; else v &= ~mask;}
- void set(u32 mask) {change(mask, true);}
-};
+
+#include "flags.h"
+
 struct Obj {
  u8 pad0[0x3dc];
  f32 f3dc;

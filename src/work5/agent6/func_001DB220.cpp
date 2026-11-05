@@ -1,11 +1,8 @@
 typedef unsigned int u32; typedef int s32; typedef unsigned char u8;
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 // SwordBeam actor (vt ro_6D19A8, ctor 0x1DB26C, dtor 0x1DB4B8); 0x1DB220 is a PMF target (table ro_6A2C64+8)
 struct Msg;

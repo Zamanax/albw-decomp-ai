@@ -25,7 +25,9 @@ extern Sys* data_007124F0;
 Vec3* func_00520FC0();
 s32 func_0068C690(const Vec3& v);
 
-struct BitFlag32 { u32 v; void reset(u32 f) { v &= ~f; } };
+
+#include "flags.h"
+
 struct Obj {
     u8 pad0[0x3d0];
     Vec3 m3d0;

@@ -8,17 +8,9 @@ typedef float f32;
 #include "vec3.h"
 
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-};
+
+#include "timer.h"
+
 
 struct Random { u32 a, b, c, d; };
 struct RandMgr { char _0[0x660]; Random rnd; };

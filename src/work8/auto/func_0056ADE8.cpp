@@ -10,7 +10,9 @@ typedef int s32;
 typedef float f32;
 
 
-struct NoThrow {};
+
+#include "sead_heap.h"
+
 void* operator new(unsigned int, NoThrow);
 inline void* operator new(unsigned int, void* p) { return p; }
 

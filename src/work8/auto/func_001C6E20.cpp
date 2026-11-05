@@ -3,12 +3,10 @@ typedef unsigned char u8;
 extern void* data_00711F50;
 extern "C" void func_001C6FA8(void*);
 extern "C" void func_00587F74(void*, void*, void*);
+
+#include "sead_string.h"
 namespace sead {
-struct SafeString {
-    SafeString(const char* s) : text(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* text;
-};
+
 }
 extern "C" void func_001C6E20(void* self) {
     u32 z = 0;

@@ -3,11 +3,9 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 
-struct BitFlag16 {
-    u16 v;
-    void change(u16 mask, bool on) { if (on) v |= mask; else v &= ~mask; }
-    void set(u16 mask) { change(mask, true); }
-};
+
+#include "flags.h"
+
 
 struct Mgr  { u8 pad[0x5d]; u8 b5d; };
 struct Child {
@@ -63,7 +61,7 @@ void func_0044AE1C(Actor* p) {
             func_0046A1D4(p->f214, 1);
         }
         if (p->b208 != 0) {
-            p->node->flags.set(0x40);
+            p->node->flags.setB(0x40);
         }
     }
 }

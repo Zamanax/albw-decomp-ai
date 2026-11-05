@@ -11,53 +11,16 @@ typedef float f32;
 
 #include "vec3.h"
 
-struct BitFlag32 {
- u32 v;
- void change(u32 mask,bool on){
-if(on)v|=mask;
-else v&=~mask;
-}
- void set(u32 mask){
-change(mask,true);
-}
- void reset(u32 mask){
-change(mask,false);
-}
-};
+
+#include "flags.h"
+
 struct Word32 {
 u32 v;
 Word32(u32 n):v(n){
 }
 };
-struct BitFlag8 {
- u8 v;
- void change(u8 mask,bool on){
-if(on)v|=mask;
-else v&=~mask;
-}
- void set(u8 mask){
-change(mask,true);
-}
- void reset(u8 mask){
-change(mask,false);
-}
-};
-struct BitFlag16 {
- u16 v;
- BitFlag16(){
-}
- BitFlag16(u16 n):v(n){
-}
- void set(u16 mask){
-v|=mask;
-}
- void setWrapped(u16 mask){
-*this=BitFlag16(v|mask);
-}
- void reset(u16 mask){
-*this=BitFlag16(v&~mask);
-}
-};
+
+
 struct Interp {
 void setTarget(s32 frames, f32 target);
 u8 opaque[0x1c];

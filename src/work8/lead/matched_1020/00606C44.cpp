@@ -1,5 +1,7 @@
 typedef unsigned int u32;
-namespace std { struct nothrow_t {}; extern const nothrow_t nothrow; }
+
+#include "sead_heap.h"
+namespace std {  extern const nothrow_t nothrow; }
 void* operator new(unsigned int, std::nothrow_t) throw();
 extern "C" char ro_0069DCC8[];
 extern "C" unsigned func_0054D89C(unsigned, unsigned);

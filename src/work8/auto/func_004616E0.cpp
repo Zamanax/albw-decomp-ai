@@ -1,13 +1,9 @@
 #include "../../../shared/include/albw_types.h"
 
 // 16-bit flag word at object+0x16; assignment is a whole-word copy back.
-struct BitFlag16 {
-    u16 v;
-    BitFlag16() {}
-    BitFlag16(u16 x) : v(x) {}
-    void set(u16 m) { *this = BitFlag16((u16)(v | m)); }
-    void reset(u16 m) { *this = BitFlag16((u16)(v & ~m)); }
-};
+
+#include "flags.h"
+
 
 struct Child476 {
     u8 pad0[4];

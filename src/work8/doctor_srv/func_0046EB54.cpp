@@ -17,8 +17,10 @@ struct Pair32 {u32 a,b;};
 struct RangeNode19 {RangeNode19* prev;RangeNode19* next;};
 struct CountedList19 {u32 count;RangeNode19 root;};
 struct CriticalSection19 {u32 words[3];};
-struct Flag32 { u32 v; void change(u32 m,bool on){if(on)v|=m;else v&=~m;} void set(u32 m){change(m,true);} void reset(u32 m){change(m,false);} };
-struct Flag16 {u16 v;Flag16(){} Flag16(u16 x):v(x){} void reset(u16 bits){*this=Flag16(v&~bits);} void set(u16 bits){*this=Flag16(v|bits);}};
+
+#include "flags.h"
+
+
 struct Ctrl231 {s16 kind,index;u32 frame;void* owner;void init(void*,s16,s16);};
 struct A{char pad[0xe];u8 flag;};struct G{char pad[0x90];A*values[4];};extern G*data_007142C8;struct S{char pad[0x90];u8 index;};extern void func_001B6C04(S*);
 void impl(S*p,u32 i,G*g,u8 mode){u32 i_c2 = i;

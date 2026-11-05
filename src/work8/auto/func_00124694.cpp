@@ -87,11 +87,9 @@ struct ActorVec124 {
 };
 struct OffsetOwnerB7 { char pad0[0x20]; OffsetList list; };
 struct OffsetItemB7 { char pad0[0x1c]; OffsetOwnerB7* owner; };
-struct BitFlag16 {
-    u16 value;
-    BitFlag16(u16 v) : value(v) {}
-    void reset(u16 mask) { *this = BitFlag16(value & ~mask); }
-};
+
+#include "flags.h"
+
 struct Child12CE { char pad0[0x16]; BitFlag16 flags; };
 struct Owner12CE { char pad0[0x14]; Child12CE* child; char pad18[0xa8-0x18]; u8 flag; };
 struct UnsignedCounts { u32 num,max; };

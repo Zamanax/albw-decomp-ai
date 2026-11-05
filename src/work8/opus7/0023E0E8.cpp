@@ -1,5 +1,7 @@
 typedef unsigned int u32; typedef int s32; typedef unsigned char u8; typedef short s16; typedef float f32;
-struct SafeString { virtual void assure() const; const char* mStr; SafeString(const char* s) : mStr(s) {} };
+
+#include "sead_string.h"
+
 struct Sub { char pad[0x44]; u8 m44; };
 struct Elem40 { char pad[0x40]; };
 struct Base { char pad[4]; Elem40 a[20];

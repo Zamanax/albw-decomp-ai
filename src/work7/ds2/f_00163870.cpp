@@ -4,13 +4,10 @@ extern void func_004F87F8(void*, s32);
 extern void func_004FABDC(void*, int, int, int);
 extern char* data_00706E20;
 extern void* func_0052FBA0(void*, u32);
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 extern void func_00150A84(void*, const sead::SafeString&, s32);
 void func_00163870(void* self) {

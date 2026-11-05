@@ -1,7 +1,9 @@
 typedef unsigned char u8;
 typedef int s32;
 typedef unsigned int u32;
-struct NoThrow {};
+
+#include "sead_heap.h"
+
 void* operator new(unsigned int, NoThrow) throw();
 
 struct Owner;

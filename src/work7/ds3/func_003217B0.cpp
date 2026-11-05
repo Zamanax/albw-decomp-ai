@@ -1,5 +1,7 @@
 #include "ds3.h"
-struct SafeString { virtual void vf(); const char* str; SafeString(const char* s) : str(s) {} };
+
+#include "sead_string.h"
+
 struct SndMgr { char pad[0x40]; void* m40; };
 extern "C" SndMgr* data_00711F50;
 extern "C" const char* data_00711FC8[];

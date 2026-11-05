@@ -27,13 +27,10 @@ static bool isDerived(const Obj* a)
     const TypeInfo* ti = getTI();
     return a && a->checkDerived(ti);
 }
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 struct A : Obj {};
 struct P484 { u8 pad[0x44]; u8 m44; void set44(u8 v) { m44 = v; } };

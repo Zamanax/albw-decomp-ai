@@ -1,5 +1,7 @@
 #include "ds3.h"
-struct SafeString { virtual void vf(); const char* str; SafeString(const char* s) : str(s) {} };
+
+#include "sead_string.h"
+
 extern "C" void* data_00711F50;
 extern "C" void func_002DF0B0(void*, const SafeString&, int);
 void func_0025AE8C() {

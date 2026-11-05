@@ -7,17 +7,9 @@
 #include "vec3.h"
 
 
-struct Timer {
-    u32 cur;
-    u32 max;
-    f32 rate;
-    void start(u32 n, u32 c = 0) {
-        max = n;
-        if (n) rate = 1.0f / n;
-        else rate = 0.0f;
-        cur = c;
-    }
-};
+
+#include "timer.h"
+
 
 struct En;
 void func_004F88A0(En* e, u32 v);

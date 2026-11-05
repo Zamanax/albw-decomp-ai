@@ -1,13 +1,10 @@
 typedef unsigned char u8;
 typedef unsigned int u32;
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-  SafeString(const char* s) : mStringTop(s) {}
-  virtual void assureTerminationImpl_() const;
-  const char* mStringTop;
-};
+
 }
 
 struct Res7A0 {

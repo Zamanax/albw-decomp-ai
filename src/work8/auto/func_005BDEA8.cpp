@@ -4,11 +4,9 @@ typedef unsigned int u32;
 typedef long long s64;
 typedef unsigned char u8;
 
-struct SafeString {
-    const char* text;
-    SafeString(const char* s) : text(s) {}
-    virtual ~SafeString() {}
-};
+
+#include "sead_string.h"
+
 
 #pragma pack(4)
 struct Id64 { s64 v; Id64() : v(-1) {} };

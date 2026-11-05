@@ -45,13 +45,10 @@ struct AnimArr {
 };
 
 
+
+#include "sead_string.h"
 namespace sead {
-class SafeString {
-public:
-    SafeString(const char* s) : mStringTop(s) {}
-    virtual void assureTerminationImpl_() const;
-    const char* mStringTop;
-};
+
 }
 
 struct Sub620 { char _pad[0x58]; f32 m58; char _pad2[0x60 - 0x5c]; f32 m60; f32 m64; };
