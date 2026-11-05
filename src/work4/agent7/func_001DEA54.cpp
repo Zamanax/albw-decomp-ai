@@ -16,18 +16,12 @@ struct T2 { u8 pad; };
 void* operator new(unsigned int size, T2) throw();
 #define nt (NoThrow())
 
+
+#include "sead_rtti.h"
 namespace sead {
 namespace RuntimeTypeInfo {
-class Interface {
-public:
-    Interface() {}
-    virtual bool isDerived(const Interface* typeInfo) const = 0;
-};
-class Root : public Interface {
-public:
-    Root() {}
-    virtual bool isDerived(const Interface* typeInfo) const;
-};
+
+
 }  // namespace RuntimeTypeInfo
 }  // namespace sead
 

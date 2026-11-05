@@ -18,9 +18,9 @@ typedef unsigned int u32;
 #define ALBW_INLINES_H
 #include "sead_rtti.h"
 
-struct RttiRoot {
-    SEAD_RTTI_BASE(RttiRoot)
-};
+
+#include "sead_rtti.h"
+
 
 template <class D, class T>
 inline bool IsDerivedFrom(const T* o)

@@ -4,7 +4,9 @@ typedef unsigned char u8;
 typedef signed char s8;
 typedef short s16;
 typedef int s32;
-struct TypeInfo { const void* vt; };
+
+#include "sead_rtti.h"
+
 extern "C" u32 data_00726A08;
 extern "C" TypeInfo data_00726A0C;
 extern "C" const char ro_006F5D5C[];

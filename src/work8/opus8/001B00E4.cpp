@@ -4,15 +4,17 @@ struct Vec3 { f32 x, y, z; void setSub(const Vec3& a, const Vec3& b); Vec3& oper
 Vec3& Vec3::operator-=(const Vec3& o) { setSub(*this, o); return *this; }
 void Vec3::sub(const Vec3& o) { setSub(*this, o); }
 struct Angle { s32 v; Angle(s32 x) : v(x) {} };
-struct TypeInfo { const void* vt; };
+
+#include "sead_rtti.h"
+
 extern "C" u32 data_00725B44;
 extern "C" TypeInfo data_00725B48;
 extern "C" const char ro_006F64F4[];
 extern "C" int __cxa_guard_acquire(u32*);
 extern "C" void __cxa_guard_release(u32*);
 struct Actor;
-struct ActorVt { int (*checkDerived)(Actor*, const TypeInfo*); };
-struct Actor { ActorVt* vt; char pad[0x368 - 4]; Vec3 m368; char pad374[0x3d0 - 0x374]; Vec3 m3d0; };
+
+struct Actor { ObjVt<Actor>* vt; char pad[0x368 - 4]; Vec3 m368; char pad374[0x3d0 - 0x374]; Vec3 m3d0; };
 extern void* data_0070FB60;
 extern char* data_00706E20;
 Actor* func_0052FBA0(void* mgr, u32 h);

@@ -1,25 +1,11 @@
  
+
+#include "sead_rtti.h"
 namespace sead {
 namespace RuntimeTypeInfo {
-class Interface {
-public:
-    Interface() {}
-    virtual bool isDerived(const Interface* typeInfo) const = 0;
-};
-class Root : public Interface {
-public:
-    Root() {}
-    virtual bool isDerived(const Interface* typeInfo) const { return typeInfo == this; }
-};
-template <typename BaseType>
-class Derive : public Interface {
-public:
-    Derive() {}
-    virtual bool isDerived(const Interface* typeInfo) const {
-        if (this == typeInfo) return true;
-        return BaseType::getRuntimeTypeInfoStatic()->isDerived(typeInfo);
-    }
-};
+
+
+
 }  
 }  
 

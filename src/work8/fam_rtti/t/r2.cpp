@@ -1,5 +1,7 @@
 typedef unsigned int u32;
-struct TypeInfo { const void* vt; };
+
+#include "sead_rtti.h"
+
 extern "C" u32 data_007260EC;
 extern "C" TypeInfo data_007260F0;
 extern "C" const char ro_006F60D4[];
