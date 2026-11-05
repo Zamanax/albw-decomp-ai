@@ -989,6 +989,7 @@ about 27 % of the variants do not compile.
 | 0060BE24 (51-function family) | 1 | 23,000 | no match; REG 11 → 10 |
 | 0060C038 (49-function family) | 1 | 3,000 | OP=1 → OP=0, REG=1 → 0, MOVED=1; 6/22 → 20/22 words, no match |
 | 003CBE60, 00542AE4, 001112A8 | 3 | 3,000 | no match (001112A8 REG 11 → 6) |
+| En206 00206FBC (stretch) | 1 | 3,000 | no match; OP 333 → 299, REG 67 → 82, MOVED 74 → 72 |
 
 The queue's 96 functions produced 7 matches (7 %), and 2 of the 7 (003C33B0, 00261160) also de-hacked
 a `__schedule_barrier` entry. The barrier pass is where the mutator pays: 21 hacks became honest
