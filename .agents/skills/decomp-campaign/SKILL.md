@@ -82,11 +82,17 @@ money, and it happens with the mutator's measured attempt attached.
   `tools/mutate.py` searches those for free. A queued function reaches a paid tier only after the
   mutator reports it EXHAUSTED, and no member of a queued shape family is planned either.
 - **Cost routing** (in `campaign.py`, constants at the top):
-  - Haiku: first attempt on functions ≤ 160 words; ~$0.01-0.05/agent, ~35-50% hit rate on the
-    closest near-misses, falling off fast further down the list.
+  - Haiku: first attempt on functions ≤ 80 words, **one target per agent**; ~$0.01-0.05/agent.
+    Measured over rounds 1–14:
+    - by size: 33–37% at ≤ 40 words, 18% at 41–80, 6% at 81–160;
+    - by targets per agent: 27% as an agent's only target, 15% with two, 7% with three.
   - DeepSeek: **hard cap 4 per round**, one target each, only for Haiku misses or functions too big
-    for Haiku, ranked by family size × closeness (family size × the structural OP count now).
-    ~$0.10-0.30/agent, ~70-80% on Haiku misses.
+    for Haiku whose start is ≤ 20 structural OPs away (72% at OP 6–20, 22% above 20). Ranked by
+    family size × closeness. ~$0.10-0.30/agent.
+  - Every target gets `logs/manual/<ADDR>/CONTEXT.md` from `next` (`tools/context.py`). It holds
+    the disassembly, the target's references next to the start source's names, and related matched
+    sources. Agents batch variants through `fn.py checks` and sweep flags with `fn.py flags`, since
+    every round trip costs them time.
   - Nobody gets the same function twice at the same tier (`logs/campaign/ledger.jsonl`, plus the
     pre-campaign `logs/manual` dirs); history and parking apply to the whole shape family.
 - **A rolling window of 20 Haiku agents, with time limits.**

@@ -7,20 +7,31 @@ targets, your check budget and where to start.
 
 ## Tools (repo root `C:\Dev\clones\albw-decomp-ai`; run every command from there)
 
-- `uv run python tools/fn.py show 0xADDR` — annotated disassembly (calls and globals named).
-- `uv run python tools/fn.py xref 0xADDR` — callers / references.
+- `logs/manual/<ADDR>/CONTEXT.md` — **read this first**. It is precomputed for you: the `fn.py show`
+  disassembly, the callers, a table of every function and global the target references (and
+  whether your start source names it), the start source's names that the target never touches,
+  and the matched sources in `src/` that use the same callees/globals (their declarations and
+  call shapes). Do not re-run `show`/`xref` for what it already contains.
+- `uv run python tools/fn.py show 0xADDR` / `xref 0xADDR` — disassembly / callers of any other address.
 - `uv run python tools/fn.py check <file> 0xADDR --cc 4.1/b1049 --flags "<flags>"` — the oracle
   (~0.1 s, parallel-safe). `.c` compiles as C99, `.cpp` as C++. Never pipe it into `head`
   (Windows raises OSError on the closed pipe); redirect to a file in your work dir instead.
   Evaluate **every** candidate with it, never with a private compile/compare script: each check is
   logged to `check_log.jsonl`, which is how the operator watches your progress live, and how your
   best attempt is collected if you are stopped.
+- `uv run python tools/fn.py checks 0xADDR v1.c v2.c v3.c [--flags "..."]` — check several variants
+  in **one** call (in parallel): a ranked table, best first, then the full output of the best. Write
+  2-5 variants of an idea and check them together instead of one call each. Each file counts
+  against your check budget.
+- `uv run python tools/fn.py flags <file> 0xADDR` — the whole flag sweep in one call (every
+  optimisation level × `/fpic`, `-Ono_tailcall`, `Cortex-A9`); ends with `BEST FLAGS: …`.
 - Default flags: `--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections`.
 - Starting point: `logs/refine/<ADDR>/best.c` (its real language is `ext` in
   `logs/refine/<ADDR>/state.json`; `origin` names the matched twin it came from). The twin is often
-  a *different* function of similar shape: if callees, offsets, sizes or constants don't line up with
-  `fn.py show`, write the function from the disassembly instead.
-- References: matched sources in `src/work8/auto/` (grep them for the callee or global you see),
+  a *different* function of similar shape. If CONTEXT.md shows the start naming few of the target's
+  references, or the callees, offsets, sizes or constants don't line up, write the function from the
+  disassembly right away. 45% of past matches did exactly that.
+- References: the related sources in CONTEXT.md, other matched sources in `src/work8/auto/`,
   `shared/include/` (the shared library, below), `docs/LESSONS.md`.
 
 ## Shared library (`shared/include/`, already on the include path)
@@ -59,13 +70,13 @@ Prefer an honest miss. Never claim a match you did not see printed.
 
 ## Order of work (cheapest first)
 
-1. `fn.py show`, then check the start source with the default flags. Diff every callee, offset,
-   allocation size, immediate and literal-pool value against the disassembly — most wins are a
+1. Read CONTEXT.md, then check the start source with the default flags. Diff every callee, offset,
+   allocation size, immediate and literal-pool value against the disassembly. Most wins are a
    wrong constant/offset/callee or a missing/extra call.
-2. **Flag sweep** on your best source (one check each): default, `-O2`, `-O2 -Otime`, `-O3` (no
-   `-Otime`), `--apcs=/fpic` at each level, `--cpu=Cortex-A9`. Some functions were built with other
-   flags; report the flags that match.
-3. Source-shape work, using the proven constructs below before inventing new ones.
+2. **Flag sweep** on your best source: `fn.py flags <file> 0xADDR` (one call; counts as one check
+   against your budget). Some functions were built with other flags; report the flags that match.
+3. Source-shape work, using the proven constructs below before inventing new ones; batch the
+   variants of each idea through `fn.py checks`.
 
 ## Proven constructs
 

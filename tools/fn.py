@@ -4,6 +4,15 @@
   python tools/fn.py xref  <addr>                 who calls / references an address
   python tools/fn.py check <file.cpp> <addr> [--sym SUBSTR] [--cc 4.1/b894] [--flags "..."]
                                                    compile with ARMCC and compare against the original
+  python tools/fn.py checks <addr> <file> [<file> ...] [--cc CC] [--flags "..."] [--jobs 8]
+                                                   check every file in parallel; ranked table, then the full
+                                                   check output of the best file
+  python tools/fn.py flags <file> <addr> [--cc CC] [--base "..."] [--jobs 8]
+                                                   check one file under every refine.flag_variants(base) flag set;
+                                                   ranked table, full output of the best, then BEST FLAGS: <flags>
+
+checks/flags rank MATCH first, then fewest OP, then fewest REG+MOVED, then highest word %; a file that does not
+compile is ranked last with its first compiler error. Each check appends to check_log.jsonl exactly like `check`.
 
 check prints, after RESULT/IDENTITY, a register-blind alignment of the two instruction streams:
   STRUCTURE: OP=a REG=b MOVED=c aligned n/m  pool p/q
@@ -844,6 +853,70 @@ def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=
                              "pool": list(st["pool"]), "cc": cc, "flags": flags}) + "\n")
 
 
+_RES = re.compile(r"^RESULT: (MATCH|NO MATCH)\s+(\d+)/(\d+) words \(([\d.]+)%\)", re.M)
+_STR = re.compile(r"^STRUCTURE: OP=(\d+) REG=(\d+) MOVED=(\d+)", re.M)
+_IDN = re.compile(r"^IDENTITY: (.*)$", re.M)
+
+
+def _run_checks(runs, cc, jobs):
+    """runs: [(label, src, addr, flags)]. Run `fn.py check` for each as a subprocess (each appends its own
+    check_log.jsonl line), in parallel. Returns rows sorted best first: dict(label, out, ok, key, ...)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(run):
+        label, src, addr, flags = run
+        r = subprocess.run([sys.executable, os.path.abspath(__file__), "check", src, "%08X" % addr,
+                            "--cc", cc, "--flags", flags], capture_output=True, text=True)
+        out = r.stdout + (("\n" + r.stderr) if r.returncode and r.stderr else "")
+        row = {"label": label, "out": out, "flags": flags}
+        m, st = _RES.search(out), _STR.search(out)
+        if r.returncode or not m or not st:
+            lines = [x for x in out.splitlines() if x.strip() and x.strip() != "COMPILE ERROR"]
+            err = next((x for x in lines if "Error" in x or "error" in x), lines[0] if lines else "(no output)")
+            row.update(ok=False, err=err.strip(), key=(1,))
+            return row
+        match = m.group(1) == "MATCH"
+        op, reg, moved = (int(x) for x in st.groups())
+        idn = _IDN.search(out)
+        idn = idn.group(1) if idn else ""
+        bad = re.search(r"(\d+) MISMATCH", idn)
+        row.update(ok=True, match=match, words=f"{m.group(2)}/{m.group(3)}", pct=float(m.group(4)),
+                   op=op, reg=reg, moved=moved, ident=idn,
+                   key=(0, not match, int(bad.group(1)) if bad else 0, op, reg + moved, -float(m.group(4))))
+        return row
+
+    with ThreadPoolExecutor(max_workers=max(1, jobs)) as ex:
+        rows = list(ex.map(one, runs))
+    rows.sort(key=lambda x: x["key"])  # stable: ties keep argument order
+    return rows
+
+
+def _print_ranked(rows):
+    w = max(len(r["label"]) for r in rows)
+    for r in rows:
+        if r["ok"]:
+            res = "MATCH   " if r["match"] else "NO MATCH"
+            idn = f"  [IDENTITY {r['ident']}]" if r["match"] else ""
+            print(f"{r['label']:{w}}  {res} {r['words']:>9} {r['pct']:5.1f}%  "
+                  f"OP={r['op']} REG={r['reg']} MOVED={r['moved']}{idn}")
+        else:
+            print(f"{r['label']:{w}}  FAILED  {r['err']}")
+    print("=" * 20 + f" best: {rows[0]['label']} " + "=" * 20)
+    print(rows[0]["out"].rstrip())
+
+
+def cmd_checks(addr, files, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, jobs=8):
+    _print_ranked(_run_checks([(f, f, addr, flags) for f in files], cc, int(jobs)))
+
+
+def cmd_flags(src, addr, cc=DEFAULT_CC, base=DEFAULT_FLAGS, jobs=8):
+    sys.modules.setdefault("fn", sys.modules[__name__])  # run as a script: let refine reuse this module
+    import refine
+    rows = _run_checks([(f, src, addr, f) for f in refine.flag_variants(base)], cc, int(jobs))
+    _print_ranked(rows)
+    print(f"BEST FLAGS: {rows[0]['flags']}")
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     if not a:
@@ -861,3 +934,17 @@ if __name__ == "__main__":
             kw[k.lstrip("-")] = v
             rest = rest[2:]
         cmd_check(a[1], int(a[2], 16), **kw)
+    elif a[0] in ("checks", "flags"):
+        kw, pos = {}, []
+        rest = a[1:]
+        while rest:
+            if rest[0].startswith("--"):
+                kw[rest[0][2:]] = rest[1]
+                rest = rest[2:]
+            else:
+                pos.append(rest[0])
+                rest = rest[1:]
+        if a[0] == "checks":
+            cmd_checks(int(pos[0], 16), pos[1:], **kw)
+        else:
+            cmd_flags(pos[0], int(pos[1], 16), **kw)

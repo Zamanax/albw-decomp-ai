@@ -23,12 +23,14 @@ A round is: free work first, then a small paid plan, then a harvest.
      per shape family is sent; famclone harvests the rest once it matches.
      Routing (the cost rule):
        haiku    - first attempt on anything <= HAIKU_MAX_WORDS words (cheap, ~$0.01-0.05/agent,
-                  up to 3 targets per agent, grouped by twin origin);
+                  HAIKU_PER_AGENT targets per agent, grouped by twin origin);
        deepseek - at most MAX_DEEPSEEK per round (hard cap), one target per agent, only for
-                  functions Haiku already missed or that are too large for Haiku, highest EV
-                  first (~$0.10-0.30/agent, ~80% hit rate on Haiku misses).
+                  functions Haiku already missed or that are too large for Haiku, with a start at
+                  most DEEPSEEK_MAX_OP structural OPs away, highest EV first (~$0.10-0.30/agent,
+                  ~50-70% hit rate).
      A function is never sent twice to the same tier.
-  5. writes logs/campaign/plan.json (+ a copy per round) and prints how to spawn it.
+  5. writes logs/campaign/plan.json (+ a copy per round) and, per target, logs/manual/<ADDR>/CONTEXT.md
+     (tools/context.py: disassembly, references vs the start source, related matched sources).
 
 Agents read docs/AGENT_BRIEF.md and write logs/manual/<ADDR>/REPORT.json per target, so results
 survive lost agent handles, crashed kernels and rate-limited agents.
@@ -63,6 +65,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fn  # noqa: E402
+import context  # noqa: E402
 import famclone  # noqa: E402
 import structscore  # noqa: E402
 
@@ -79,8 +82,12 @@ CAND_FILE = os.path.join(ROOT, "logs", "triage", "unindexed_candidate.txt")
 MODELS = {"haiku": "anthropic/claude-haiku-5-5",
           "deepseek": "openrouter/deepseek/deepseek-v4.1-flash-1017"}
 MAX_DEEPSEEK = 4          # hard cap per round (cost + rate limits)
-HAIKU_MAX_WORDS = 160     # larger functions skip Haiku (measured: Haiku wins are <= ~110 words)
-HAIKU_PER_AGENT = 3
+# Measured on rounds 1-14 (505 Haiku, 42 DeepSeek targets): Haiku matched 33-37% of functions <= 40 words,
+# 18% at 41-80 and 6% (4/70) at 81-160; 27% as an agent's only target but 15% with 2 and 7% with 3
+# (later targets get the leftovers of the budget). DeepSeek matched 72% at OP 6-20 but 22% above OP 20.
+HAIKU_MAX_WORDS = 80
+HAIKU_PER_AGENT = 1
+DEEPSEEK_MAX_OP = 20
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
@@ -287,8 +294,10 @@ def task_prompt(rnd, tier, targets, retry):
     for t in targets:
         src = "logs/refine/%s/best.c (language %s)" % (t["addr"], t["ext"])
         org = t["origin"].split(":", 1)[1] if t["origin"].startswith("twin:") else "none (synth skeleton)"
-        lines.append("- 0x%s: refine best %d/%d words, %d differing instructions. Start: %s. Twin: %s."
-                     % (t["addr"], t["words"], t["total"], t["n_op"], src, org))
+        lines.append("- 0x%s: refine best %d/%d words, %d differing instructions. Start: %s. Twin: %s. "
+                     "Context: logs/manual/%s/CONTEXT.md (disassembly, what the target references and whether "
+                     "the start names it, related matched sources) - read it before anything else."
+                     % (t["addr"], t["words"], t["total"], t["n_op"], src, org, t["addr"]))
         if t["fanout"] > 1:
             lines.append("  Family: %d functions share this exact shape; a match here is cloned to all of "
                          "them, so it is worth %dx your effort. Name every extern by its address."
@@ -355,7 +364,7 @@ def cmd_next(a):
         if "deepseek" in tiers:
             continue
         if "haiku" in tiers or t["total"] > HAIKU_MAX_WORDS:
-            if len(ds) < n_ds:
+            if len(ds) < n_ds and t["n_op"] <= DEEPSEEK_MAX_OP:
                 ds.append(t)
                 seen_shapes.add(t["shape"])
             continue
@@ -381,8 +390,10 @@ def cmd_next(a):
             tasks.append(dict(name="c%s_hk_%s" % (tag, ch[0]["addr"]), tier="haiku", model=MODELS["haiku"],
                               addrs=[x["addr"] for x in ch], prompt=task_prompt(rnd, "haiku", ch, retry=False)))
 
-    # stale reports would be harvested as this round's answer: set them aside; and remember where each
-    # target's check logs end, so live progress and timeout reports count only this round's checks
+    # stale reports would be harvested as this round's answer: set them aside; remember where each
+    # target's check logs end, so live progress and timeout reports count only this round's checks;
+    # and precompute each target's CONTEXT.md (saves the agents their first 5-10 orientation turns)
+    index = context.related_index()
     for t in tasks:
         t["soft_s"], t["hard_s"] = TIME[t["tier"]]
         t["log_base"] = {}
@@ -391,6 +402,8 @@ def cmd_next(a):
             if os.path.exists(r):
                 shutil.move(r, os.path.join(MANUAL, addr, "REPORT.prev.json"))
             t["log_base"][addr] = {rel: len(lines) for rel, lines in check_logs(addr).items()}
+            start = "logs/refine/%s/best.c" % addr
+            context.build(int(addr, 16), start=start if os.path.exists(os.path.join(ROOT, start)) else None, index=index)
     plan = dict(round=rnd, created=time.strftime("%Y-%m-%d %H:%M:%S"), batch=a.batch, tasks=tasks)
     json.dump(plan, open(PLAN, "w"), indent=1)
     json.dump(plan, open(os.path.join(CAMP, "plan_round%03d.json" % rnd), "w"), indent=1)
