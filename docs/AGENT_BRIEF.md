@@ -12,6 +12,9 @@ targets, your check budget and where to start.
 - `uv run python tools/fn.py check <file> 0xADDR --cc 4.1/b1049 --flags "<flags>"` — the oracle
   (~0.1 s, parallel-safe). `.c` compiles as C99, `.cpp` as C++. Never pipe it into `head`
   (Windows raises OSError on the closed pipe); redirect to a file in your work dir instead.
+  Evaluate **every** candidate with it, never with a private compile/compare script: each check is
+  logged to `check_log.jsonl`, which is how the operator watches your progress live, and how your
+  best attempt is collected if you are stopped.
 - Default flags: `--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections`.
 - Starting point: `logs/refine/<ADDR>/best.c` (its real language is `ext` in
   `logs/refine/<ADDR>/state.json`; `origin` names the matched twin it came from). The twin is often
@@ -117,7 +120,9 @@ Prefer an honest miss. Never claim a match you did not see printed.
   anywhere else, not even scratch scripts.
 - Never edit `functions.json`, `src/`, `tools/`, `shared/` or docs; never run git, `worklist.py`,
   `refine.py` or `campaign.py`.
-- Respect the check budget in your task message.
+- Respect the check budget and the time budget in your task message. A `WRAP UP` message means:
+  stop exploring, write every target's `REPORT.json` now, and finish. At the hard time limit you are
+  stopped; a target without a report is then recorded as a timeout from your best logged check.
 
 ## Reporting (mandatory — this is how your work is collected)
 

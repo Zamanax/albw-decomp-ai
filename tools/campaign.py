@@ -2,6 +2,7 @@
 """Campaign driver: one round of the cost-routed multi-agent matching loop.
 
   python tools/campaign.py next    [--refine N] [--haiku N] [--deepseek N] [--batch N]
+  campaign.run_round(agent, log)   (in an omp Python eval cell: spawns and supervises the plan)
   python tools/campaign.py harvest [--commit]
   python tools/campaign.py status
 
@@ -32,6 +33,12 @@ A round is: free work first, then a small paid plan, then a harvest.
 Agents read docs/AGENT_BRIEF.md and write logs/manual/<ADDR>/REPORT.json per target, so results
 survive lost agent handles, crashed kernels and rate-limited agents.
 
+`run_round(agent, log)` (eval kernel only: it needs omp's agent())
+  Rolling window of --batch Haiku agents (a new one starts as soon as any finishes) plus all DeepSeek
+  agents; TIME[tier] = (wrap-up message, hard stop) per agent; a stopped agent's unreported targets
+  get a timeout REPORT.json from their best logged check. Logs events live and a progress table of
+  the running agents every minute (fn.py check_log.jsonl: checks and best pct per target).
+
 `harvest`
   Reads the REPORT.json of every planned target, scans the claimed source for forbidden
   constructs, registers MATCH claims through worklist.py register (which re-verifies), records
@@ -40,7 +47,8 @@ survive lost agent handles, crashed kernels and rate-limited agents.
   A target without a REPORT.json (agent failed, rate limited) is not recorded, so it is retried.
 
 `status`
-  Ledger totals and hit rate per tier, and what the current plan contains.
+  Ledger totals and hit rate per tier, what the current plan contains, and while it runs the live
+  progress of every unreported target (checks and best pct from fn.py's check logs).
 """
 import argparse
 import collections
@@ -74,6 +82,14 @@ MAX_DEEPSEEK = 4          # hard cap per round (cost + rate limits)
 HAIKU_MAX_WORDS = 160     # larger functions skip Haiku (measured: Haiku wins are <= ~110 words)
 HAIKU_PER_AGENT = 3
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
+# (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
+# (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
+# DeepSeek's at p50 5 / max 20 min, while the slowest agents ran 40-70 min - a tail that held up whole
+# rounds and produced nothing.
+TIME = {"haiku": (900, 1200), "deepseek": (1500, 2100)}
+WRAP_UP = ("WRAP UP: your time budget is used. Stop exploring now. Write logs/manual/<ADDR>/REPORT.json for "
+           "every target (MATCH only if fn.py check printed RESULT: MATCH and IDENTITY ... 0 MISMATCH for that "
+           "file and flags, otherwise MISS with your best words), then reply DONE. You will be stopped in %d minutes.")
 
 FORBID = re.compile(r"__attribute__\(\(weak\)\)|\b__weak\b|__schedule_barrier|\b__asm\b|\basm\s*\(|"
                     r"\bvolatile\b|\bperm_t\b|&\s*0xffffffff\b|while\s*\(\s*0\s*\)|\b(\w+)\s*\?\s*\1\s*:\s*0\b", re.I)
@@ -178,6 +194,48 @@ def search_queue(best, fan):
             fh.write(json.dumps(e) + "\n")
     return out
 
+
+def check_logs(addr):
+    """{path: lines} of every fn.py check_log.jsonl under logs/manual/<addr> (agents may use subdirs)."""
+    out = {}
+    for root, _, files in os.walk(os.path.join(MANUAL, addr)):
+        if "check_log.jsonl" in files:
+            p = os.path.join(root, "check_log.jsonl")
+            out[os.path.relpath(p, ROOT)] = open(p, errors="replace").read().splitlines()
+    return out
+
+
+def progress(addr, base=None):
+    """This round's fn.py checks of addr (lines past the plan's baseline): checks, best pct and its source."""
+    n, best = 0, None
+    for rel, lines in check_logs(addr).items():
+        for l in lines[(base or {}).get(rel, 0):]:
+            try:
+                e = json.loads(l)
+            except ValueError:
+                continue
+            if e.get("addr") != addr:
+                continue
+            n += 1
+            if best is None or (e.get("match"), e.get("pct", 0)) > (best.get("match"), best.get("pct", 0)):
+                best = dict(e, path=os.path.join(os.path.dirname(rel), e.get("src", "")))
+    return n, best
+
+
+def timeout_report(addr, base=None):
+    """REPORT.json for a target whose agent hit the hard time limit, from its best logged check: a MATCH
+    if a check matched (harvest re-verifies it through worklist.py register), else a MISS."""
+    rp = os.path.join(MANUAL, addr, "REPORT.json")
+    if os.path.exists(rp):
+        return False
+    n, b = progress(addr, base)
+    os.makedirs(os.path.dirname(rp), exist_ok=True)
+    json.dump(dict(addr=addr, status="MATCH" if b and b.get("match") else "MISS", timeout=True, checks=n,
+                   file=b["path"].replace("\\", "/") if b else None, flags=b.get("flags") if b else None,
+                   words="%.1f%%" % b["pct"] if b else "", note="stopped at the hard time limit; best logged check"),
+              open(rp, "w"), indent=1)
+    return True
+
 # ------------------------------------------------------------------ free stages
 
 def run(argv, timeout=3600):
@@ -220,9 +278,12 @@ def refine_batch(n, jobs=10):
 
 def task_prompt(rnd, tier, targets, retry):
     checks, stall = BUDGET[tier]
+    soft, hard = TIME[tier]
     lines = ["Read docs/AGENT_BRIEF.md first and follow it exactly.", "",
              "Round %d, tier %s. Budget: at most %d oracle checks per target; stop a target after %d "
-             "checks without improvement." % (rnd, tier, checks, stall), "", "Targets:"]
+             "checks without improvement. Time: about %d minutes for the whole task; a WRAP UP message "
+             "arrives then, and you are stopped at %d minutes." % (rnd, tier, checks, stall, soft // 60, hard // 60),
+             "", "Targets:"]
     for t in targets:
         src = "logs/refine/%s/best.c (language %s)" % (t["addr"], t["ext"])
         org = t["origin"].split(":", 1)[1] if t["origin"].startswith("twin:") else "none (synth skeleton)"
@@ -320,12 +381,16 @@ def cmd_next(a):
             tasks.append(dict(name="c%s_hk_%s" % (tag, ch[0]["addr"]), tier="haiku", model=MODELS["haiku"],
                               addrs=[x["addr"] for x in ch], prompt=task_prompt(rnd, "haiku", ch, retry=False)))
 
-    # stale reports would be harvested as this round's answer: set them aside
+    # stale reports would be harvested as this round's answer: set them aside; and remember where each
+    # target's check logs end, so live progress and timeout reports count only this round's checks
     for t in tasks:
+        t["soft_s"], t["hard_s"] = TIME[t["tier"]]
+        t["log_base"] = {}
         for addr in t["addrs"]:
             r = os.path.join(MANUAL, addr, "REPORT.json")
             if os.path.exists(r):
                 shutil.move(r, os.path.join(MANUAL, addr, "REPORT.prev.json"))
+            t["log_base"][addr] = {rel: len(lines) for rel, lines in check_logs(addr).items()}
     plan = dict(round=rnd, created=time.strftime("%Y-%m-%d %H:%M:%S"), batch=a.batch, tasks=tasks)
     json.dump(plan, open(PLAN, "w"), indent=1)
     json.dump(plan, open(os.path.join(CAMP, "plan_round%03d.json" % rnd), "w"), indent=1)
@@ -334,8 +399,118 @@ def cmd_next(a):
              sum(t["fanout"] for t in hk + ds)))
     for t in ds:
         print("  deepseek 0x%s  %d/%d words  family %d" % (t["addr"], t["words"], t["total"], t["fanout"]))
-    print("NEXT  spawn the plan (see .agents/skills/decomp-campaign), then: "
-          "uv run python tools/campaign.py harvest --commit")
+    print("NEXT  spawn the plan: in a Python eval cell, campaign.run_round(agent, log) "
+          "(see .agents/skills/decomp-campaign), then: uv run python tools/campaign.py harvest --commit")
+
+
+# ------------------------------------------------------------------ run (inside the omp eval kernel)
+
+def reported(addr):
+    p = os.path.join(MANUAL, addr, "REPORT.json")
+    if not os.path.exists(p):
+        return None
+    try:
+        r = json.load(open(p))
+    except ValueError:
+        return "BAD"
+    return "TIMEOUT" if r.get("timeout") else str(r.get("status", "?")).upper()
+
+
+def mmss(s):
+    return "%d:%02d" % (s // 60, s % 60)
+
+
+def run_round(spawn, log=print, poll=10, table_every=60):
+    """Run the current plan from an omp Python eval cell: `campaign.run_round(agent, log)`.
+
+    A rolling window, not batches: up to plan["batch"] Haiku agents run at once and a new one starts
+    the moment any finishes; every DeepSeek agent starts at once (MAX_DEEPSEEK caps them). An agent
+    past its soft limit (plan task soft_s) gets WRAP_UP once; past hard_s it is stopped and each of its
+    targets without a REPORT.json gets a timeout MISS carrying the best logged check, so harvest records
+    it instead of re-planning it. Events are logged as they happen, and every table_every seconds a
+    table of the running agents with each target's checks and best logged pct (fn.py check_log.jsonl).
+    Results stay file-based: a dead kernel loses nothing, run it again and only unreported tasks start."""
+    plan = json.load(open(PLAN))
+    if plan.get("harvested"):
+        log("round %d is already harvested. NEXT  uv run python tools/campaign.py next" % plan["round"])
+        return
+    rerun = time.strftime("r%H%M") if plan.get("started") else ""   # labels must stay unique
+    plan["started"] = plan.get("started") or time.strftime("%Y-%m-%d %H:%M:%S")
+    json.dump(plan, open(PLAN, "w"), indent=1)
+    todo = [t for t in plan["tasks"] if not all(reported(x) for x in t["addrs"])]
+    queue = {tier: [t for t in todo if t["tier"] == tier] for tier in ("deepseek", "haiku")}
+    slots = {"deepseek": MAX_DEEPSEEK, "haiku": plan.get("batch", 20)}
+    total = {tier: len(q) for tier, q in queue.items()}
+    done = collections.Counter()
+    running, t_start, t_table = {}, time.time(), 0.0
+    log("round %d: %d haiku + %d deepseek agents to run (%d already reported), window %d haiku"
+        % (plan["round"], total["haiku"], total["deepseek"], len(plan["tasks"]) - len(todo), slots["haiku"]))
+
+    def tag(t):
+        return "%s %s" % ("ds" if t["tier"] == "deepseek" else "hk", "+".join(t["addrs"]))
+
+    def outcomes(t):
+        return ", ".join("%s %s" % (x, reported(x) or "NOREPORT") for x in t["addrs"])
+
+    while any(queue.values()) or running:
+        now = time.time()
+        for tier, q in queue.items():
+            while q and sum(r["t"]["tier"] == tier for r in running.values()) < slots[tier]:
+                t = q.pop(0)
+                running[t["name"]] = dict(t=t, t0=now, wrapped=False,
+                                          h=spawn(t["prompt"], label=t["name"] + rerun, model=t["model"]))
+        for name, r in list(running.items()):
+            t, el = r["t"], now - r["t0"]
+            if r["h"].done():
+                try:
+                    r["h"].wait(1)   # consume the reply: results are read from REPORT.json, not messages
+                except Exception:
+                    pass
+                why = "done"
+            elif el > t.get("hard_s", TIME[t["tier"]][1]):
+                try:
+                    r["h"].cancel()
+                except Exception:
+                    pass
+                for x in t["addrs"]:
+                    timeout_report(x, t.get("log_base", {}).get(x))
+                why = "STOPPED at hard limit"
+            else:
+                if el > t.get("soft_s", TIME[t["tier"]][0]) and not r["wrapped"]:
+                    left = (t.get("hard_s", TIME[t["tier"]][1]) - el) / 60
+                    try:
+                        r["h"].send(WRAP_UP % max(1, round(left)))
+                    except Exception as e:
+                        log("  wrap-up to %s failed: %s" % (tag(t), e))
+                    r["wrapped"] = True
+                    log("[%s] wrap-up sent  %s  (%s in)" % (mmss(now - t_start), tag(t), mmss(el)))
+                continue
+            del running[name]
+            done[t["tier"]] += 1
+            log("[%s] %-4s %s  %s  -> %s" % (mmss(now - t_start), why, tag(t), mmss(el), outcomes(t)))
+        if running and now - t_table >= table_every:
+            t_table = now
+            rep = collections.Counter(s for t in plan["tasks"] for x in t["addrs"] for s in [reported(x)] if s)
+            run_n = collections.Counter(r["t"]["tier"] for r in running.values())
+            lines = ["[%s] haiku %d/%d done, %d running, %d queued | deepseek %d/%d done, %d running | reports: %s"
+                     % (mmss(now - t_start), done["haiku"], total["haiku"], run_n["haiku"], len(queue["haiku"]),
+                        done["deepseek"], total["deepseek"], run_n["deepseek"],
+                        ", ".join("%s %d" % kv for kv in sorted(rep.items())) or "none yet")]
+            for r in sorted(running.values(), key=lambda r: r["t0"]):
+                t, cells = r["t"], []
+                for x in t["addrs"]:
+                    n, b = progress(x, t.get("log_base", {}).get(x))
+                    st = reported(x)
+                    cells.append("%s %s" % (x, st if st else "%2d checks best %s" % (
+                        n, ("MATCH" if b["match"] else "%.1f%%" % b["pct"]) if b else "-")))
+                lines.append("   %-2s %6s%s  %s" % ("ds" if t["tier"] == "deepseek" else "hk", mmss(now - r["t0"]),
+                                                    "*" if r["wrapped"] else " ", " | ".join(cells)))
+            log("\n".join(lines))
+        if running or any(queue.values()):
+            time.sleep(poll)
+    rep = collections.Counter(reported(x) or "NOREPORT" for t in plan["tasks"] for x in t["addrs"])
+    log("round %d finished in %s: %s. NEXT  uv run python tools/campaign.py harvest --commit"
+        % (plan["round"], mmss(time.time() - t_start), ", ".join("%s %d" % kv for kv in sorted(rep.items()))))
 
 
 # ------------------------------------------------------------------ harvest
@@ -379,7 +554,7 @@ def cmd_harvest(a):
             except Exception:
                 rows.append((addr, t["tier"], "BADREPORT", ""))
                 continue
-            outcome, words = "MISS", str(r.get("words", ""))
+            outcome, words = ("TIMEOUT" if r.get("timeout") else "MISS"), str(r.get("words", ""))
             if addr in status:
                 outcome = "ALREADY"
             elif str(r.get("status", "")).upper() == "MATCH" and r.get("file"):
@@ -454,6 +629,13 @@ def cmd_status(a):
         done = sum(os.path.exists(os.path.join(MANUAL, x, "REPORT.json")) for t in p["tasks"] for x in t["addrs"])
         tot = sum(len(t["addrs"]) for t in p["tasks"])
         print("current plan: round %d, %d agents, %d/%d targets reported" % (p["round"], len(p["tasks"]), done, tot))
+        if not p.get("harvested"):   # live progress of the unreported targets, from fn.py's check logs
+            for t in p["tasks"]:
+                for x in t["addrs"]:
+                    if not reported(x):
+                        n, b = progress(x, t.get("log_base", {}).get(x))
+                        print("  %-8s %s  %2d checks  best %s" % (t["tier"], x, n, (
+                            "MATCH" if b["match"] else "%.1f%%" % b["pct"]) if b else "-"))
     st = load_status()
     print("functions.json: %d honest, %d hack" % (sum(v.get("status") == "honest" for v in st.values()),
                                                    sum(v.get("status") == "hack" for v in st.values())))
