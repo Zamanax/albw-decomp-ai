@@ -1,0 +1,2103 @@
+{
+  "task": "P2_schedule_barrier",
+  "scope": {
+    "total_targets": 165,
+    "unique_source_files": 86,
+    "verified_conversions": 101,
+    "open_targets": 64,
+    "method": "copy source, delete __schedule_barrier(), check with fn.py across flag variants and honest source constructs"
+  },
+  "flag_sweep_summary": {
+    "default_only_match": 10,
+    "O2time": 21,
+    "O2": 15,
+    "notail": 1,
+    "targets_matching_some_flag": 47,
+    "targets_not_matching_any_flag": 118
+  },
+  "classes": [
+    {
+      "name": "function-pointer-dispatch",
+      "count": 51,
+      "status": "verified",
+      "construct": "Replace the inlined member call with an explicit function-pointer local: `void (*fp)(Npc*,s32,s32) = *(void(**)(Npc*,s32,s32))((char*)(*(void**)q) + 0xac); fp(q, q->m854, -1);`. The named function pointer forces the compiler to load the vtable pointer and slot pointer into locals, producing the target's exact load/call ordering without the barrier.",
+      "evidence": "0060BD64_fp.cpp matches 48/48 words with 0 IDENTITY MISMATCH; verified on all 51 family addresses 0060BD64..0063A748.",
+      "targets": [
+        "0060BD64",
+        "0060CBF0",
+        "0060DA74",
+        "0060EAB8",
+        "0060F8F4",
+        "00610788",
+        "00611814",
+        "006126A8",
+        "0061353C",
+        "006143E4",
+        "00615278",
+        "0061610C",
+        "00616FA4",
+        "00617E3C",
+        "00618CD0",
+        "00619B64",
+        "0061A9F8",
+        "0061B88C",
+        "0061C7F0",
+        "0061D684",
+        "0061E518",
+        "0061F3AC",
+        "00620240",
+        "006210D4",
+        "00621F68",
+        "00622DB8",
+        "00623BF4",
+        "00624A3C",
+        "006258CC",
+        "00626778",
+        "0062762C",
+        "006284E4",
+        "0062956C",
+        "0062A404",
+        "0062B4D0",
+        "0062C558",
+        "0062D5E0",
+        "0062E474",
+        "0062F308",
+        "0063019C",
+        "00631224",
+        "006322AC",
+        "00633140",
+        "0063401C",
+        "00634EB0",
+        "00635D70",
+        "00636C04",
+        "00637B80",
+        "00638A20",
+        "006398B4",
+        "0063A748"
+      ]
+    },
+    {
+      "name": "struct-copy",
+      "count": 1,
+      "status": "verified",
+      "construct": "Copy the struct to a named local, modify the field, copy back: `Req24 tmp = r; tmp.m18 = 1; r = tmp;`. The struct copy forces the store order and the r0 constant allocation that the barrier enforced.",
+      "evidence": "001D3DBC_copy.cpp matches 58/58 words with 0 IDENTITY MISMATCH.",
+      "targets": [
+        "001D3DBC"
+      ]
+    },
+    {
+      "name": "pointer-local-store-order",
+      "count": 2,
+      "status": "verified",
+      "construct": "Take a pointer local to the store destination before storing: `u8* g8=&gate8; u8* g9=&gate9; *g8=a; *g9=b;` (002D455C) and `undefined4* p40=(undefined4*)(param_1+0x40); *p40=0;` (002FE86C). The named address cannot be reordered past the following load/store, replacing the barrier's scheduling effect.",
+      "evidence": "002D455C_b.cpp matches 71/71 words; 002FE86C_b.c matches 43/43 words; both 0 MISMATCH.",
+      "targets": [
+        "002D455C",
+        "002FE86C"
+      ]
+    },
+    {
+      "name": "barrier-redundant-default-flags",
+      "count": 10,
+      "status": "verified",
+      "construct": "Simply delete __schedule_barrier(). The barrier was unnecessary: the source compiles to the target's bytes without it under the original default flags.",
+      "evidence": "All 10 re-checked with their recorded flags and matched 100%: 0024F0D4, 002ABDE8, 003248BC, 0038862C, 003B7480, 003BDDE8, 003C1384, 0040E1BC, 004139B0, 004D0804.",
+      "targets": [
+        "0024F0D4",
+        "002ABDE8",
+        "003248BC",
+        "0038862C",
+        "003B7480",
+        "003BDDE8",
+        "003C1384",
+        "0040E1BC",
+        "004139B0",
+        "004D0804"
+      ]
+    },
+    {
+      "name": "optimization-level-flags",
+      "count": 37,
+      "status": "verified",
+      "construct": "Delete __schedule_barrier() and build with the optimization flags the original used. The barrier was compensating for -O3 -Otime over-scheduling; -O2, -O2 -Otime, -O3 without -Otime, or -Ono_tailcall produce the target's instruction order naturally.",
+      "evidence": "All 37 re-checked and matched 100% with their winning flag set (O2time 21, O2 15, notail 1).",
+      "targets": [
+        "00104944",
+        "00124694",
+        "00143EFC",
+        "00173164",
+        "00173218",
+        "0017D38C",
+        "001C643C",
+        "00290784",
+        "002D1348",
+        "002D3110",
+        "002E04C8",
+        "0036C0B0",
+        "003782D4",
+        "003C09AC",
+        "003D159C",
+        "003D1700",
+        "003D1A50",
+        "003D1BB4",
+        "003D2C00",
+        "003DA8D8",
+        "0040F084",
+        "0041D79C",
+        "0049AEB4",
+        "004BFE0C",
+        "004E87D4",
+        "0050DD1C",
+        "0051D27C",
+        "00554F70",
+        "0055DA84",
+        "005681C0",
+        "0056AB0C",
+        "0056AB84",
+        "0056ADA8",
+        "0056ADE8",
+        "0056AE28",
+        "0056F134",
+        "00581B58"
+      ]
+    },
+    {
+      "name": "load_load_swap",
+      "count": 10,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   80  ldr r0, [r4, #0x14]                    ldr r1, [r4, #0x218]                  ",
+        "!!   84  ldr r1, [r4, #0x218]                   ldr r0, [r4, #0x14]                   "
+      ],
+      "targets": [
+        "0014FAFC",
+        "0043DF84",
+        "00448ECC",
+        "0044AD64",
+        "004A1B9C",
+        "004BD474",
+        "0054EA0C",
+        "00550954",
+        "0056C6A8",
+        "00579EF8"
+      ],
+      "constructs_tried": [
+        "pointer locals to both load addresses (0044AD64_c)",
+        "named locals for each loaded value (0044AD64_b)",
+        "inlined helper with parameter (0044AD64_d/e)",
+        "member-function helper with parameter (00448ECC_e)",
+        "named local for second load (00448ECC_b)",
+        "reordering source statements (00448ECC_c)",
+        "removing barrier only (all)"
+      ]
+    },
+    {
+      "name": "branch_swap+load_load_swap+store_swap",
+      "count": 10,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!    c  strb r0, [r7, #0xae]                   ldr r4, [r7, #0x38]                   ",
+        "!!   10  ldr r4, [r7, #0x38]                    add r5, r7, #0x34                     ",
+        "!!   14  add r5, r7, #0x34                      strb r0, [r7, #0xae]                  "
+      ],
+      "targets": [
+        "0025C464",
+        "0025D328",
+        "0025D380",
+        "0025D3D8",
+        "0025D430",
+        "002FCCB8",
+        "0034B1DC",
+        "0038EFE8",
+        "0044D9D4",
+        "0058ECE4"
+      ],
+      "constructs_tried": [
+        "pointer locals for stores (002D455C_b worked for a different tag group)",
+        "removing barrier only (all)"
+      ]
+    },
+    {
+      "name": "load_load_swap+load_mov_swap",
+      "count": 8,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   18  ldr r0, [r0, #8]                       mov r1, r4                            ",
+        "!!   1c  mov r1, r4                             ldr r0, [r0, #8]                      "
+      ],
+      "targets": [
+        "00100E78",
+        "001BB754",
+        "0037CD38",
+        "003C33B0",
+        "00554EB0",
+        "00560EF8",
+        "005610A8",
+        "0058FB38"
+      ],
+      "constructs_tried": [
+        "named local for argument a (00100E78)",
+        "pointer local for global g (00100E78)",
+        "removing barrier only (all)"
+      ]
+    },
+    {
+      "name": "store_swap",
+      "count": 8,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   58  str r0, [r4, #0x3e4]                   vstr s16, [r4, #0x3e0]                ",
+        "!!   5c  str r1, [r4, #0x3dc]                   str r0, [r4, #0x3e4]                  ",
+        "!!   60  vstr s16, [r4, #0x3e0]                 str r1, [r4, #0x3dc]                  "
+      ],
+      "targets": [
+        "00109DE4",
+        "00179104",
+        "001D9D40",
+        "00200EBC",
+        "0028B164",
+        "0040E74C",
+        "0055BA2C",
+        "005B9348"
+      ],
+      "constructs_tried": [
+        "pointer local to first store address (002D455C_b and 002FE86C_b worked; 00200EBC/00179104/005B9348/0028B164 failed)",
+        "struct copy of Vec3 (00200EBC_d)",
+        "named locals for each stored value (00200EBC_c/e, 00179104_c)",
+        "pointer locals to each field (00200EBC_b)",
+        "removing barrier only (all)"
+      ]
+    },
+    {
+      "name": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "count": 7,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   88  ldr r0, [r4, #0x34]                    ldr r1, [r4, #0x34]                   ",
+        "!!   8c  mov r2, #1                             add r0, r4, #0x100                    ",
+        "!!   90  ldrb r1, [r0, #0x654]                  mov r2, #1                            ",
+        "!!   94  strb r1, [r0, #0x655]                  ldrb r3, [r1, #0x654]                 "
+      ],
+      "targets": [
+        "00101300",
+        "00178D58",
+        "0019AAFC",
+        "002B1644",
+        "00385A90",
+        "00455620",
+        "004983C0"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "load_load_swap+store_swap",
+      "count": 7,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   60  ldr r2, [r0, #0xc]                     ldr r2, [r0, #0x14]                   ",
+        "!!   64  ldr r0, [r0, #0x14]                    ldr r0, [r0, #0xc]                    ",
+        "!!   68  vstr s0, [r0, #0x10]                   vstr s0, [r2, #0x10]                  "
+      ],
+      "targets": [
+        "00144D04",
+        "0029C008",
+        "004483A8",
+        "0049840C",
+        "0059A414",
+        "006720B4",
+        "00673C3C"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "load_load_swap+load_mov_swap+store_swap",
+      "count": 4,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   94  str r8, [r4, #0x70]                    ldr r0, [r4, #0x1d8]                  ",
+        "!!   98  ldr r0, [r4, #0x1d8]                   vldr s0, [pc, #0x40]                  ",
+        "!!   9c  vldr s0, [pc, #0x3c]                   str r0, [r4, #0x1d4]                  ",
+        "!!   a0  str r0, [r4, #0x1d4]                   mov r0, #2                            "
+      ],
+      "targets": [
+        "001637A4",
+        "00261160",
+        "003D2BB0",
+        "0048D9D0"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "branch_swap+load_load_swap",
+      "count": 3,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   7c  ldr r1, [r0]                           ldrb r1, [r4, #0x224]                 ",
+        "!!   80  ldrb r0, [r4, #0x70]                   ldr r2, [r0]                          ",
+        "!!   84  add r1, r1, #0x10                      ldrb r0, [r4, #0x70]                  ",
+        "!!   88  add r2, r0, r0, lsl #3                 cmp r1, #0                            "
+      ],
+      "targets": [
+        "0019A9DC",
+        "002DE9CC",
+        "00459504"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "call_swap",
+      "count": 2,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   50  blo #0x2b37d8                          blo #0x2b3810                         ",
+        "!!   58  mov r1, #3                             pop {r4, lr}                          ",
+        "!!   5c  add r0, r0, #0xec                      mov r1, #3                            ",
+        "!!   60  bl #0x662638                           add r0, r0, #0xec                     "
+      ],
+      "targets": [
+        "0012F880",
+        "002B3774"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "branch_swap",
+      "count": 2,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   24  rsb r1, r4, r4, lsl #4                 rsb r0, r4, r4, lsl #4                ",
+        "!!   28  add r0, r6, #0x14                      add r1, r0, r0, lsl #1                ",
+        "!!   2c  add r1, r1, r1, lsl #1                 add r0, r6, #0x14                     "
+      ],
+      "targets": [
+        "001E8B28",
+        "0058E538"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "unclassified",
+      "count": 2,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!   20  mov r2, #1                             mov r3, #1                            ",
+        "!!   24  ands r0, r1, r2, lsl r0                ands r0, r1, r3, lsl r0               "
+      ],
+      "targets": [
+        "00221234",
+        "00584B94"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    },
+    {
+      "name": "branch_swap+load_load_swap+load_mov_swap",
+      "count": 1,
+      "status": "open",
+      "construct": "none found; see constructs_tried and evidence",
+      "evidence": [
+        "!!    8     8  ldr r0, [pc, #0x38]                    ldr r0, [pc, #0x3c]                   ",
+        "!!   12    12  add r1, r0, #0x54                      ldr r1, [pc, #0x3c]                   ",
+        "!!         20                                         ldrb r0, [r4, #0x429]                 ",
+        "!!   24        ldrb r0, [r4, #0x429]                                                        "
+      ],
+      "targets": [
+        "001928E4"
+      ],
+      "constructs_tried": [
+        "removing barrier only",
+        "pointer locals",
+        "named locals",
+        "struct copy"
+      ]
+    }
+  ],
+  "verified": [
+    {
+      "addr": "0060BD64",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0060CBF0",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0060DA74",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0060EAB8",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0060F8F4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00610788",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00611814",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006126A8",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061353C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006143E4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00615278",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061610C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00616FA4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00617E3C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00618CD0",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00619B64",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061A9F8",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061B88C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061C7F0",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061D684",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061E518",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0061F3AC",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00620240",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006210D4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00621F68",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00622DB8",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00623BF4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00624A3C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006258CC",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00626778",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062762C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006284E4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062956C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062A404",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062B4D0",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062C558",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062D5E0",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062E474",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0062F308",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0063019C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00631224",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006322AC",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00633140",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0063401C",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00634EB0",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00635D70",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00636C04",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00637B80",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "00638A20",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "006398B4",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "0063A748",
+      "class": "function-pointer-dispatch",
+      "file": "logs/manual/P2_schedule_barrier/final/0060BD64_fp.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "48/48 words",
+      "identity": "0 MISMATCH",
+      "construct": "void (*fp)(Npc*,s32,s32)=*(void(**)(Npc*,s32,s32))((char*)(*(void**)q)+0xac); fp(q,q->m854,-1);"
+    },
+    {
+      "addr": "001D3DBC",
+      "class": "struct-copy",
+      "file": "logs/manual/P2_schedule_barrier/final/001D3DBC_copy.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "58/58 words",
+      "identity": "0 MISMATCH",
+      "construct": "Req24 tmp=r; tmp.m18=1; r=tmp;"
+    },
+    {
+      "addr": "002D455C",
+      "class": "pointer-local-store-order",
+      "file": "logs/manual/P2_schedule_barrier/final/002D455C_b.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "71/71 words",
+      "identity": "0 MISMATCH",
+      "construct": "u8* g8=&gate8; u8* g9=&gate9; *g8=a; *g9=b;"
+    },
+    {
+      "addr": "002FE86C",
+      "class": "pointer-local-store-order",
+      "file": "logs/manual/P2_schedule_barrier/final/002FE86C_b.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "43/43 words",
+      "identity": "0 MISMATCH",
+      "construct": "undefined4* p40=(undefined4*)(param_1+0x40); *p40=0;"
+    },
+    {
+      "addr": "0024F0D4",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0024F0D4.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "14/14 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "002ABDE8",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/002ABDE8.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "56/56 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "003248BC",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003248BC.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "13/13 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "0038862C",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0038862C.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "10/10 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "003B7480",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003B7480.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "25/25 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "003BDDE8",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003BDDE8.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "25/25 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "003C1384",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003C1384.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "25/25 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "0040E1BC",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0040E1BC.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "19/19 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "004139B0",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/004139B0.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "75/75 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "004D0804",
+      "class": "barrier-redundant-default-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/004D0804.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+      "words": "45/45 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); no other change needed"
+    },
+    {
+      "addr": "00104944",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00104944.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "25/25 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "00124694",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00124694.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "12/12 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "00143EFC",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00143EFC.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
+      "words": "36/36 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with notail"
+    },
+    {
+      "addr": "00173164",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00173164.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "28/28 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "00173218",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00173218.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "28/28 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0017D38C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0017D38C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "19/19 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "001C643C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/001C643C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "34/34 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "00290784",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00290784.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "38/38 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "002D1348",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/002D1348.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "22/22 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "002D3110",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/002D3110.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "33/33 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "002E04C8",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/002E04C8.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "16/16 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0036C0B0",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0036C0B0.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "77/77 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003782D4",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003782D4.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "17/17 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "003C09AC",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003C09AC.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "41/41 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003D159C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003D159C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "20/20 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003D1700",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003D1700.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "23/23 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003D1A50",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003D1A50.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "20/20 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003D1BB4",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003D1BB4.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "23/23 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003D2C00",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003D2C00.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "22/22 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "003DA8D8",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/003DA8D8.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "23/23 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "0040F084",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0040F084.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "31/31 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "0041D79C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0041D79C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "22/22 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "0049AEB4",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0049AEB4.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "71/71 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "004BFE0C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/004BFE0C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "28/28 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "004E87D4",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/004E87D4.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "35/35 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0050DD1C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0050DD1C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "19/19 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "0051D27C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0051D27C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "20/20 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "00554F70",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00554F70.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "38/38 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "0055DA84",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0055DA84.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "31/31 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "005681C0",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/005681C0.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "25/25 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0056AB0C",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0056AB0C.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "16/16 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0056AB84",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0056AB84.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "16/16 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0056ADA8",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0056ADA8.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "16/16 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0056ADE8",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0056ADE8.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "16/16 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0056AE28",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0056AE28.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 --split_sections",
+      "words": "16/16 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2"
+    },
+    {
+      "addr": "0056F134",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/0056F134.c",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "10/10 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    },
+    {
+      "addr": "00581B58",
+      "class": "optimization-level-flags",
+      "file": "logs/manual/P2_schedule_barrier/final/00581B58.cpp",
+      "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+      "words": "17/17 words",
+      "identity": "0 MISMATCH",
+      "construct": "remove __schedule_barrier(); build with O2time"
+    }
+  ],
+  "open": [
+    {
+      "addr": "00100E78",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "9/11",
+      "path": "src/work8/sol2/variants/00100E78_1.cpp",
+      "diff": [
+        "!!   18  ldr r0, [r0, #8]                       mov r1, r4                            ",
+        "!!   1c  mov r1, r4                             ldr r0, [r0, #8]                      "
+      ]
+    },
+    {
+      "addr": "00101300",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "15/21",
+      "path": "src/work8/perm_server/00101300_match.cpp",
+      "diff": [
+        "!!   24  mov r0, #1                             ldrbeq r1, [r4, #1]                   ",
+        "!!   28  strbne r0, [r4, #1]                    mov r0, #1                            ",
+        "!!   2c  ldrb r1, [r4, #1]                      strbne r0, [r4, #1]                   ",
+        "!!   30  cmp r1, #0                             cmpeq r1, #0                          "
+      ]
+    },
+    {
+      "addr": "00109DE4",
+      "class": "store_swap",
+      "words": "12/29",
+      "path": "src/work8/sol2/variants/00109DE4_0.cpp",
+      "diff": [
+        "!!    0  mov r1, #0                             mvn ip, #0                            ",
+        "!!    4  add r3, r0, #0x3c                      push {r4, lr}                         ",
+        "!!    8  push {r4, lr}                          mov r3, #1                            ",
+        "!!    c  mvn r2, #0                             str ip, [r0, #0x40]                   "
+      ]
+    },
+    {
+      "addr": "0012F880",
+      "class": "call_swap",
+      "words": "4/26",
+      "path": "src/work8/perm_server/0012F880_match.cpp",
+      "diff": [
+        "!!   16        mov r6, r1                                                                   ",
+        "!!   28    24  beq #0x12f8a8                          mov r6, r1                            ",
+        "!!   32    28  mov r4, r0                             movne r4, r0                          ",
+        "!!   36    32  bl #0x10c0b8                           blne #0x12f8a0                        "
+      ]
+    },
+    {
+      "addr": "00144D04",
+      "class": "load_load_swap+store_swap",
+      "words": "28/31",
+      "path": "src/work8/sol2/session4/00144D04.cpp",
+      "diff": [
+        "!!   60  ldr r2, [r0, #0xc]                     ldr r2, [r0, #0x14]                   ",
+        "!!   64  ldr r0, [r0, #0x14]                    ldr r0, [r0, #0xc]                    ",
+        "!!   68  vstr s0, [r0, #0x10]                   vstr s0, [r2, #0x10]                  "
+      ]
+    },
+    {
+      "addr": "0014FAFC",
+      "class": "load_load_swap",
+      "words": "20/23",
+      "path": "src/work8/perm_server/0014FAFC_match.cpp",
+      "diff": [
+        "!!   30  vldr s0, [sp, #4]                      vldr s1, [sp, #4]                     ",
+        "!!   34  vmul.f32 s1, s17, s0                   vldr s0, [sp]                         ",
+        "!!   38  vldr s0, [sp]                          vmul.f32 s1, s17, s1                  "
+      ]
+    },
+    {
+      "addr": "001637A4",
+      "class": "load_load_swap+load_mov_swap+store_swap",
+      "words": "46/51",
+      "path": "src/work8/opus3/001637A4.cpp",
+      "diff": [
+        "!!   20  vstr s0, [r0, #8]                      vldr s1, [pc, #0x84]                  ",
+        "!!   24  vldr s0, [pc, #0x80]                   vstr s0, [r0, #8]                     ",
+        "!!   28  mov r3, #0                             vstr s1, [r4, #0x3dc]                 ",
+        "!!   2c  vstr s0, [r4, #0x3dc]                  mov r3, #0                            "
+      ]
+    },
+    {
+      "addr": "00178D58",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "19/22",
+      "path": "src/work8/perm_server/00178D58_match.cpp",
+      "diff": [
+        "!!   1c  mov r1, #1                             ldrh r1, [r0, #0x22]                  ",
+        "!!   20  strb r1, [r0, #0x2b]                   mov r2, #1                            ",
+        "!!   24  ldrh r1, [r0, #0x22]                   strb r2, [r0, #0x2b]                  "
+      ]
+    },
+    {
+      "addr": "00179104",
+      "class": "store_swap",
+      "words": "32/35",
+      "path": "src/work8/sol2/variants/00179104_7.c",
+      "diff": [
+        "!!   44  mov r0, #0                             mov r1, #0                            ",
+        "!!   48  strh r0, [r4, #0x20]                   mov r0, r5                            ",
+        "!!   4c  mov r0, r5                             strh r1, [r4, #0x20]                  "
+      ]
+    },
+    {
+      "addr": "001928E4",
+      "class": "branch_swap+load_load_swap+load_mov_swap",
+      "words": "7/22",
+      "path": "src/work8/permuter_match/001928E4.cpp",
+      "diff": [
+        "!!    8     8  ldr r0, [pc, #0x38]                    ldr r0, [pc, #0x3c]                   ",
+        "!!   12    12  add r1, r0, #0x54                      ldr r1, [pc, #0x3c]                   ",
+        "!!         20                                         ldrb r0, [r4, #0x429]                 ",
+        "!!   24        ldrb r0, [r4, #0x429]                                                        "
+      ]
+    },
+    {
+      "addr": "0019A9DC",
+      "class": "branch_swap+load_load_swap",
+      "words": "21/26",
+      "path": "src/work8/doctor_srv/func_0019A9DC.cpp",
+      "diff": [
+        "!!   20  ldr r0, [r7, #0x2c]                    ldr r5, [r7, #0x34]                   ",
+        "!!   24  ldr r5, [r7, #0x34]                    ldr r1, [r7, #0x2c]                   ",
+        "!!   28  sub r4, r0, r5                         add r0, r7, #0x28                     ",
+        "!!   2c  add r0, r7, #0x28                      sub r6, r0, r5                        "
+      ]
+    },
+    {
+      "addr": "0019AAFC",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "16/26",
+      "path": "src/work8/sol2/variants/0019AAFC_1.cpp",
+      "diff": [
+        "!!   10  add r5, r4, #0x600                     mov r6, #0                            ",
+        "!!   14  mov r0, r1                             strb r7, [r4, #0x673]                 ",
+        "!!   18  mov r6, #0                             mov r0, r1                            ",
+        "!!   1c  add r5, r5, #0x73                      str r6, [sp, #4]                      "
+      ]
+    },
+    {
+      "addr": "001BB754",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "9/13",
+      "path": "src/work8/perm_server/001BB754_match.cpp",
+      "diff": [
+        "!!    0  ldr r3, [r0, #0x10]                    ldr ip, [r0, #0x10]                   ",
+        "!!    c  add r2, r3, #0x1c                      add r2, ip, #0x1c                     ",
+        "!!   1c  mov ip, #1                             mov r3, #1                            ",
+        "!!   20  lsl r1, ip, r1                         lsl r1, r3, r1                        "
+      ]
+    },
+    {
+      "addr": "001D9D40",
+      "class": "store_swap",
+      "words": "35/39",
+      "path": "src/work8/perm_server/001D9D40_match.cpp",
+      "diff": [
+        "!!   28  mov r7, r2                             mov r6, r2                            ",
+        "!!   2c  mov r6, r3                             mov r7, r3                            ",
+        "!!   58  str r6, [sp, #0x4c]                    str r7, [sp, #0x4c]                   ",
+        "!!   60  cmp r7, #0                             cmp r6, #0                            "
+      ]
+    },
+    {
+      "addr": "001E8B28",
+      "class": "branch_swap",
+      "words": "42/45",
+      "path": "src/work8/recheck100/func_001E8B28.cpp",
+      "diff": [
+        "!!   24  rsb r1, r4, r4, lsl #4                 rsb r0, r4, r4, lsl #4                ",
+        "!!   28  add r0, r6, #0x14                      add r1, r0, r0, lsl #1                ",
+        "!!   2c  add r1, r1, r1, lsl #1                 add r0, r6, #0x14                     "
+      ]
+    },
+    {
+      "addr": "00200EBC",
+      "class": "store_swap",
+      "words": "84/87",
+      "path": "src/work8/opus2/00200EBC.cpp",
+      "diff": [
+        "!!   58  str r0, [r4, #0x3e4]                   vstr s16, [r4, #0x3e0]                ",
+        "!!   5c  str r1, [r4, #0x3dc]                   str r0, [r4, #0x3e4]                  ",
+        "!!   60  vstr s16, [r4, #0x3e0]                 str r1, [r4, #0x3dc]                  "
+      ]
+    },
+    {
+      "addr": "00221234",
+      "class": "unclassified",
+      "words": "22/33",
+      "path": "src/work8/sol2/session3/00221234.cpp",
+      "diff": [
+        "!!   92    92  bic r0, r0, #1                         bic r0, r0, #3                        ",
+        "!!   96        bic r0, r0, #2                                                               "
+      ]
+    },
+    {
+      "addr": "0025C464",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "19/22",
+      "path": "src/work8/sol2/variants/0025C464_0.cpp",
+      "diff": [
+        "!!   1c  str r0, [r4, #0xb0]                    ldrb r1, [r4, #0x8e]                  ",
+        "!!   20  ldrb r0, [r4, #0x8e]                   str r0, [r4, #0xb0]                   ",
+        "!!   24  cmp r0, #0                             cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "0025D328",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "19/22",
+      "path": "src/work8/auto/var/v_0025D328_from_0025C464.cpp",
+      "diff": [
+        "!!   1c  str r0, [r4, #0xb0]                    ldrb r1, [r4, #0x8e]                  ",
+        "!!   20  ldrb r0, [r4, #0x8e]                   str r0, [r4, #0xb0]                   ",
+        "!!   24  cmp r0, #0                             cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "0025D380",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "19/22",
+      "path": "src/work8/auto/var/v_0025D380_from_0025C464.cpp",
+      "diff": [
+        "!!   1c  str r0, [r4, #0xb0]                    ldrb r1, [r4, #0x8e]                  ",
+        "!!   20  ldrb r0, [r4, #0x8e]                   str r0, [r4, #0xb0]                   ",
+        "!!   24  cmp r0, #0                             cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "0025D3D8",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "19/22",
+      "path": "src/work8/auto/var/v_0025D3D8_from_0025C464.cpp",
+      "diff": [
+        "!!   1c  str r0, [r4, #0xb0]                    ldrb r1, [r4, #0x8e]                  ",
+        "!!   20  ldrb r0, [r4, #0x8e]                   str r0, [r4, #0xb0]                   ",
+        "!!   24  cmp r0, #0                             cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "0025D430",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "19/22",
+      "path": "src/work8/auto/var/v_0025D430_from_0025C464.cpp",
+      "diff": [
+        "!!   1c  str r0, [r4, #0xb0]                    ldrb r1, [r4, #0x8e]                  ",
+        "!!   20  ldrb r0, [r4, #0x8e]                   str r0, [r4, #0xb0]                   ",
+        "!!   24  cmp r0, #0                             cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "00261160",
+      "class": "load_load_swap+load_mov_swap+store_swap",
+      "words": "16/22",
+      "path": "src/work8/permuter_match/00261160.cpp",
+      "diff": [
+        "!!   14  ldr r0, [pc, #0x38]                    ldr r1, [pc, #0x38]                   ",
+        "!!   18  mov r1, sp                             add r0, r4, #0x3d800                  ",
+        "!!   1c  str r0, [sp]                           add r0, r0, #0x3bc                    ",
+        "!!   20  add r0, r4, #0x3d800                   str r1, [sp]                          "
+      ]
+    },
+    {
+      "addr": "0028B164",
+      "class": "store_swap",
+      "words": "23/25",
+      "path": "src/work8/sol1/0028B164.c",
+      "diff": [
+        "!!   48  movne r0, #0                           strbeq r0, [r4, #0x5d8]               ",
+        "!!   4c  strbeq r0, [r4, #0x5d8]                movne r0, #0                          "
+      ]
+    },
+    {
+      "addr": "0029C008",
+      "class": "load_load_swap+store_swap",
+      "words": "14/41",
+      "path": "src/work8/sol1/0029C008.c",
+      "diff": [
+        "!!   20    20  ldr r0, [pc, #0x80]                    ldr r0, [pc, #0x84]                   ",
+        "!!         40                                         ldr r0, [r4]                          ",
+        "!!         44                                         ldr r1, [r4, #0x2c]                   ",
+        "!!         60                                         cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "002B1644",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "43/48",
+      "path": "src/work8/sol2/variants/002B1644_4.c",
+      "diff": [
+        "!!   88  ldr r0, [r4, #0x34]                    ldr r1, [r4, #0x34]                   ",
+        "!!   8c  mov r2, #1                             add r0, r4, #0x100                    ",
+        "!!   90  ldrb r1, [r0, #0x654]                  mov r2, #1                            ",
+        "!!   94  strb r1, [r0, #0x655]                  ldrb r3, [r1, #0x654]                 "
+      ]
+    },
+    {
+      "addr": "002B3774",
+      "class": "call_swap",
+      "words": "42/47",
+      "path": "src/work8/sol1/002B3774.cpp",
+      "diff": [
+        "!!   50  blo #0x2b37d8                          blo #0x2b3810                         ",
+        "!!   58  mov r1, #3                             pop {r4, lr}                          ",
+        "!!   5c  add r0, r0, #0xec                      mov r1, #3                            ",
+        "!!   60  bl #0x662638                           add r0, r0, #0xec                     "
+      ]
+    },
+    {
+      "addr": "002DE9CC",
+      "class": "branch_swap+load_load_swap",
+      "words": "19/24",
+      "path": "src/work8/sol1/002DE9CC.cpp",
+      "diff": [
+        "!!   18  ldr r0, [r7, #0x28]                    ldr r5, [r7, #0x30]                   ",
+        "!!   1c  ldr r5, [r7, #0x30]                    ldr r1, [r7, #0x28]                   ",
+        "!!   20  sub r4, r0, r5                         add r0, r7, #0x24                     ",
+        "!!   24  add r0, r7, #0x24                      sub r6, r0, r5                        "
+      ]
+    },
+    {
+      "addr": "002FCCB8",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "25/28",
+      "path": "src/work8/sol1/002FCCB8.cpp",
+      "diff": [
+        "!!    c  strb r0, [r7, #0xae]                   ldr r4, [r7, #0x38]                   ",
+        "!!   10  ldr r4, [r7, #0x38]                    add r5, r7, #0x34                     ",
+        "!!   14  add r5, r7, #0x34                      strb r0, [r7, #0xae]                  "
+      ]
+    },
+    {
+      "addr": "0034B1DC",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "27/31",
+      "path": "src/work8/sol1/0034B1DC.c",
+      "diff": [
+        "!!   38  strb r6, [r4, #0x8e]                   add r0, r4, #0xa8                     ",
+        "!!   3c  add r0, r4, #0xa8                      strb r6, [r4, #0x8e]                  ",
+        "!!   44  strb r5, [r4, #0x8f]                   ldr r0, [pc, #0x2c]                   ",
+        "!!   48  ldr r0, [pc, #0x28]                    strb r5, [r4, #0x8f]                  "
+      ]
+    },
+    {
+      "addr": "0037CD38",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "9/29",
+      "path": "src/work8/perm_server/0037CD38_match.cpp",
+      "diff": [
+        "!!    0     0  push {r4, lr}                          push {r4, r5, r6, lr}                 ",
+        "!!   20    20  ldr r0, [pc, #0x50]                    ldr r0, [pc, #0x54]                   ",
+        "!!   48    48  ldr r0, [r4, #0x40c]                   add r0, r4, #0x400                    ",
+        "!!         52                                         add r0, r0, #0xc                      "
+      ]
+    },
+    {
+      "addr": "00385A90",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "21/32",
+      "path": "src/work8/sol1/00385A90.cpp",
+      "diff": [
+        "!!    4  mov r4, r0                             ldrh r2, [r0, #0xe4]                  ",
+        "!!    8  ldrh r0, [r0, #0xe4]                   mov r4, r0                            ",
+        "!!    c  add r1, r4, #0x1c4                     ldr r0, [r0, #0x1c4]                  ",
+        "!!   10  lsr r0, r0, #1                         add r1, r4, #0x1c4                    "
+      ]
+    },
+    {
+      "addr": "0038EFE8",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "19/35",
+      "path": "src/work8/sol1/0038EFE8.cpp",
+      "diff": [
+        "!!    8  ldr r2, [pc, #0x74]                    ldr r3, [pc, #0x74]                   ",
+        "!!   14  str r2, [r0]                           str r3, [r0]                          ",
+        "!!   3c  ldr ip, [r0, #0x30]                    ldr r3, [r0, #0x30]                   ",
+        "!!   40  add r4, r0, #0x88                      mvn r2, #0                            "
+      ]
+    },
+    {
+      "addr": "003C33B0",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "9/16",
+      "path": "src/work8/perm_local/imported/func_003C33B0.c",
+      "diff": [
+        "!!    0  add r2, r1, r1, lsl #3                 add r3, r1, r1, lsl #3                ",
+        "!!    8  mov r3, r0                             mov r2, r0                            ",
+        "!!    c  add r2, r0, r2, lsl #2                 add r3, r0, r3, lsl #2                ",
+        "!!   10  movlo r3, r2                           movlo r2, r3                          "
+      ]
+    },
+    {
+      "addr": "003D2BB0",
+      "class": "load_load_swap+load_mov_swap+store_swap",
+      "words": "14/20",
+      "path": "src/work8/sol1/003D2BB0.cpp",
+      "diff": [
+        "!!   14  mov r0, #0                             ldr r3, [pc, #0x30]                   ",
+        "!!   18  str r0, [r2, r1, lsl #2]               mov r0, #0                            ",
+        "!!   1c  ldr r2, [pc, #0x28]                    str r0, [r2, r1, lsl #2]              ",
+        "!!   20  str r0, [r2, r1, lsl #2]               add ip, r3, #0x20                     "
+      ]
+    },
+    {
+      "addr": "0040E74C",
+      "class": "store_swap",
+      "words": "14/31",
+      "path": "src/work8/sol2/session3/0040E74C.c",
+      "diff": [
+        "!!         44                                         str r0, [sp]                          ",
+        "!!   52        beq #0x40e7a4                                                                ",
+        "!!   56        str r0, [sp]                                                                 ",
+        "!!         64                                         beq #0x40e7a4                         "
+      ]
+    },
+    {
+      "addr": "0043DF84",
+      "class": "load_load_swap",
+      "words": "15/74",
+      "path": "src/work8/sol1/0043DF84.c",
+      "diff": [
+        "!!   12    12  ldr r0, [pc, #0x110]                   ldr r0, [pc, #0x10c]                  ",
+        "!!   28    28  orr r0, r0, #1                         orr r0, r0, #3                        ",
+        "!!   32        orr r0, r0, #2                                                               "
+      ]
+    },
+    {
+      "addr": "004483A8",
+      "class": "load_load_swap+store_swap",
+      "words": "70/78",
+      "path": "src/work8/opus2/004483A8.cpp",
+      "diff": [
+        "!!   68  ldr r0, [r4, #0x14]                    ldr r1, [r4, #0x218]                  ",
+        "!!   6c  ldr r1, [r4, #0x218]                   ldr r0, [r4, #0x14]                   ",
+        "!!  114  vstr s0, [r4, #0x250]                  str r6, [r4, #0x280]                  ",
+        "!!  118  vstr s0, [r4, #0x254]                  vstr s0, [r4, #0x250]                 "
+      ]
+    },
+    {
+      "addr": "00448ECC",
+      "class": "load_load_swap",
+      "words": "63/65",
+      "path": "src/work8/opus5/00448ECC.cpp",
+      "diff": [
+        "!!   80  ldr r0, [r4, #0x14]                    ldr r1, [r4, #0x218]                  ",
+        "!!   84  ldr r1, [r4, #0x218]                   ldr r0, [r4, #0x14]                   "
+      ]
+    },
+    {
+      "addr": "0044AD64",
+      "class": "load_load_swap",
+      "words": "44/46",
+      "path": "src/work8/sol2/session6/0044AD64.c",
+      "diff": [
+        "!!   34  ldr r0, [r4, #0x14]                    ldr r1, [r4, #0x218]                  ",
+        "!!   38  ldr r1, [r4, #0x218]                   ldr r0, [r4, #0x14]                   "
+      ]
+    },
+    {
+      "addr": "0044D9D4",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "6/29",
+      "path": "src/work8/ghidra_srv/func_0044D9D4.c",
+      "diff": [
+        "!!          0                                         ldr r2, [r0, #0x12c]                  ",
+        "!!          4                                         ldrb r3, [r2, #0x15c]                 ",
+        "!!         12                                         cmp r3, #2                            ",
+        "!!    8    20  vldmia r2, {s0, s1}                    vldmia r2, {s1, s2}                   "
+      ]
+    },
+    {
+      "addr": "00455620",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "29/37",
+      "path": "src/work8/sol1/00455620.c",
+      "diff": [
+        "!!   64  ldr r1, [r4, #0xbc]                    ldr r0, [r4, #0xbc]                   ",
+        "!!   68  mov r0, #2                             mov r1, #2                            ",
+        "!!   6c  ldrb r1, [r1, #0x15c]                  ldrb r0, [r0, #0x15c]                 ",
+        "!!   70  cmp r1, #2                             cmp r0, #2                            "
+      ]
+    },
+    {
+      "addr": "00459504",
+      "class": "branch_swap+load_load_swap",
+      "words": "66/75",
+      "path": "src/work8/LS3/func_00459504.cpp",
+      "diff": [
+        "!!   7c  ldr r1, [r0]                           ldrb r1, [r4, #0x224]                 ",
+        "!!   80  ldrb r0, [r4, #0x70]                   ldr r2, [r0]                          ",
+        "!!   84  add r1, r1, #0x10                      ldrb r0, [r4, #0x70]                  ",
+        "!!   88  add r2, r0, r0, lsl #3                 cmp r1, #0                            "
+      ]
+    },
+    {
+      "addr": "0048D9D0",
+      "class": "load_load_swap+load_mov_swap+store_swap",
+      "words": "52/57",
+      "path": "src/work8/opus6/0048D9D0.cpp",
+      "diff": [
+        "!!   94  str r8, [r4, #0x70]                    ldr r0, [r4, #0x1d8]                  ",
+        "!!   98  ldr r0, [r4, #0x1d8]                   vldr s0, [pc, #0x40]                  ",
+        "!!   9c  vldr s0, [pc, #0x3c]                   str r0, [r4, #0x1d4]                  ",
+        "!!   a0  str r0, [r4, #0x1d4]                   mov r0, #2                            "
+      ]
+    },
+    {
+      "addr": "004983C0",
+      "class": "branch_swap+load_load_swap+load_mov_swap+store_swap",
+      "words": "6/19",
+      "path": "src/work8/perm_server/004983C0_match.cpp",
+      "diff": [
+        "!!    8  str r1, [r0, #0x10]                    vldr s0, [pc, #0x34]                  ",
+        "!!    c  vldr s0, [pc, #0x30]                   str r2, [r0, #8]                      ",
+        "!!   10  str r2, [r0, #8]                       strb r2, [r0, #0x14]                  ",
+        "!!   14  strb r2, [r0, #0x14]                   vstr s0, [r0, #0x18]                  "
+      ]
+    },
+    {
+      "addr": "0049840C",
+      "class": "load_load_swap+store_swap",
+      "words": "11/25",
+      "path": "src/work8/sol2/variants/0049840C_0.cpp",
+      "diff": [
+        "!!   24    24  vstmia r0, {s0, s1}                    vstmia r0, {s0, s1, s2}               ",
+        "!!   28    28  vldr s0, [pc, #0x3c]                   vldr s0, [pc, #0x38]                  ",
+        "!!   36        vstr s2, [r4, #0x9c]                                                         ",
+        "!!         76                                         vstr s16, [r4, #0xac]                 "
+      ]
+    },
+    {
+      "addr": "004A1B9C",
+      "class": "load_load_swap",
+      "words": "22/24",
+      "path": "src/work8/sol2/session4/004A1B9C.c",
+      "diff": [
+        "!!   3c  ldrd r0, r1, [r4, #0x28]               ldr r3, [r4, #0x24]                   ",
+        "!!   40  ldr r3, [r4, #0x24]                    ldrd r0, r1, [r4, #0x28]              "
+      ]
+    },
+    {
+      "addr": "004BD474",
+      "class": "load_load_swap",
+      "words": "32/36",
+      "path": "src/work8/sol1/004BD474.c",
+      "diff": [
+        "!!   58  ldr r0, [r4, #0x3e8]                   ldr r1, [pc, #0x2c]                   ",
+        "!!   5c  add r6, r0, #0x80000000                ldr r0, [r4, #0x3e8]                  ",
+        "!!   60  ldr r0, [pc, #0x24]                    ldr r5, [r1]                          ",
+        "!!   64  ldr r5, [r0]                           add r6, r0, #0x80000000               "
+      ]
+    },
+    {
+      "addr": "0054EA0C",
+      "class": "load_load_swap",
+      "words": "20/24",
+      "path": "src/work8/sol2/session4/0054EA0C.cpp",
+      "diff": [
+        "!!   28  vldr s1, [r0, #4]                      vldr s0, [r0, #4]                     ",
+        "!!   2c  vldr s0, [r4, #0xc4]                   vldr s1, [r4, #0xc4]                  ",
+        "!!   30  vadd.f32 s2, s1, s0                    vadd.f32 s2, s0, s1                   ",
+        "!!   40  vsub.f32 s0, s1, s0                    vsub.f32 s0, s0, s1                   "
+      ]
+    },
+    {
+      "addr": "00550954",
+      "class": "load_load_swap",
+      "words": "16/18",
+      "path": "src/work8/perm_server/00550954_match.cpp",
+      "diff": [
+        "!!   24  vldr s0, [r0, #0x154]                  vldr s1, [pc, #0x18]                  ",
+        "!!   28  vldr s1, [pc, #0x14]                   vldr s0, [r0, #0x154]                 "
+      ]
+    },
+    {
+      "addr": "00554EB0",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "15/24",
+      "path": "src/work8/sol2/variants/00554EB0_2.c",
+      "diff": [
+        "!!    8  mov r6, #1                             mov r7, #1                            ",
+        "!!    c  add r5, r0, #0x1c                      asr r4, ip, #5                        ",
+        "!!   10  asr r4, ip, #5                         add r6, r0, #0x1c                     ",
+        "!!   14  ldr r7, [r5, r4, lsl #2]               and r5, ip, #0x1f                     "
+      ]
+    },
+    {
+      "addr": "0055BA2C",
+      "class": "store_swap",
+      "words": "6/9",
+      "path": "src/work8/perm_server/0055BA2C_match.cpp",
+      "diff": [
+        "!!   14  ldm r2, {r2, r3}                       ldm r2, {r1, r2}                      ",
+        "!!   18  strd r2, r3, [r4]                      str r0, [r4, #8]                      ",
+        "!!   1c  str r0, [r4, #8]                       stm r4, {r1, r2}                      "
+      ]
+    },
+    {
+      "addr": "00560EF8",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "22/28",
+      "path": "src/work8/perm_server/00560EF8_match.cpp",
+      "diff": [
+        "!!         88                                         moveq r0, #0                          ",
+        "!!         96                                         ldr r0, [r4]                          ",
+        "!!   96        ldr r0, [r4]                                                                 "
+      ]
+    },
+    {
+      "addr": "005610A8",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "22/28",
+      "path": "src/work8/perm_server/005610A8_match.cpp",
+      "diff": [
+        "!!         88                                         moveq r0, #0                          ",
+        "!!         96                                         ldr r0, [r4]                          ",
+        "!!   96        ldr r0, [r4]                                                                 "
+      ]
+    },
+    {
+      "addr": "0056C6A8",
+      "class": "load_load_swap",
+      "words": "44/49",
+      "path": "src/work8/perm_local/imported/func_0056C6A8.c",
+      "diff": [
+        "!!  108   108  ldr r1, [pc, #0x48]                    ldr r1, [pc, #0x4c]                   ",
+        "!!        180                                         cmp r4, #0                            ",
+        "!!  188   192  .word 0x1000100                        .word 0x1000100                       "
+      ]
+    },
+    {
+      "addr": "00579EF8",
+      "class": "load_load_swap",
+      "words": "21/25",
+      "path": "src/work8/perm_server/00579EF8_match.cpp",
+      "diff": [
+        "!!   20  ldrsh r1, [r1, r0]                     ldr r2, [r0, #0x1c]                   ",
+        "!!   24  ldr r0, [r0, #0x1c]                    ldrsh r1, [r1, r0]                    ",
+        "!!   30  ldr r2, [r0, #8]                       ldr r0, [r2, #0xc]                    ",
+        "!!   34  ldr r0, [r0, #0xc]                     ldr r2, [r2, #8]                      "
+      ]
+    },
+    {
+      "addr": "00584B94",
+      "class": "unclassified",
+      "words": "10/12",
+      "path": "src/work8/sol1/00584B94.cpp",
+      "diff": [
+        "!!   20  mov r2, #1                             mov r3, #1                            ",
+        "!!   24  ands r0, r1, r2, lsl r0                ands r0, r1, r3, lsl r0               "
+      ]
+    },
+    {
+      "addr": "0058E538",
+      "class": "branch_swap",
+      "words": "4/26",
+      "path": "src/work8/sol2/variants/0058E538_4.cpp",
+      "diff": [
+        "!!    4     4  sub r4, r0, #0xc                       mov r2, r0                            ",
+        "!!         16                                         sub r4, r2, #0xc                      "
+      ]
+    },
+    {
+      "addr": "0058ECE4",
+      "class": "branch_swap+load_load_swap+store_swap",
+      "words": "26/31",
+      "path": "src/work8/perm_server/0058ECE4_match.c",
+      "diff": [
+        "!!    4  push {r4, lr}                          ldr r3, [pc, #0x64]                   ",
+        "!!    8  sub r4, r0, #0x38                      push {r4, lr}                         ",
+        "!!   14  str r2, [r0]                           sub r4, r0, #0x38                     ",
+        "!!   18  ldr r0, [pc, #0x50]                    str r2, [r0]                          "
+      ]
+    },
+    {
+      "addr": "0058FB38",
+      "class": "load_load_swap+load_mov_swap",
+      "words": "8/15",
+      "path": "src/work8/sol2/variants/0058FB38_0.cpp",
+      "diff": [
+        "!!   1c  ldr r1, [r4, #0x1c]                    ldr r3, [r4, #0x1c]!                  ",
+        "!!   20  ldr r0, [r0]                           ldr r2, [r0]                          ",
+        "!!   24  cmp r1, r0                             ldr r1, [r4, #4]                      ",
+        "!!   28  ldr r1, [r4, #0x20]                    mov r0, r5                            "
+      ]
+    },
+    {
+      "addr": "0059A414",
+      "class": "load_load_swap+store_swap",
+      "words": "6/10",
+      "path": "src/work8/perm_local/imported/func_0059A414.cpp",
+      "diff": [
+        "!!    8  str r2, [r0]                           ldr r1, [pc, #0x14]                   ",
+        "!!    c  str r2, [r0, #4]                       str r2, [r0]                          ",
+        "!!   10  ldr r2, [pc, #8]                       str r2, [r0, #4]                      ",
+        "!!   14  ldr r1, [pc, #8]                       ldr r2, [pc, #4]                      "
+      ]
+    },
+    {
+      "addr": "005B9348",
+      "class": "store_swap",
+      "words": "10/12",
+      "path": "src/work8/perm_local/imported/func_005B9348.c",
+      "diff": [
+        "!!    8  str r1, [r0]                           mvn r2, #0                            ",
+        "!!   10  mvn r2, #0                             str r1, [r0]                          "
+      ]
+    },
+    {
+      "addr": "006720B4",
+      "class": "load_load_swap+store_swap",
+      "words": "27/48",
+      "path": "src/work8/sol2/session4/006720B4.cpp",
+      "diff": [
+        "!!   52    52  vldr s0, [pc, #0x80]                   vldr s0, [pc, #0x7c]                  ",
+        "!!  108        str r0, [sp]                                                                 ",
+        "!!  188   184  andeq r0, r0, r0                       andeq r0, r0, r0                      "
+      ]
+    },
+    {
+      "addr": "00673C3C",
+      "class": "load_load_swap+store_swap",
+      "words": "27/48",
+      "path": "src/work8/sol2/session4/006720B4.cpp",
+      "diff": [
+        "!!   52    52  vldr s0, [pc, #0x80]                   vldr s0, [pc, #0x7c]                  ",
+        "!!  108        str r0, [sp]                                                                 ",
+        "!!  188   184  andeq r0, r0, r0                       andeq r0, r0, r0                      "
+      ]
+    }
+  ]
+}

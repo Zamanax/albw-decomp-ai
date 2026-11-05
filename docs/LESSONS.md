@@ -871,7 +871,7 @@ change only if every entry of the file still matches.
   headermigrate), then run permuter-style register searches on the closest constructor (00206FBC)
   rather than more agent passes.
 
-### The shared library as built (15 headers, 1,580 lines, 1,654 matched sources on it)
+### The shared library as built (16 headers, 1,580 lines, 1,670 matched source files on it)
 
 Six DeepSeek agents, one per family, designed the headers and dry-ran the migrations; the
 coordinator applied them one family at a time and re-verified with `tools/headercheck.py` after
@@ -902,6 +902,15 @@ What the migration measurements established (each is a byte-level fact, not a gu
   `operator new[]` must be declared or armcc emits `__aeabi_vec_new_cookie` instead of the original
   inline cookie + `new[]` + `vec_ctor`.
 - Failures left unmigrated are documented in each agent's `logs/manual/LIB_*/REPORT.json`; the most
-  common cause is a source that needs a *third* form the library does not own (a safe copy of
-  String without a virtual destructor, a materialised `nothrow` tag) and a few `struct X {...} x;`
-  declarations the harness does not rewrite.
+  common cause is a source that needs a *third* form the library does not own (a SafeString copy
+  without a virtual destructor, a materialised `nothrow` tag) and a few `struct X {...} x;` or
+  `typedef struct {...} X;` definitions the harness does not rewrite.
+
+## The diff classifier hides register/order near-misses (measured 2026-11-05)
+
+`sweep.classify()` compares target and build row by row, so a moved or inserted instruction turns
+every later row into an OP (wrong-instruction) difference. 0060BE24's best (register rotation plus
+one swapped pair) classifies as OP=14; 0060C038's best (one missing `mov`) scores 6/22 words at 93%
+similarity. Of 255 unmatched agent best sources only 3 classify as OP=0, of refine's 7,889 bests 1.
+An alignment-based structure score is the prerequisite for routing register-only near-misses to a
+machine search: `docs/HANDOVER_REGISTER_SEARCH.md`.

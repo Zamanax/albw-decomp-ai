@@ -1,0 +1,44 @@
+{
+  "addr": "0060BE24",
+  "family_dir": "logs/manual/P4_fam_0060BE24",
+  "status": "OPEN",
+  "best_words": "107/120",
+  "similarity": "see best.cpp",
+  "size_bytes": 480,
+  "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+  "cc": "4.1/b1049",
+  "best_source": "logs/manual/P4_fam_0060BE24/best.cpp",
+  "blx_call_result_copy_is_blocker": false,
+  "blocker": "register permutation only (no blx call-result copy: target stores the func_004904CC result straight from r0 with 'str r0,[r4,#0x818]', no 'mov r1,r0')",
+  "solved": [
+    "prologue/tail (member helper bump(u8) with a parameter, per LESSONS finding 1)",
+    "VFP constant placement: the m7f0 increment kept as a body-internal constant so 1.0f lands in s1 like the target",
+    "zero constant materialization at 0x3c in r5: achieved by making the whole case-0 body a member helper with a u32 parameter (run0(tgt, zero)) called as p->run0(tgt, 0)",
+    "call-merge alias idiom for the request call (Npc* q = p; q->request(...)) matching the 0060BC9C sibling"
+  ],
+  "remaining_diff": [
+    "0x78/0x7c  argument-setup order swapped: target 'mov r1,sp' then 'add r2,r4,#0x3d0'; ours the reverse",
+    "0xd0       subtraction operand order: target 'sub r1,r2,r1'; ours 'sub r1,r1,r2' (same value, registers swapped)",
+    "0x12c      base pointer register: target 'add r5,r4,#0x400'; ours 'add r7,r4,#0x400'",
+    "0x130      'adds r5,r5,#0x35c' vs ours 'adds r7,r7,#0x35c'",
+    "0x138      'ldr r0,[r5,#0x18]' vs ours 'ldr r0,[r7,#0x18]'",
+    "0x140      'cmpne r0,r5' vs ours 'cmpne r0,r7'",
+    "0x150      'ldrne r7,[r5,#0x18]' vs ours 'ldrne r5,[r7,#0x18]'",
+    "0x154      'cmpne r7,#0' vs ours 'cmpne r5,#0'",
+    "0x158      'cmpne r7,r5' vs ours 'cmpne r5,r7'",
+    "0x160      'mov r0,r7' vs ours 'mov r0,r5'",
+    "0x174      'ldr r0,[r7]' vs ours 'ldr r0,[r5]'",
+    "0x180      'mov r0,r7' vs ours 'mov r0,r5'"
+  ],
+  "analysis": "All 13 remaining diffs are pure register permutations; opcodes, offsets and semantics are identical. The target assigns r5 to the owner base q and r7 to the reload o; ours swaps them. The target reuses r5 (the zero constant's register) for the base after the zero's live range ends at 0xf0. armcc in our builds either reserves r5 as a constant register (static/inlined owner) or rematerialises the zero elsewhere (member-helper owner). Member-helper owner reproduces the target's owner region exactly (base r5, reload r7, tgt r6) but loses the early region (real 76); static owner keeps the early region (real 107) but uses r7 for the base.",
+  "tested": [
+    "864-variant permuter sweep over zero-decl / zero-value / vec3-arg / angle-expression / owner-structure x 2 flag sets: best 103/120",
+    "flag sweep over MPCore/ARM1136JF-S/ARM1176JZF-S x {-O2, -O3, -O3 -Otime, -O2 -Otime} x {-Ono_tailcall}: best 106/120 at MPCore -O3 -Otime",
+    "owner block as static helper, member helper with 0/1/2 parameters, direct inline, double-check form",
+    "case-0 body as member helper with u32 parameter (best, 107/120)",
+    "explicit function-pointer form of the v8 blx call (104/120)",
+    "switch case reordering (all worse)",
+    "named-argument and reference-alias forms of the func_00115C70 call (all worse)"
+  ],
+  "next_step": "permuter.py over best.cpp for the r5/r7 base-reload swap; the two live-range choices are mutually exclusive in the source space tried"
+}
