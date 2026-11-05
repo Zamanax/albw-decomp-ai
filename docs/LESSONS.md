@@ -914,3 +914,100 @@ one swapped pair) classifies as OP=14; 0060C038's best (one missing `mov`) score
 similarity. Of 255 unmatched agent best sources only 3 classify as OP=0, of refine's 7,889 bests 1.
 An alignment-based structure score is the prerequisite for routing register-only near-misses to a
 machine search: `docs/HANDOVER_REGISTER_SEARCH.md`.
+
+## Structural score, routing and the automatic mutator (implemented 2026-11-05)
+
+All three steps of `docs/HANDOVER_REGISTER_SEARCH.md` are in. The measured impact of each:
+
+### 1. The structure score replaced the row-by-row classification
+
+`fn.py check` now prints, after `RESULT`/`IDENTITY`,
+`STRUCTURE: OP=a REG=b MOVED=c aligned n/m  pool p/q`. The two instruction streams are aligned on
+register-blind text (branches by kind — local, other function, call —, pc-relative loads by the value
+they read), so an inserted or moved instruction no longer turns every later row into an OP:
+
+- **OP** — on one side only, or aligned but different with registers ignored;
+- **REG** — aligned, same instruction, different registers;
+- **MOVED** — same instruction on both sides, at different positions;
+- **pool** — literal-pool and jump-table words compared by value (pointers are masked: unverifiable
+  before link).
+
+`sweep.classify()` parses that line, so `refine.py`, `sweep.py` and `campaign.py`'s ranking all use it.
+Measured on the 7,883 unmatched functions that have a best source (`tools/structscore.py census`):
+
+| bucket | refine | agents + `shared/wip` | best of the two | family reach |
+|---|---|---|---|---|
+| OP=0 | 4 | 71 | **75** | 125 functions (73 shapes) |
+| OP 1-2 | 8 | 43 | 49 | 99 (48) |
+| OP 3-5 | 29 | 37 | 64 | 67 (62) |
+| OP >5 | 7,841 | 102 | 7,695 | 7,702 |
+
+Before: of 255 agent bests 3 were OP=0, of refine's 7,889 bests 1. The handover's two pilots now read
+0060BE24 `OP=0 REG=11 MOVED=1` (was OP=14) and 0060C038 `OP=1 REG=1 MOVED=0` (was 6/22 words at 93 %
+similarity). Every one of the 17,221 matched sources (honest and hack) scores 0/0/0 — the handover
+asked for a 100-entry spot check, the whole corpus is checked and cached in `logs/structure/cache/`.
+
+Things the score has to get right, found by that full check (each one first read as a false OP):
+
+- `ldr rX, [pc]` — capstone prints no offset when it is 0, so the pool lookup missed it entirely;
+- a pool float whose encoding has the top bits of a branch (`0x4B360B60`) is masked by the *word
+  compare* as an "out-of-function branch", so its position shows 35/35 words "matched" while the
+  float differs by one ulp. The structure score drops pool positions the word compare masks, so
+  `0021BEF8` still reads 0/0/0 — but that entry is probably not a real match: **the branch rule at
+  `fn.py` `compare` (`(tw & 0x0E000000) == 0x0A000000 and (tw & 0xFF000000) == (mw & 0xFF000000)`)
+  can mask any differing data word with a branch-like encoding.** Worth a look on its own;
+- "call of ours where the original has an ARM NOP" is only a difference when our callee is an image
+  function that is not a leaf (`bx lr`, `pop {.., pc}`): armlink inlines leaves to a NOP, and a callee
+  outside the image (`__aeabi_atexit`, `__cxa_guard_release`) cannot be checked — both stay masked.
+
+### 2. Routing: register/order near-misses never reach a paid tier
+
+`campaign.py next` scores the best source of every unmatched function (refine's, the agents', and
+`shared/wip`'s) and writes `logs/campaign/search_queue.jsonl` for the ones whose best source is OP=0,
+or OP<=2 where every OP is a register copy or a flipped branch. One representative per shape family
+is queued, no queued function or shape sibling is put in the paid plan, and `mutate.py`'s EXHAUSTED
+results return a function to the normal routing. Measured: 96 queued representatives (OP=0: 87,
+order-only: 9) with a family reach of 204 functions, 0 of them in round 8's plan. `next --queue-only`
+re-scores the queue without touching the plan.
+
+### 3. The mutator: hill climbing on the structure score
+
+`tools/mutate.py` applies 1–3 random meaning-preserving rewrites per variant to the compared
+function's body (and to the bodies of the file's functions it calls), scores with `fn.py`'s
+STRUCTURE line (fewest OP, then REG+MOVED, then most words), keeps anything no worse, and restarts
+from one of the best states after `--patience` checks without a new best. Rewrites: statement moves,
+`if` (not) `else` flips, commutative operand swaps, temporaries for member-access chains (the C
+type comes from a compiler probe: armcc's "cannot convert" error names the type of any expression),
+single-use inlining, `set`/`setCopy`, `exec`/`execute`, `PtrList`/`Named`/`Assign`, integer-type
+changes and `refine.flag_variants`. 16 workers give ~57 checks/s natively (3,000 checks ≈ 55 s);
+about 27 % of the variants do not compile.
+
+| pilot | targets | checks each | result |
+|---|---|---|---|
+| search queue (`queue`) | 96 | 3,000 | 7 matched, 89 exhausted |
+| `__schedule_barrier` hacks (`barriers`, barrier deleted first) | 64 | 2,000 | 33 matched; 28 registered honest, 5 refused |
+| 0060BE24 (51-function family) | 1 | 23,000 | no match; REG 11 → 10 |
+| 0060C038 (49-function family) | 1 | 3,000 | OP=1 → OP=0, REG=1 → 0, MOVED=1; 6/22 → 20/22 words, no match |
+| 003CBE60, 00542AE4, 001112A8 | 3 | 3,000 | no match (001112A8 REG 11 → 6) |
+
+The queue's 96 functions produced 7 matches (7 %), and 2 of the 7 (003C33B0, 00261160) also de-hacked
+a `__schedule_barrier` entry. The barrier pass is where the mutator pays: 21 hacks became honest
+matches from a free search, plus 7 new functions. Five sources matched but were refused: two read a
+field through `*(volatile u8*)` and one keeps `__attribute__((weak))` from the start source, two have
+`if`/`else` arms that are the same code (permuter leftovers) — those must stay hacks.
+
+What the failures teach:
+
+- **OP=0 does not mean "one rewrite away".** 115 of the 160 targets still end at OP=0, mostly REG or
+  MOVED. Statement order and named locals move register pressure, but not every rotation is reachable:
+  0060BE24's remaining delta (owner base r5 vs r7) follows from *which* helper is a member and which
+  is static — a construct choice the rewrite set cannot express. A construct-level move (make the
+  helper a member, or inline it at one call site) is what a paid agent is for.
+- **`sub r1, r2, r1` vs `sub r1, r1, r2`** is an operand swap of a non-commutative operator with the
+  same value only when the result is negated later; the mutator does not try it (deliberately).
+- **Named locals can be load-bearing.** Several matches depend on `T* t1 = &x; t1->f = ...` chains
+  that survive `mutate.py tidy` (removing them breaks the match). Every local is assigned and read, so
+  no rule is broken, but a reviewer will read them as compiler steering; they are honest only in the
+  sense that the bytes are the original's.
+- **Retry per family, not per function.** `famclone` cloned 6 more functions from the mutator's
+  matches as soon as the queue was re-scored; one match per shape is what matters.

@@ -4,6 +4,14 @@
   python tools/fn.py xref  <addr>                 who calls / references an address
   python tools/fn.py check <file.cpp> <addr> [--sym SUBSTR] [--cc 4.1/b894] [--flags "..."]
                                                    compile with ARMCC and compare against the original
+
+check prints, after RESULT/IDENTITY, a register-blind alignment of the two instruction streams:
+  STRUCTURE: OP=a REG=b MOVED=c aligned n/m  pool p/q
+  OP     instructions on one side only, or aligned but different with registers ignored
+  REG    aligned, same instruction, different registers
+  MOVED  same instruction (registers ignored) on both sides, at different positions
+Literal-pool and jump-table words are scored the same way, by value (a relocated word counts as the
+address it points at); `pool p/q` is the matched/maximum count of those.
 """
 import bisect, difflib, json, os, re, struct, subprocess, sys, time
 
@@ -229,9 +237,9 @@ def code_end(start, end):
         ins = dis1(a)
         if ins is None:
             continue
-        m = re.search(r"\[pc, #(-?0x[0-9a-f]+|-?\d+)\]", ins.op_str)
+        m = re.search(r"\[pc(?:, #(-?0x[0-9a-f]+|-?\d+))?\]", ins.op_str)
         if m and ins.mnemonic.startswith(("ldr", "vldr")):
-            tgt = ins.address + 8 + int(m.group(1), 0)
+            tgt = ins.address + 8 + int(m.group(1), 0) if m.group(1) else ins.address + 8
             if start <= tgt < end:
                 pool.add(tgt & ~3)
     ce = end
@@ -279,9 +287,9 @@ def listing(start, end, data_words=None):
                 note = name_of(t) or ""
             else:
                 note = f"<+{t - start:#x}>"
-        m = re.search(r"\[pc, #(-?0x[0-9a-f]+|-?\d+)\]", ins.op_str)
+        m = re.search(r"\[pc(?:, #(-?0x[0-9a-f]+|-?\d+))?\]", ins.op_str)
         if m:
-            la = ins.address + 8 + int(m.group(1), 0)
+            la = ins.address + 8 + int(m.group(1), 0) if m.group(1) else ins.address + 8
             if in_text(la):
                 v = rd32(la & ~3)
                 note = f"={v:#x} {name_of(v) or ''}".rstrip()
@@ -445,6 +453,208 @@ def reloc_identity(s, rows):
     return ok, unknown, bad
 
 
+# ---------------- structural score ----------------
+# Register names as capstone prints them (r9-r12 come out as sb/sl/fp/ip).
+REGTOK = re.compile(r"\b(?:r\d+|sb|sl|fp|ip|sp|lr|pc|[sdq]\d+)\b")
+_LIT = re.compile(r"\[pc(?:, #(-?0x[0-9a-f]+|-?\d+))?\]")
+def _pcoff(m):
+    """The pc-relative offset of a `[pc]`/`[pc, #n]` match (capstone omits a zero offset)."""
+    return int(m.group(1), 0) if m.group(1) else 0
+
+
+_ADR = re.compile(r"^(\w+), pc, #(?:0x[0-9a-f]+|\d+)$")
+
+
+def _looks_addr(v):
+    """A word that points into the game image (text, rodata, data or bss)."""
+    return TA <= v < DA + DS + 0x200000
+
+
+def _insn_token(ins, branch=None, lit=None):
+    """(register-blind text, full text) of one instruction. branch: CALL / EXT / LOCAL for b/bl (targets
+    are position- and link-dependent); lit: the value its pc-relative load reads (ADDR when relocated)."""
+    m, op = ins.mnemonic, ins.op_str
+    if branch:
+        full = f"{'bl' if m == 'blx' else m} {branch}"
+        return full, full
+    if lit is not None:
+        op = _LIT.sub("=" + lit, op)
+    elif m.startswith(("add", "sub")) and _ADR.match(op):
+        op = _ADR.match(op).group(1) + ", pc, LOCAL"  # adr: the offset depends on the position
+    full = f"{m} {op}"
+    return REGTOK.sub("R", full), full
+
+
+def _branch_kind(w, here, lo, hi):
+    """CALL / EXT / LOCAL for an immediate b/bl/blx word at address here (function spans [lo, hi)), else None."""
+    if (w >> 25) == 0x7D:
+        return "CALL"
+    if (w & 0x0E000000) != 0x0A000000 or (w >> 28) == 0xF:
+        return None
+    if w & 0x01000000:
+        return "CALL"
+    imm = w & 0xFFFFFF
+    imm = imm - 0x1000000 if imm & 0x800000 else imm
+    return "LOCAL" if lo <= here + 8 + (imm << 2) < hi else "EXT"
+
+
+def _tiny_callee(a):
+    """A function armlink may inline to nothing: a leaf of at most four instructions, ending in `bx lr`,
+    `pop {..., pc}` or `mov pc, lr`."""
+    for k in range(4):
+        if not in_text(a + 4 * k):
+            return False
+        w = rd32(a + 4 * k)
+        if (w & 0x0FFFFFFF) in (0x012FFF1E, 0x01A0F00E) or (w & 0x0FFF8000) == 0x08BD8000:
+            return True
+        if (w & 0x0E000000) == 0x0A000000:
+            return False  # a branch: not a leaf
+    return False
+
+
+def _align(T, M):
+    """diff two token lists. Returns (equal block ranges, unpaired token lists per changed block)."""
+    sm = difflib.SequenceMatcher(None, T, M, autojunk=False)
+    equal, blocks = [], []
+    for tag, a1, a2, b1, b2 in sm.get_opcodes():
+        if tag == "equal":
+            equal.append((a1, b1, a2 - a1))
+        else:
+            blocks.append((T[a1:a2], M[b1:b2]))
+    from collections import Counter
+    pairs = Counter(x for bt, _ in blocks for x in bt) & Counter(x for _, bm in blocks for x in bm)
+    left_t, left_m = Counter(pairs), Counter(pairs)
+
+    def unpaired(seq, left):
+        out = []
+        for x in seq:
+            if left[x] > 0:
+                left[x] -= 1
+            else:
+                out.append(x)
+        return out
+
+    return equal, [(unpaired(bt, left_t), unpaired(bm, left_m)) for bt, bm in blocks], sum(pairs.values())
+
+
+def structure(s, e, ce, tpool, jt, mine, fsize, relmap, rows):
+    """Register-blind alignment of the original [s,e) and our bytes.
+    Returns dict(op, reg, moved, aligned, total, pool, ops); ops lists the OP instructions (register-blind),
+    "-" = only in the original, "+" = only in ours; pool is (matched, original, ours) pool words.
+
+    Each instruction becomes (register-blind text, full text); literal-pool and jump-table words are scored
+    separately, by value. Rows the positional compare
+    already accepted (linker fix-ups: calls, BLX, inlined tiny callees, NOP'd tail calls) take the original's
+    token, so every masking rule of the word compare carries over. The streams are aligned on the register-blind
+    text: aligned pairs whose full text differs are REG; unaligned leftovers that pair up across the two sides
+    (same register-blind text) are MOVED; the rest are OP, counted per changed block as max(original side, our
+    side) so one substituted instruction is one OP. Each pool word is compared with the pool word at the same
+    place (dropped when the word compare masks it), so code that is right but whose pool holds another constant
+    does not read as a match."""
+    n_t, n_m = (e - s) // 4, len(mine) // 4
+    mw = struct.unpack_from(f"<{n_m}I", mine, 0)
+
+    tt = [None] * n_t
+    for i in range(n_t):
+        a = s + i * 4
+        if a >= ce or a in tpool or a in jt:
+            continue
+        ins = dis1(a)
+        if ins is None:
+            continue
+        w = rd32(a)
+        lit = None
+        lm = _LIT.search(ins.op_str)
+        if lm:
+            la = (a + 8 + _pcoff(lm)) & ~3
+            v = rd32(la) if in_text(la) else None
+            lit = "?" if v is None else "ADDR" if _looks_addr(v) else f"{v:#x}"
+            if v is not None and ins.op_str.startswith("d") and in_text(la + 4):
+                lit += f":{rd32(la + 4):#x}"
+        tt[i] = _insn_token(ins, _branch_kind(w, a, s, e), lit)
+
+    # our side: pool = the words a pc-relative load reads, and ABS32 (data pointer) words
+    decoded = [next(md.disasm(struct.pack("<I", w), i * 4, 1), None) for i, w in enumerate(mw)]
+    mpool = set()
+    for i, ins in enumerate(decoded):
+        lm = ins and _LIT.search(ins.op_str)
+        if lm and ins.mnemonic.startswith(("ldr", "vldr")):
+            mpool.add((i * 4 + 8 + _pcoff(lm)) // 4)
+    mt = [None] * n_m
+    for i, ins in enumerate(decoded):
+        rel = relmap.get(i * 4)
+        if ins is None or i * 4 >= fsize or i in mpool or (rel and rel[0] == 2):
+            continue
+        w = mw[i]
+        branch = _branch_kind(w, i * 4, 0, fsize)
+        if branch and rel:  # relocated: the target is outside this function
+            branch = "CALL" if branch == "CALL" else "EXT"
+        lit = None
+        lm = _LIT.search(ins.op_str)
+        if lm:
+            li = (i * 4 + 8 + _pcoff(lm)) // 4
+            if 0 <= li < n_m:
+                lrel = relmap.get(li * 4)
+                v = mw[li]
+                lit = "ADDR" if (lrel and lrel[0] == 2) or _looks_addr(v) else f"{v:#x}"
+                if ins.op_str.startswith("d") and li + 1 < n_m:
+                    lit += f":{mw[li + 1]:#x}"
+            else:
+                lit = "?"
+        mt[i] = _insn_token(ins, branch, lit)
+
+    for i, tw, _mw, ok, rel in rows:  # positional fix-ups the word compare accepted
+        if not (ok and i < n_t and i < n_m and tt[i] and mt[i]):
+            continue
+        # "call to a tiny function inlined by the linker" masks a call of ours behind a non-branch word of
+        # the original. Behind an ARM NOP the original's callee was inlined to nothing: armlink does that to
+        # a leaf of a few instructions (`bx lr` / `pop {.., pc}`). A call of ours to an image function that is
+        # not a leaf is a real difference (a wrong callee); a callee outside the image cannot be checked here.
+        if (tw == 0xE1A00000 and rel and rel[0] in (1, 28) and
+                ((_mw >> 25) == 0x7D or (_mw & 0x0E000000) == 0x0A000000)):
+            ca = named_address(rel[1])
+            if ca and in_text(ca) and not _tiny_callee(ca):
+                continue  # a call to a real function where the original has none: OP
+        mt[i] = tt[i]
+
+    T = [x for x in tt if x]
+    M = [x for x in mt if x]
+    equal, blocks, moved = _align([x[0] for x in T], [x[0] for x in M])
+    aligned = sum(n for _, _, n in equal)
+    reg = sum(T[a1 + k][1] != M[b1 + k][1] for a1, b1, n in equal for k in range(n))
+
+    op, ops = 0, []
+    for ut, um in blocks:
+        op += max(len(ut), len(um))
+        ops += ["-" + x for x in ut] + ["+" + x for x in um]
+
+    # literal pool / jump-table data, by value: pointers are unverifiable until link time (masked on both
+    # sides), and a relocated word of ours holds no value yet, so that position cannot be compared at all.
+    masked = {i for i, tw, _m, ok, _ in rows if ok and tw != _m}  # a difference the word compare masks
+    ptok = ["ADDR" if _looks_addr(rd32(s + i * 4)) else f"{rd32(s + i * 4):#x}"
+            for i in range(n_t) if (s + i * 4 in tpool or s + i * 4 in jt) and i not in masked]
+    pok = []
+    for i in range(n_m):
+        rel = relmap.get(i * 4)
+        if i not in masked and (i in mpool or (rel and rel[0] == 2)):
+            if rel and rel[0] == 2 and not _looks_addr(mw[i]):
+                pok.append("?")
+            else:
+                pok.append("ADDR" if _looks_addr(mw[i]) else f"{mw[i]:#x}")
+    pmatch = 0
+    for k in range(max(len(ptok), len(pok))):
+        t = ptok[k] if k < len(ptok) else None
+        o = pok[k] if k < len(pok) else None
+        if o == "?":
+            continue  # ours is a relocated word: its value is only known after linking
+        if t is not None and t == o:
+            pmatch += 1
+            continue
+        op += 1
+        ops += (["-" + t] if t is not None else []) + (["+" + o] if o is not None and o != "?" else [])
+    return dict(op=op, reg=reg, moved=moved, aligned=aligned, total=max(len(T), len(M)), ops=ops,
+                pool=(pmatch, len(ptok), len(pok)))
+
 
 def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=False):
     s, e = func_range(addr)
@@ -593,6 +803,11 @@ def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=
             print(f"  !! +{off:#x} '{name}' names {want:#010x}, the original targets {got:#010x}")
     else:  # words are not aligned with the original: relocated words would be compared with unrelated ones
         print("IDENTITY: not checked (no match)")
+    st = structure(s, e, ce, tpool, jt, mine, f["size"], relmap, rows)
+    print(f"STRUCTURE: OP={st['op']} REG={st['reg']} MOVED={st['moved']} aligned {st['aligned']}/{st['total']}"
+          f"  pool {st['pool'][0]}/{max(st['pool'][1], st['pool'][2])}")
+    if st["ops"]:
+        print("STRUCTURE OPS: " + " | ".join(st["ops"][:12]) + (" | ..." if len(st["ops"]) > 12 else ""))
 
     def dis(w, a):
         if w is None:
@@ -625,7 +840,8 @@ def cmd_check(src, addr, sym=None, cc=DEFAULT_CC, flags=DEFAULT_FLAGS, prebuilt=
         # from funcs.json, so tools can reject it (make_done.py / auto_harvest.py re-verify against the real table)
         fh.write(json.dumps({"t": time.strftime("%H:%M:%S"), "addr": f"{s:08X}", "end": f"{e_full:08X}",
                              "src": os.path.basename(src), "pct": round(pct, 1), "sim": round(sim, 1), "match": exact,
-                             "cc": cc, "flags": flags}) + "\n")
+                             "op": st["op"], "reg": st["reg"], "moved": st["moved"],
+                             "pool": list(st["pool"]), "cc": cc, "flags": flags}) + "\n")
 
 
 if __name__ == "__main__":

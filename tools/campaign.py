@@ -10,9 +10,16 @@ A round is: free work first, then a small paid plan, then a harvest.
 `next`
   1. famclone --apply: clone existing matches onto shape-identical functions (free).
   2. optional `--refine N`: run refine.py on the next N never-refined candidates (free, CPU only).
-  3. build the agent plan from refine's near-misses, ranked by expected value
-     EV = family size x (1 - differing instructions / words). One representative per shape
-     family is sent; famclone harvests the rest once it matches.
+  3. score every unmatched function's best source (refine's and the agents', structscore.py:
+     fn.py's register-blind STRUCTURE line, cached) and route:
+       search queue - OP=0 (only register/order differences left) or OP <= 2 where every OP is a
+                  register copy or a flipped branch (structscore.order_only): one representative
+                  per shape goes to logs/campaign/search_queue.jsonl for tools/mutate.py (free).
+                  Never sent to a paid tier, nor is any member of its shape family. A function whose
+                  mutate result is EXHAUSTED leaves the queue and is routed like any other.
+  4. build the agent plan from the remaining near-misses, ranked by expected value
+     EV = family size x (1 - differing instructions (structural OP) / words). One representative
+     per shape family is sent; famclone harvests the rest once it matches.
      Routing (the cost rule):
        haiku    - first attempt on anything <= HAIKU_MAX_WORDS words (cheap, ~$0.01-0.05/agent,
                   up to 3 targets per agent, grouped by twin origin);
@@ -20,7 +27,7 @@ A round is: free work first, then a small paid plan, then a harvest.
                   functions Haiku already missed or that are too large for Haiku, highest EV
                   first (~$0.10-0.30/agent, ~80% hit rate on Haiku misses).
      A function is never sent twice to the same tier.
-  4. writes logs/campaign/plan.json (+ a copy per round) and prints how to spawn it.
+  5. writes logs/campaign/plan.json (+ a copy per round) and prints how to spawn it.
 
 Agents read docs/AGENT_BRIEF.md and write logs/manual/<ADDR>/REPORT.json per target, so results
 survive lost agent handles, crashed kernels and rate-limited agents.
@@ -49,6 +56,7 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fn  # noqa: E402
 import famclone  # noqa: E402
+import structscore  # noqa: E402
 
 ROOT = fn.ROOT
 PY = sys.executable
@@ -56,6 +64,7 @@ DEFAULT_FLAGS = "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split
 CAMP = os.path.join(ROOT, "logs", "campaign")
 PLAN = os.path.join(CAMP, "plan.json")
 LEDGER = os.path.join(CAMP, "ledger.jsonl")
+QUEUE = structscore.QUEUE
 MANUAL = os.path.join(ROOT, "logs", "manual")
 CAND_FILE = os.path.join(ROOT, "logs", "triage", "unindexed_candidate.txt")
 
@@ -67,7 +76,7 @@ HAIKU_PER_AGENT = 3
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 
 FORBID = re.compile(r"__attribute__\(\(weak\)\)|\b__weak\b|__schedule_barrier|\b__asm\b|\basm\s*\(|"
-                    r"\bvolatile\b|perm_t|&\s*0xffffffff\b|while\s*\(\s*0\s*\)|\b(\w+)\s*\?\s*\1\s*:\s*0\b", re.I)
+                    r"\bvolatile\b|\bperm_t\b|&\s*0xffffffff\b|while\s*\(\s*0\s*\)|\b(\w+)\s*\?\s*\1\s*:\s*0\b", re.I)
 
 
 # ------------------------------------------------------------------ state
@@ -124,16 +133,50 @@ def near_misses(status):
 
 
 def shape_fanout(addrs):
-    """addr -> (shape key, number of unmatched functions with that shape)."""
+    """addr -> (shape key, number of unmatched functions with that shape), counted over every unmatched
+    candidate (logs/triage/unindexed_candidate.txt) plus addrs, not only over addrs."""
+    status, addrs = load_status(), set(addrs)
+    every = addrs | {l.split()[0] for l in open(CAND_FILE) if l.strip()}
     keys = {}
-    for a in addrs:
+    for a in every:
+        if a in status and a not in addrs:
+            continue
         try:
             keys[a] = famclone.words(int(a, 16))
         except Exception:
             keys[a] = ("?", a)
     count = collections.Counter(keys.values())
-    return {a: (k, count[k]) for a, k in keys.items()}
+    return {a: (keys[a], count[keys[a]]) for a in addrs}
 
+
+def mutate_exhausted(addr):
+    p = os.path.join(structscore.MUTATE, addr, "result.json")
+    return os.path.exists(p) and json.load(open(p)).get("status") == "EXHAUSTED"
+
+
+def search_queue(best, fan):
+    """Representatives (one per shape) whose best source differs only by registers/order. Writes QUEUE."""
+    q = {}
+    for addr, (src, sc, _) in best.items():
+        if sc.get("err") or sc["match"] or mutate_exhausted(addr):
+            continue
+        kind = "OP=0" if sc["op"] == 0 else "order-only" if structscore.order_only(sc) else None
+        if kind is None:
+            continue
+        shape, fanout = fan[addr]
+        if shape not in q or structscore.rank(sc) < structscore.rank(q[shape]["sc"]):
+            q[shape] = dict(addr=addr, sc=sc, src=src, kind=kind, fanout=fanout)
+    out = []
+    for shape, e in q.items():
+        sc, src = e["sc"], e["src"]
+        out.append(dict(addr=e["addr"], kind=e["kind"], path=os.path.relpath(src["path"], ROOT),
+                        flags=src["flags"], cc=src["cc"], origin=src["origin"], op=sc["op"], reg=sc["reg"],
+                        moved=sc["moved"], total=sc["n"], ops=sc["ops"], fanout=e["fanout"]))
+    out.sort(key=lambda e: (-e["fanout"], e["op"], e["reg"] + e["moved"]))
+    with open(QUEUE, "w") as fh:
+        for e in out:
+            fh.write(json.dumps(e) + "\n")
+    return out
 
 # ------------------------------------------------------------------ free stages
 
@@ -207,9 +250,21 @@ def cmd_next(a):
     status = load_status()
     tried, skip = attempted(), parked()
     pool = near_misses(status)
-    fan = shape_fanout([t["addr"] for t in pool])
+    best = structscore.best_structures(status, progress=True)
+    fan = shape_fanout(sorted({t["addr"] for t in pool} | set(best)))
+    queue = search_queue(best, fan)
+    queued = {e["addr"] for e in queue}
+    queued_shapes = {fan[e["addr"]][0] for e in queue}
+    print("search queue: %d functions (OP=0: %d, OP<=2 order-only: %d), family reach %d -> %s"
+          % (len(queue), sum(e["kind"] == "OP=0" for e in queue), sum(e["kind"] == "order-only" for e in queue),
+             sum(e["fanout"] for e in queue), os.path.relpath(QUEUE, ROOT)))
+    if a.queue_only:  # refresh logs/campaign/search_queue.jsonl only: no famclone, no plan, no REPORT moves
+        return
     for t in pool:
         t["shape"], t["fanout"] = fan[t["addr"]]
+        sc = best.get(t["addr"], (None, {"err": "unscored"}, None))[1]
+        if not sc.get("err"):
+            t["n_op"] = sc["op"]  # structural OP of the best source (refine's or an agent's)
         t["ev"] = t["fanout"] * max(0.05, 1.0 - t["n_op"] / float(t["total"]))
     pool.sort(key=lambda t: (-t["ev"], t["total"]))
 
@@ -233,7 +288,7 @@ def cmd_next(a):
     seen_shapes, hk, ds = set(), [], []
     n_ds = min(a.deepseek, MAX_DEEPSEEK)
     for t in pool:
-        if t["shape"] in seen_shapes or t["shape"] in dead:
+        if t["shape"] in seen_shapes or t["shape"] in dead or t["shape"] in queued_shapes or t["addr"] in queued:
             continue
         tiers = tried.get(t["addr"], set()) | (shape_tiers[t["shape"]] if t["fanout"] > 1 else set())
         if "deepseek" in tiers:
@@ -408,6 +463,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     n = sub.add_parser("next")
+    n.add_argument("--queue-only", action="store_true",
+                   help="only re-score and rewrite the search queue (no famclone, no plan)")
     n.add_argument("--refine", type=int, default=0, help="refine N new candidates first (free)")
     n.add_argument("--haiku", type=int, default=60, help="Haiku target functions in the plan")
     n.add_argument("--deepseek", type=int, default=MAX_DEEPSEEK, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)

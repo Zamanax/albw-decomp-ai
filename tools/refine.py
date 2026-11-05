@@ -336,11 +336,12 @@ def gen_order(text, budget, name=None):
 # -------------------------------------------------------------------- engine
 
 def better(a, b):
-    """Is candidate a strictly closer to the target than current best b?"""
+    """Is candidate a strictly closer to the target than current best b? Fewest OP, then REG+MOVED
+    (states written before the MOVED count existed have no n_moved)."""
     if b is None:
         return True
-    ka = (not a["match"], a["n_op"], a["n_reg"], -a["words"], -a["sim"])
-    kb = (not b["match"], b["n_op"], b["n_reg"], -b["words"], -b["sim"])
+    ka = (not a["match"], a["n_op"], a["n_reg"] + a.get("n_moved", 0), -a["words"], -a["sim"])
+    kb = (not b["match"], b["n_op"], b["n_reg"] + b.get("n_moved", 0), -b["words"], -b["sim"])
     return ka < kb
 
 
@@ -393,7 +394,7 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
         if r["err"] in ("TIMEOUT", "NO OUTPUT"):
             r = check_one(sd, path, addr, flags, None)  # wine warm-up flake; retry once
         if r["err"]:
-            rec = dict(match=False, n_op=999, n_reg=0, perm=False, words=0,
+            rec = dict(match=False, n_op=999, n_reg=0, n_moved=0, perm=False, words=0,
                        total=0, sim=0.0, err=r["err"][:80])
         else:
             rec = dict(classify(r["out"], r["words"], r["total"]))
@@ -402,7 +403,7 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
         rec.update(iter=state["iter"], wave=wave, flags=flags, path=path)
         with open(hist_path, "a") as fh:
             fh.write(json.dumps({k: rec.get(k) for k in
-                                 ("iter", "wave", "flags", "match", "n_op", "n_reg",
+                                 ("iter", "wave", "flags", "match", "n_op", "n_reg", "n_moved",
                                   "perm", "words", "total", "sim", "err")}) + "\n")
         return rec
 
@@ -520,8 +521,8 @@ def run(addr, budget=60, start="auto", src=None, fresh=False,
 
 
 def _print_rec(tag, rec):
-    print("  %-10s OP=%-3d REG=%-3d %s %d/%d sim=%.1f%s%s" % (
-        tag, rec["n_op"], rec["n_reg"], "PERM " if rec["perm"] else "",
+    print("  %-10s OP=%-3d REG=%-3d MOVED=%-3d %s %d/%d sim=%.1f%s%s" % (
+        tag, rec["n_op"], rec["n_reg"], rec.get("n_moved", 0), "PERM " if rec["perm"] else "",
         rec["words"], rec["total"], rec["sim"],
         " MATCH" if rec["match"] else "", " " + rec["err"][:40] if rec["err"] else ""))
 
@@ -536,7 +537,7 @@ def _finish(addr, state, status, as_json, quiet):
         print(json.dumps({"addr": "%08X" % addr, "status": status,
                           "used": state["used"], "origin": state["origin"],
                           "best": {k: b.get(k) for k in
-                                   ("n_op", "n_reg", "perm", "words", "total",
+                                   ("n_op", "n_reg", "n_moved", "perm", "words", "total",
                                     "sim", "match", "flags", "err", "mismatches")}}))
         return {"addr": addr, "status": status, "used": state["used"], "best": b}
     if not quiet:

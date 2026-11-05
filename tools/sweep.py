@@ -14,11 +14,13 @@ spec.py (all slots use @@NAME@@ — braces clash with C):
              random sample, seed 1)
   FLAGS      optional list of flag strings (default: fn.py defaults only)
 
-Classification (parsed from fn.py check's diff table):
-  OP      instruction really differs (mnemonic/immediate/operands)
+Classification (fn.py check's STRUCTURE line: a register-blind alignment, so an
+inserted or moved instruction does not misalign everything after it):
+  OP      instruction really differs (mnemonic/immediate/operands) or is missing
   REG     same instruction modulo register names — allocation-only delta
-  PERM    whole function is one reordering of the same instruction multiset
-Variants with 0 OP diffs are allocation-only near-misses: mutate ordering /
+  MOVED   same instruction on both sides at another position — order-only delta
+  PERM    OP == 0 and MOVED > 0: a pure reordering
+Variants with 0 OP diffs are allocation/order-only near-misses: mutate ordering /
 locals / flags, keep the construct.
 """
 import importlib.util
@@ -37,7 +39,8 @@ from permuter import RESULT_RE, check_one  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_FLAGS = "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections"
-REGTOK = re.compile(r"\b(?:r\d+|sp|lr|pc|ip|s\d+|d\d+)\b")
+REGTOK = re.compile(r"\b(?:r\d+|sb|sl|fp|ip|sp|lr|pc|[sdq]\d+)\b")  # same as fn.py's
+STRUCTURE_RE = re.compile(r"STRUCTURE: OP=(\d+) REG=(\d+) MOVED=(\d+) aligned (\d+)/(\d+)")
 
 
 def canon(text):
@@ -82,49 +85,18 @@ def parse_rows(out):
 
 
 def classify(out, words, total):
-    """Classify a NO MATCH result into OP / REG / PERM structure."""
+    """Classify a NO MATCH result into OP / REG / MOVED / PERM structure.
+
+    The counts come from fn.py's STRUCTURE line; rows (positional diff table)
+    and regmap are display hints only."""
     same = int(RESULT_RE.search(out).group(2))
+    st = STRUCTURE_RE.search(out)
+    n_op, n_reg, n_moved = (int(st.group(k)) for k in (1, 2, 3))
     rows = parse_rows(out)
-    n_op = n_reg = 0
-    regmap = []
-    for off, t, mine in rows:
-        if t == mine:
-            continue
-        if not t or not mine:
-            n_op += 1  # one side missing (sizes differ): a real instruction delta
-            continue
-        if t.startswith("b") and mine.startswith("b"):
-            # branch-pair (target differs only by condition code or in/out-of-
-            # function displacement, e.g. bne vs beq): one OP, not fatal
-            n_op += 1
-            continue
-        if off == "?":
-            # grouped-opcodes table (sizes differ): missing side = missing
-            # instruction; align-by-off recon gives unreliable deltas, so
-            # just count the presence gap without reg-level detail
-            n_op += 1
-            continue
-        if canon(t) == canon(mine) or (t.startswith("bl #") and mine.startswith("bl #")):
-            # same instruction modulo register names, or cross-TU bl target
-            # (fn.py prints those unmarked: unresolved extern names)
-            n_reg += 1
-            regmap.append("%s->%s(+%s)" % (regtok(t), regtok(mine), off))
-        else:
-            n_op += 1
-    perm = False
-    if "sizes differ" not in out and len(rows) == total and len(rows) > 1:
-        tgt = sorted(canon(t) for _, t, _ in rows)
-        mine = sorted(canon(m) for _, _, m in rows)
-        if tgt != mine:
-            # same multiset modulo one branch's condition code? then it's a
-            # branch-cond-flip permutation, not a real instruction delta
-            strip_cc = lambda s: re.sub(r"^b(eq|ne|lt|gt|le|ge|hi|lo)\b", "b", s)
-            if [strip_cc(x) for x in tgt] == [strip_cc(x) for x in mine] and n_reg == 0:
-                n_op = 0
-                perm = True
-        else:
-            perm = True
-    return dict(n_op=n_op, n_reg=n_reg, perm=perm, regmap=regmap, rows=rows, same=same)
+    regmap = ["%s->%s(+%s)" % (regtok(t), regtok(mine), off) for off, t, mine in rows
+              if t and mine and t != mine and off != "?" and canon(t) == canon(mine)]
+    return dict(n_op=n_op, n_reg=n_reg, n_moved=n_moved, perm=n_op == 0 and n_moved > 0,
+                regmap=regmap, rows=rows, same=same)
 
 
 def body_permutations(body, sample):
@@ -210,7 +182,7 @@ def main():
         r = check_one(workdir, src, addr, fl, sym)
         r.update(idx=idx, flags=fl, src=src, subs=subs)
         if r["err"]:
-            r.update(n_op=999, n_reg=0, perm=False, regmap=[])
+            r.update(n_op=999, n_reg=0, n_moved=0, perm=False, regmap=[])
         else:
             r.update(classify(r["out"], r["words"], r["total"]))
         return r
@@ -225,9 +197,9 @@ def main():
             if r["err"]:
                 print("[%d/%d] v%05d ERR: %s" % (i + 1, len(variants), r["idx"], r["err"][:60]))
             else:
-                print("[%d/%d] v%05d %s OP=%d REG=%d%s %d/%d sim=%.1f [%s]" % (
+                print("[%d/%d] v%05d %s OP=%d REG=%d MOVED=%d%s %d/%d sim=%.1f [%s]" % (
                     i + 1, len(variants), r["idx"], "MATCH " if r["match"] else "",
-                    r["n_op"], r["n_reg"], " PERM" if r["perm"] else "",
+                    r["n_op"], r["n_reg"], r["n_moved"], " PERM" if r["perm"] else "",
                     r["words"], r["total"], r["sim"], " ".join(r["flags"].split()[-3:-1])))
             if r["match"] and stop:
                 for p in futs:
@@ -235,19 +207,19 @@ def main():
                 break
 
     results.sort(key=lambda r: (r["match"], r["err"] == "", r["n_op"] == 0, -r["n_op"],
-                                -r["n_reg"], r["perm"], r["words"], r["sim"]), reverse=True)
+                                -(r["n_reg"] + r["n_moved"]), r["words"], r["sim"]), reverse=True)
     with open(os.path.join(workdir, "results.jsonl"), "w") as fh:
         for r in results:
             fh.write(json.dumps({k: r.get(k) for k in
                                  ("idx", "flags", "subs", "match", "words", "total", "sim",
-                                  "n_op", "n_reg", "perm", "regmap", "err")}) + "\n")
+                                  "n_op", "n_reg", "n_moved", "perm", "regmap", "err")}) + "\n")
     print("\nbest of %d in %.0fs | %s" % (len(results), time.time() - t0, workdir))
     for r in results[:top]:
         if r["err"]:
             print("  v%05d ERR %s" % (r["idx"], r["err"][:60]))
             continue
-        print("  v%05d %s OP=%d REG=%d%s %d/%d sim=%.1f [%s] %s" % (
-            r["idx"], "MATCH" if r["match"] else "     ", r["n_op"], r["n_reg"],
+        print("  v%05d %s OP=%d REG=%d MOVED=%d%s %d/%d sim=%.1f [%s] %s" % (
+            r["idx"], "MATCH" if r["match"] else "     ", r["n_op"], r["n_reg"], r["n_moved"],
             " PERM" if r["perm"] else "", r["words"], r["total"], r["sim"],
             " ".join(r["flags"].split()[-3:-1]),
             "; ".join(r["regmap"][:6]) + (" ..." if len(r["regmap"]) > 6 else "")))

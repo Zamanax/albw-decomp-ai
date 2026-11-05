@@ -1,5 +1,14 @@
 # Handover: register allocation and instruction order (2026-11-05)
 
+> **Status (same day): all three steps are implemented.** `fn.py check` prints `STRUCTURE: OP=a REG=b
+> MOVED=c aligned n/m  pool p/q`, `sweep.classify()` / `refine.py` / `campaign.py` use it, `campaign.py
+> next` routes register/order near-misses to `logs/campaign/search_queue.jsonl` instead of a paid tier
+> (`next --queue-only` re-scores it), and `tools/mutate.py` searches those sources (plus the
+> `__schedule_barrier` hacks, `mutate.py barriers`) by hill climbing. `tools/structscore.py census`
+> prints the per-step impact; measured results are in `docs/LESSONS.md` ("Structural score, routing and
+> the automatic mutator"). Still open: the Haiku library validation round below, and the `fn.py`
+> branch-masking hole noted in LESSONS (`0021BEF8` may not be a real match).
+
 Goal of the next session: stop paying language-model agents for differences that are only
 register choice or instruction order, and let the machine search for them instead. Three steps,
 in this order:
