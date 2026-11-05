@@ -98,6 +98,12 @@ typedef void* (*CreateFn)();
 
 // sead::Factory: an opaque 0x248-byte block; both the constructor and the destructor are real
 // game functions (out of line here, as in every matched source).
+//
+// The fourth parameter is the list the factory registers into. It is typed `PtrCnt*` rather than
+// `PtrListBase*` because the three inline forms above are not one class hierarchy (the named and
+// assign forms derive from their own count pair), while every list type puts the count pair at
+// offset 0 — so `&list` converts to `PtrCnt*` with no adjustment and the emitted argument is
+// identical in every matched source.
 struct Factory {
     char storage[0x248];
     Factory(CreateFn, u32, const SafeString&, PtrCnt*, const SafeString&, const char*, int);

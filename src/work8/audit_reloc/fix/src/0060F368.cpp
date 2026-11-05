@@ -8,13 +8,9 @@ struct Blk800 {
     u8 p0[0x3c]; u32 m3c; u8 p1[0x4c - 0x40]; u16 m4c; u16 m4e;
     u8 p2[0x5d - 0x50]; u8 m5d;
 };
-struct Npc {
-    u8 p0[0x3ac]; u32 m3ac; u8 p1[0x810-0x3b0]; u32 m810;
-    u8 p2[0x857-0x814]; u8 m857; u8 m858; u8 pad859; u8 m85a;
-    u8 p3[0x85d-0x85b]; u8 m85d; u8 p4[0x86c-0x85e]; volatile u32 m86c;
-    u8 p5[0x8ac-0x870]; u32 m8ac; u8 p6[0x964-0x8b0]; u8 m964;
-    u8 p7[0x984-0x965]; s32 m984;
-};
+
+#include "actor.h"
+
 extern "C" void* data_00709D28;
 extern "C" void func_004A8304(void*, u32);
 extern "C" void func_004A879C(void*, u32, s32);

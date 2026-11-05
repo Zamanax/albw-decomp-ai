@@ -29,6 +29,18 @@
 // (0x4FDC84, 0x4FDCA0, 0x4FDCBC) and its +0x1c8 array is indexed by ActorParam-like ids
 // (0x4FDBA0, 0x4FDBD8).  Files that define it keep their own definition.
 struct Obj2D0;
+// ---------------------------------------------------------------------------------------------
+// The actor parameter record handed to every actor constructor (ActorParam* in 0x150E40,
+// EnemyArg*/EnemyParam* in 0x4FD464, NpcBase's 5th argument in 0x623368).  Only the fields the
+// matched constructors read are modelled: the record is at least 0x2a4 bytes, the rail indices at
+// +0x29c/+0x2a0 are read by 0x2CC998/0x2CC9A4, and +0x1c by 0x1E4414.
+struct ActorParam {
+    u8 pad000[0x1c];
+    u32 m1c;                   // +0x01C  (0x1E4414 reads it)
+    u8 pad020[0x29c - 0x20];
+    s32 m29c;                  // +0x29C  rail index (negative = "no rail")  0x2CC998
+    s32 m2a0;                  // +0x2A0  second rail check                 0x2CC9A4
+};
 
 // ---------------------------------------------------------------------------------------------
 // Primary base: +0x000..0x320.
@@ -198,7 +210,8 @@ struct Npc {
     u8 m964;                 // +0x964  StateMgr::mCur
     u8 pad965[0x984 - 0x965];
     s32 m984;                // +0x984  saved initial state
-    u8 m988;                 // +0x988
+    u8 m988;                 // +0x988  first byte past NpcBase (a derived actor's member in
+                             //        0x60B5E4's model, which is the only source that reads it)
 
     void changeState(s32 state, s32 flag);
 };
@@ -385,17 +398,6 @@ public:
     void (T::*mFunc)();        // +0x08
 };
 
-// ---------------------------------------------------------------------------------------------
-// The actor parameter record handed to every actor constructor (ActorParam* in 0x150E40,
-// EnemyArg*/EnemyParam* in 0x4FD464, NpcBase's 5th argument in 0x623368).  Only the fields the
-// matched constructors read are modelled: the record is at least 0x2a4 bytes, the rail indices at
-// +0x29c/+0x2a0 are read by 0x2CC998/0x2CC9A4, and +0x1c by 0x1E4414.
-struct ActorParam {
-    u8 pad000[0x1c];
-    u32 m1c;                   // +0x01C  (0x1E4414 reads it)
-    u8 pad020[0x29c - 0x20];
-    s32 m29c;                  // +0x29C  rail index (negative = "no rail")  0x2CC998
-    s32 m2a0;                  // +0x2A0  second rail check                 0x2CC9A4
-};
+
 
 #endif

@@ -8,11 +8,13 @@ struct ABaseA { u8 padA[0x31c]; virtual ~ABaseA();
   virtual void a13(); virtual void a14(); virtual void a15(); virtual void a16();
   virtual void a17(); virtual void a18(); virtual void a19(); virtual void a20(); };
 struct ABaseB { u8 padB[0x410 - 0x324]; virtual void b0(); };
-struct ActorBase : ABaseA, ABaseB { virtual ~ActorBase(); };
+
+#include "actor.h"
+
 struct MemXBase { ~MemXBase(); u8 padX[0x54]; }; struct MemX : MemXBase {};
 struct MemY { ~MemY(); u8 padY[0x2e4]; };
 struct MemZ { ~MemZ(); u8 padZ[0x68]; };
-struct ActB : ActorBase { virtual ~ActB() {} MemZ mZ; };
+struct ActB : ActorBaseExt { virtual ~ActB() {} MemZ mZ; };
 struct ActC : ActB {
   virtual ~ActC() {}
   virtual void c1(); virtual void c2(); virtual void c3(); virtual void c4();

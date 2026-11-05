@@ -34,8 +34,11 @@
 #include "albw_types.h"
 #include <stdarg.h>
 
-namespace sead {
-
+// Defined at global scope on purpose: 447 matched sources name the class unqualified at file scope
+// and one shared header (static_init.h, the Factory constructor's `const SafeString&` parameters)
+// also forward-declares `struct SafeString;` there. A global-scope `using` of a namespaced class
+// cannot be combined with that declaration, so the class lives at global scope and the namespace
+// gets the alias instead.
 class SafeString {
 public:
     SafeString() : mStringTop(0) {}
@@ -44,6 +47,10 @@ public:
     virtual void assureTerminationImpl_() const;  // 0x006916EC (no-op); vtable slot +0x08
     const char* mStringTop;                      // +0x04
 };
+
+namespace sead {
+
+using ::SafeString;
 
 // BufferedSafeStringBase<char>: the string points into a caller-supplied buffer and knows its size.
 // The base step of the FixedSafeString<24> constructor 0x0010BDF0 stores, in this order,
@@ -86,8 +93,5 @@ private:
 };
 
 }  // namespace sead
-
-// Most matched sources name the class unqualified at file scope.
-using sead::SafeString;
 
 #endif

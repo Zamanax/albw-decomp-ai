@@ -20,27 +20,9 @@ struct M7c0 {
     Entry** m28;
 };
 
-struct Npc {
-    u8 pad0[0x3d0];
-    Vec3 m3d0;
-    u8 pad3dc[0x3e8 - 0x3dc];
-    s32 m3e8;
-    u8 pad3ec[0x7c0 - 0x3ec];
-    M7c0* m7c0;
-    u8 pad7c4[0x834 - 0x7c4];
-    f32 m834;
-    u8 pad838[0x848 - 0x838];
-    u16 m848;
-    u16 m84a;
-    u8 pad84c[0x857 - 0x84c];
-    u8 m857;
-    u8 pad858[0x85b - 0x858];
-    s8 m85b;
-    u8 pad85c[0x914 - 0x85c];
-    s8 m914;
-    u8 pad915[0x984 - 0x915];
-    u32 m984;
-};
+
+#include "actor.h"
+
 
 extern "C" s32 func_004BFE7C(Npc*, Vec3*, s32*, s8*, f32, M7c0*);
 extern "C" s32 func_004C1388(Npc*);

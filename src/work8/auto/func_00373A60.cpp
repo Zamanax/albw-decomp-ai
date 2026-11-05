@@ -10,30 +10,16 @@ typedef unsigned long long u64;
 // Chain: own vptr pair -> member at +0x9BC (dtor 0x5027C4) -> base 0x6EB7B0 level (members
 // +0x868/+0x864 -> 0x36D0E0) -> base 0x6D2174 level (+0x75C -> 0x35D6D0, +0x478 -> 0x503368)
 // -> base 0x6E0B24 level (+0x410 -> 0x4EE540) -> ActorBase dtor 0x1510A4 (tail call).
-struct ActorBaseA {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual ~ActorBaseA();
-    virtual void v5();  virtual void v6();  virtual void v7();  virtual void v8();
-    virtual void v9();  virtual void v10(); virtual void v11(); virtual void v12();
-    virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16();
-    virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20();
-    char padA[0x320 - 4];
-};
-struct ActorBaseB {
-    virtual void b0();
-    char padB[0x410 - 0x324];
-};
-class ActorBase : public ActorBaseA, public ActorBaseB {
-public:
-    virtual ~ActorBase();
-};
+
+
+
+#include "actor.h"
+
 struct MemX { ~MemX(); char pad[0x54]; };     // dtor 0x35D6D0
 struct MemY { ~MemY(); char pad[0x2e4]; };    // dtor 0x503368
 struct MemZ { ~MemZ(); char pad[0x68]; };     // dtor 0x4EE540
 struct MemW { ~MemW(); char pad[0x8c]; };     // dtor 0x5027C4
-class ActB : public ActorBase {
+class ActB : public ActorBaseExt {
 public:
     virtual ~ActB() {}
     MemZ mZ;

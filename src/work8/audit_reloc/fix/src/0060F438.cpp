@@ -27,39 +27,9 @@ struct Obj7ac {
     }
 };
 
-struct Npc {
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
-    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
-    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
-    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
-    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
-    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
-    virtual void v40(); virtual void v41(); virtual void v42();
-    virtual void request(u8, s32);
 
-    u8 pad4[0x3e8 - 4];
-    s32 m3e8;                  // +0x3e8
-    u8 pad3ec[0x7ac - 0x3ec];
-    Obj7ac* m7ac;              // +0x7ac
-    u8 pad7b0[0x7c0 - 0x7b0];
-    void* m7c0;                // +0x7c0
-    u8 pad7c4[0x848 - 0x7c4];
-    u16 m848;                  // +0x848
-    u16 m84a;                  // +0x84a
-    u8 pad84c[0x850 - 0x84c];
-    u16 m850;                  // +0x850
-    u8 m852, m853;             // +0x852
-    u8 pad854[0x857 - 0x854];
-    u8 m857;                   // +0x857
-    u8 pad858[0x911 - 0x858];
-    u8 m911;                   // +0x911
-    u8 pad912[0x914 - 0x912];
-    u8 m914;                   // +0x914
-};
+#include "actor.h"
+
 
 extern "C" void func_004C1300(Npc*, s32);
 extern "C" s32 func_004C1388(Npc*);

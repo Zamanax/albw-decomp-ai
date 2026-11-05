@@ -46,11 +46,9 @@ struct Game {char pad[0x3dbbc];ActorMgr mgr;};
 extern Game* data_00706E20;
 extern s32 data_0070AA74;
 struct Mtx34 {f32 m[12];void translation(Vec3* p)const{p->x=m[3];p->y=m[7];p->z=m[11];}};
-struct Model {
-    char p0[0x74];Vec3 m74;char p80[0xd8-0x80];Mtx34 md8;
-    char p108[0x164-0x108];BitFlag32 m164;
-    void update(s32 a,const Vec3& b);
-};
+
+#include "model.h"
+
 struct AnimElem {u32 m0,m4;f32 m8;u32 mc;f32 m10;char p14[0x12];u8 m26;void setFrame(f32 f){if(m8!=f){m8=f;m26=1;}}};
 struct AnimArr {u32 pad[3];s32 num,max;AnimElem* data;AnimElem& operator[](s32 i){if((u32)i<(u32)num)return data[i];return data[0];}};
 struct Elem {Vec3 pos,vel;Model* model;AnimArr* anim;void* collider;s32 angle;};

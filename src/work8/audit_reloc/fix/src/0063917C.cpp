@@ -12,18 +12,9 @@ struct Child {
     virtual bool vf16(Npc*);
 };
 
-struct Npc {
-    u8 pad0[0x2d7 - 0];
-    u8 m2d7;                 // 0x2d7
-    u8 pad2d8[0x770 - 0x2d8];
-    Child* m770;             // 0x770
-    u8 pad774[0x8ac - 0x774];
-    u32 m8ac;                // 0x8ac
-    u8 pad8b0[0x964 - 0x8b0];
-    u8 m964;                 // 0x964
-    u8 pad965[0x984 - 0x965];
-    s32 m984;                // 0x984
-};
+
+#include "actor.h"
+
 
 extern "C" bool func_00547538(void*);
 extern "C" bool func_00547B20(void*);

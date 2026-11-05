@@ -7,30 +7,16 @@ typedef int s32;
 typedef float f32;
 typedef unsigned long long u64;
 // agent3: actor class family around 0x1E76EC / 0x1E7FDC (3-level dtor chain, base ActorBase dtor 0x1510A4)
-struct ActorBaseA {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual ~ActorBaseA();
-    virtual void v5();  virtual void v6();  virtual void v7();  virtual void v8();
-    virtual void v9();  virtual void v10(); virtual void v11(); virtual void v12();
-    virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16();
-    virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20();
-    char padA[0x320 - 4];
-};
-struct ActorBaseB {
-    virtual void b0();
-    char padB[0x410 - 0x324];
-};
-class ActorBase : public ActorBaseA, public ActorBaseB {
-public:
-    virtual ~ActorBase();   // 0x1510A4
-};
+
+
+
+#include "actor.h"
+
 struct MemX { ~MemX(); char pad[0x54]; };    // dtor 0x35D6D0
 struct MemY { ~MemY(); char pad[0x2e4]; };   // dtor 0x503368
 struct MemZ { ~MemZ(); char pad[0x68]; };    // dtor 0x4EE540
 
-class ActB : public ActorBase {             // vtable ro_6E0B24 (21 slots, 2nd at +0x5c)
+class ActB : public ActorBaseExt {             // vtable ro_6E0B24 (21 slots, 2nd at +0x5c)
 public:
     virtual ~ActB() {}
     MemZ mZ;                                 // +0x410
