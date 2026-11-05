@@ -52394,6 +52394,13 @@
 "path": "src/work8/auto/func_003B192C.cpp",
 "status": "honest"
 },
+"003B1998": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003B1998.cpp",
+"status": "honest"
+},
 "003B1DC4": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -52506,6 +52513,13 @@
 "path": "src/work8/audit_reloc/fix/src/003B2F78.cpp",
 "status": "honest"
 },
+"003B2F7C": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003B2F7C.cpp",
+"status": "honest"
+},
 "003B31B0": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -52574,6 +52588,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/audit_reloc/fix/src/003B4104.cpp",
+"status": "honest"
+},
+"003B4108": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003B4108.cpp",
 "status": "honest"
 },
 "003B426C": {
@@ -53505,6 +53526,13 @@
 "path": "src/work8/audit_reloc/fix/src/003BEE28.cpp",
 "status": "honest"
 },
+"003BEF58": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003BEF58.cpp",
+"status": "honest"
+},
 "003BF374": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -54038,6 +54066,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/audit_reloc/fix/src/003C3BC0.cpp",
+"status": "honest"
+},
+"003C3BC4": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003C3BC4.cpp",
 "status": "honest"
 },
 "003C3D28": {
@@ -61663,6 +61698,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/audit_reloc/fix/src/00428E7C.cpp",
+"status": "honest"
+},
+"00428F60": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00428F60.cpp",
 "status": "honest"
 },
 "0042918C": {
@@ -114078,6 +114120,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
 "hack_reasons": [],
 "path": "src/work8/perm_local/imported/func_006549D4.cpp",
+"status": "honest"
+},
+"00654B58": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00654B58.cpp",
 "status": "honest"
 },
 "00654C3C": {
