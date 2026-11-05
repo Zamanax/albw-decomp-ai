@@ -870,3 +870,38 @@ change only if every entry of the file still matches.
   branch: fold StateMgrBase and the sead string family into shared headers (verify with
   headermigrate), then run permuter-style register searches on the closest constructor (00206FBC)
   rather than more agent passes.
+
+### The shared library as built (15 headers, 1,580 lines, 1,654 matched sources on it)
+
+Six DeepSeek agents, one per family, designed the headers and dry-ran the migrations; the
+coordinator applied them one family at a time and re-verified with `tools/headercheck.py` after
+every step (final: 3,037 entries, 0 failing).
+
+| Header | Provides | Sources migrated |
+|---|---|---|
+| `sead_string.h` / `sead_heap.h` | SafeString (global + `sead::` alias), Buffered/FixedSafeString<N>, NoThrow/nothrow_t, engine `operator new/new[]` | 530 / 124 |
+| `static_init.h` | PtrCnt, PtrListBase/PtrList (+`Named`, `Assign` forms), Factory, Id64 | 472 |
+| `vec3.h` / `sead_math.h` | Vec3 (set/setCopy, setAdd/Sub/Mul/Div/ScaleAdd, normalize), Vec2, Vec4, Mtx33/34, Angle, SinCosSample | 451 / 62 |
+| `actor.h` / `model.h` | ActorBase vs ActorBaseExt (0x40C vs 0x410 root), Npc, EnemyBase, Delegate<T>, ActorParam, Model | 302 / 2 |
+| `sead_rtti.h` | TypeInfo, ObjVt<T>, RttiRoot, SEAD_RTTI_BASE | 185 |
+| `flags.h` / `timer.h` | Flag32/16/8 (BitFlag* aliases), Timer | 139 / 48 |
+| `statemgr.h` | StateMgrT<Owner> with exec vs execute, StateMgrBase, name buffer | 72 |
+| `sead_container.h` | ListNode/ListImpl/OffsetList, PtrArray, Buffer<T> | 21 |
+
+What the migration measurements established (each is a byte-level fact, not a guess):
+- **The game really has two spellings of several helpers**, so the header carries both, named:
+  `Vec3::set` (memberwise) vs `setCopy` (`*this = o`, split `ldm/ldr/str/strd`); `StateMgr::exec`
+  (through `this`) vs `execute` (through a local alias); `ActorBase` (0x40C) vs `ActorBaseExt`
+  (0x410, folds the enemy handle word into the root); `PtrListBase` plain vs `Named` vs `Assign`.
+- **`nothrow_t` must be a one-byte type with a user-declared constructor**, else armcc allocates it
+  differently (3/14 vs 13/15 files).
+- **A hand-written `stdarg.h` is required**: `typedef struct __va_list { void* __ap; } va_list;`
+  inside `namespace std` for C++, `__va_start(va_list, last)` / `__va_arg(va_list, T)`. Defining a
+  variadic member inside a class template makes armcc exit silently (code 5).
+- **`SafeString` needs a virtual destructor** for 447 static name tables, and the engine's
+  `operator new[]` must be declared or armcc emits `__aeabi_vec_new_cookie` instead of the original
+  inline cookie + `new[]` + `vec_ctor`.
+- Failures left unmigrated are documented in each agent's `logs/manual/LIB_*/REPORT.json`; the most
+  common cause is a source that needs a *third* form the library does not own (a safe copy of
+  String without a virtual destructor, a materialised `nothrow` tag) and a few `struct X {...} x;`
+  declarations the harness does not rewrite.
