@@ -54,12 +54,30 @@ def brace_depth(text, pos):
     return stripped.count("{") - stripped.count("}")
 
 
-def candidate(text, name, header):
+OWNER_FIELD = re.compile(r"\b(\w+)\s*\*\s*mOwner\s*;")
+
+
+def candidate(text, name, header, template=None, renames=()):
+    """The source with its local `struct name {...};` replaced by the shared header.
+
+    template: the header defines `template<class T> struct <template>`; the owner class is read
+    from the removed definition's `X* mOwner;` field and the file gets `typedef <template><X> name;`.
+    renames: (regex, replacement) pairs applied to the rest of the file (member-name differences).
+    """
     span = find_definition(text, name)
     if not span:
         return None
     s, e = span
-    return text[:s] + '\n#include "%s"\n' % header + text[e:]
+    repl = '\n#include "%s"\n' % header
+    if template:
+        owner = OWNER_FIELD.search(text[s:e])
+        if not owner:
+            return None
+        repl += "typedef %s<%s> %s;\n" % (template, owner.group(1), name)
+    rest = text[e:]
+    for pat, sub in renames:
+        rest = re.sub(pat, sub, rest)
+    return text[:s] + repl + rest
 
 
 def check(path, key, flags):
@@ -78,10 +96,10 @@ def check(path, key, flags):
     return "ok", "%s/%s" % (r.group(2), r.group(3))
 
 
-def try_file(path, entries, name, header, apply):
+def try_file(path, entries, name, header, apply, template=None, renames=()):
     full = os.path.join(ROOT, path)
     text = open(full, encoding="utf-8", errors="replace").read()
-    new = candidate(text, name, header)
+    new = candidate(text, name, header, template, renames)
     if new is None:
         return dict(path=path, outcome="no_definition")
     d, f = os.path.split(full)
@@ -107,7 +125,12 @@ def main():
     ap.add_argument("--jobs", type=int, default=16)
     ap.add_argument("--limit", type=int)
     ap.add_argument("--paths", help="comma-separated repo paths to restrict to")
+    ap.add_argument("--template", help="header defines template<class T> struct TEMPLATE; owner from mOwner")
+    ap.add_argument("--rename", action="append", default=[], metavar="REGEX=REPL",
+                    help="rewrite member names in the rest of the file (repeatable)")
+    ap.add_argument("--log", help="log name under logs/headermigrate (default: the struct name)")
     a = ap.parse_args()
+    renames = [tuple(r.split("=", 1)) for r in a.rename]
 
     data = json.load(open(os.path.join(ROOT, "functions.json")))
     by_path = {}
@@ -126,10 +149,11 @@ def main():
         paths = paths[:a.limit]
 
     with ThreadPoolExecutor(a.jobs) as ex:
-        res = list(ex.map(lambda p: try_file(p, by_path[p], a.struct, a.header, a.apply), paths))
+        res = list(ex.map(lambda p: try_file(p, by_path[p], a.struct, a.header, a.apply, a.template, renames),
+                          paths))
 
     os.makedirs(os.path.join(ROOT, "logs", "headermigrate"), exist_ok=True)
-    with open(os.path.join(ROOT, "logs", "headermigrate", a.struct + ".jsonl"), "w") as fh:
+    with open(os.path.join(ROOT, "logs", "headermigrate", (a.log or a.struct) + ".jsonl"), "w") as fh:
         for r in res:
             fh.write(json.dumps(r) + "\n")
     counts = {}

@@ -4,13 +4,10 @@ typedef unsigned int u32; typedef int s32; typedef unsigned char u8; typedef sig
 
 struct En1AA;
 struct Timeline { void func_00352210(bool b, f32 frame); };
-struct StateMgr {
-    typedef void (En1AA::*Func)();
-    u32 mCounter; s8 mCur; s8 mNext; u8 mNum; char pad7[0x10 - 7];
-    Timeline* mTimeline; En1AA* mOwner; Func* mEnter; Func* mExec; Func* mExit;
-    void changeState(int s) ;
-    void execute() { (mOwner->*mExec[mCur])(); ++mCounter; if (mTimeline) mTimeline->func_00352210(true, (f32)mCounter); }
-};
+
+#include "statemgr.h"
+typedef StateMgrT<En1AA> StateMgr;
+
 f32 func_004F898C();
 void func_004F8964(f32* v, bool clamp, f32 g);
 void func_004FB0D8(En1AA* e, f32* vy);

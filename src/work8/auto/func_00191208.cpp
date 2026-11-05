@@ -4,15 +4,10 @@ typedef void (Base::*PMF)();
 extern "C" void func_00352210(void*, u32, f32);
 extern "C" void func_00547514(void*);
 extern "C" void func_00151214(void*);
-struct StateMgr {
-    u32 mCount; s8 mCur; s8 mNext; u8 mNum; u8 pad7; u32 mNames[2]; void* mTimeline;
-    Base* mOwner; PMF* mEnter; PMF* mExec; PMF* mExit;
-    void exec() {
-        (mOwner->*mExec[mCur])();
-        u32 c = ++mCount;
-        if (mTimeline) func_00352210(mTimeline, 1, (f32)c);
-    }
-};
+
+#include "statemgr.h"
+typedef StateMgrT<Base> StateMgr;
+
 struct Owner {
     u8 pad0[0x2c]; u16 mFlag2c; u8 pad1[0x2d7 - 0x2e]; u8 mFlag2d7; u8 pad2[0x4f8 - 0x2d8];
     StateMgr mMgr; u8 pad3[0x588 - 0x51c]; u8 mFlag588;

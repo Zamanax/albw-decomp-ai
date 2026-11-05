@@ -76,20 +76,10 @@ struct BitFlag32 {
 
 struct En;
 struct Timeline { void func_00352210(bool b, f32 frame); };
-struct StateMgr {
-    typedef void (En::*Func)();
-    s32 mCounter;        
-    s8 mCur;             
-    s8 mNext;            
-    u8 mNum;             
-    char pad7[0x10 - 7];
-    Timeline* mTimeline; 
-    En* mOwner;          
-    Func* mEnter;        
-    Func* mExec;         
-    Func* mExit;         
-    void changeState(int s) ;   
-};
+
+#include "statemgr.h"
+typedef StateMgrT<En> StateMgr;
+
 
 struct Model;
 struct Node;

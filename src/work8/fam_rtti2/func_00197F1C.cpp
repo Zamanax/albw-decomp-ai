@@ -31,15 +31,10 @@ typedef float f32;
 struct Base { virtual void v(); };
 typedef void (Base::*PMF)();
 extern "C" void func_00352210(void*, u32, f32);
-struct StateMgr {
-    u32 mCount; s8 mCur; s8 mNext; u8 mNum; u8 pad7; u32 mNames[2]; void* mTimeline;
-    Base* mOwner; PMF* mEnter; PMF* mExec; PMF* mExit;
-    void exec() {
-        (mOwner->*mExec[mCur])();
-        u32 c = ++mCount;
-        if (mTimeline) func_00352210(mTimeline, 1, (f32)c);
-    }
-};
+
+#include "statemgr.h"
+typedef StateMgrT<Base> StateMgr;
+
 struct A : Obj { u8 pad[0x508 - 4]; s16 m508; u8 pad2[0x900 - 0x50a]; u8 m900; };
 extern "C" char* data_00706E20;
 extern "C" Obj* func_0052FBA0(void* mgr, u32 h);
