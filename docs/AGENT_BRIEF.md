@@ -18,7 +18,26 @@ targets, your check budget and where to start.
   a *different* function of similar shape: if callees, offsets, sizes or constants don't line up with
   `fn.py show`, write the function from the disassembly instead.
 - References: matched sources in `src/work8/auto/` (grep them for the callee or global you see),
-  `shared/include/` (e.g. `sead_rtti.h`), `docs/LESSONS.md`.
+  `shared/include/` (the shared library, below), `docs/LESSONS.md`.
+
+## Shared library (`shared/include/`, already on the include path)
+
+1,654 matched sources build on these; each is the form that those functions' bytes prove. **Use
+them, never redefine the type locally.** A local copy is what makes an otherwise right function
+differ in register allocation or store order.
+
+| Header | Provides |
+|---|---|
+| `sead_string.h`, `sead_heap.h` | `SafeString` (global, `sead::` alias), `BufferedSafeString`, `FixedSafeString<N>`, `NoThrow`/`nothrow_t`, engine `operator new`/`new[]` (Heap-like tag, 0x10BAB4/0x10CEE0) |
+| `vec3.h`, `sead_math.h` | `Vec3` (both copy helpers: `set` memberwise, `setCopy` = `*this = o`), `Vec2`, `Vec4`, `Mtx33/34`, `Angle`, `SinCosSample`, `sinCos` |
+| `statemgr.h`, `actor.h`, `model.h` | `StateMgrT<Owner>` (`exec` vs `execute` forms, `StateMgrBase`), `ActorBase`/`ActorBaseExt`/`ActorBaseA/B`, `Npc`, `EnemyBase`, `Delegate<T>`, `ActorParam`, `Model` |
+| `static_init.h`, `sead_container.h` | `PtrCnt`/`PtrList*`/`Factory` (+ `…Named`, `…Assign` forms), `Id64`, `ListNode`/`ListImpl`, `PtrArray`, `Buffer<T>` |
+| `flags.h`, `timer.h` | `Flag32`/`Flag16`/`Flag8` (`BitFlag*` aliases), `Timer` |
+| `sead_rtti.h` | `TypeInfo`, `ObjVt<T>`, `RttiRoot`, `SEAD_RTTI_BASE` |
+| `cp15.h`, `stdarg.h`, `albw_types.h` | system registers, varargs for `...` functions, integer/float typedefs |
+
+If the interaction is different from the library form (the same helper exists in two shapes in the
+game), say which form your function needs in the report instead of forking the type locally.
 
 ## Done means — both lines, verbatim from `fn.py check`
 
