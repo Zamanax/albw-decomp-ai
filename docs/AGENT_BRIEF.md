@@ -99,6 +99,12 @@ Prefer an honest miss. Never claim a match you did not see printed.
   ((char*)(*(void**)q) + 0xac); fp(q, q->m854, -1);` (0060BD64 family, 51 functions).
 - Two adjacent stores in the wrong order: struct copy `T tmp = r; tmp.m = 1; r = tmp;` (001D3DBC) or a
   pointer local per stored field (002D455C).
+- `mov r0, r0` in the *middle* of a body (r0 still holds `this`): a call to a 4-byte `bx lr` no-op
+  (e.g. `func_001E6CE8(p)`, found in many vtables) that armlink NOPed — write the call (003B39BC).
+- 12-byte struct copied as a 2-word `ldm` + separate `ldr`/`str` where you emit one 3-word `ldm`:
+  copy through a pointer local, `Vec3* q = &p->v; Vec3 t = *q;` (002A0714).
+- Field loaded into r0 where the original loads into another reg and masks into a fresh one: read
+  the field twice (`if (s->m == 0) …; u32 c = (u8)s->m;`) so the base stays live (00542AE4).
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`

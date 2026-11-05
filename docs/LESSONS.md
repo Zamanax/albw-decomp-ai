@@ -653,6 +653,16 @@ Constructs that closed near-misses (all honest):
   accepted by fn.py once the rest aligns; it was never the blocker.
 - Static initializers: declare the globals in address order; the
   pointer-holding struct last (005CE944 family).
+- Mid-body `mov r0,r0` with `this` still in r0 (003B39BC): armlink NOPed a
+  `bl` to a 4-byte `bx lr` stub (func_001E6CE8, ~15 vtables); the source
+  calls it. Every earlier attempt stalled at 1/13 without that call.
+- 12-byte copy split `ldm {r1,r2}` + `ldr/str` (002A0714): `Vec3* q =
+  &p->v960; Vec3 t = *q;`. Copying the field directly merges into one
+  3-word `ldm`. A store run `str r1,[r0,#0x960]!` likewise needs a pointer
+  local for the destination.
+- Byte field loaded straight into r0 vs `ldrb r2` + `and r0,r2,#0xff`
+  (00542AE4): the source reads the field twice (zero test, then `(u8)`
+  widening), which keeps the base live across the load.
 
 Open, recurring (not reproduced honestly yet):
 - Dead `ldr` of a field immediately overwritten (003C0698, 0031A710,
