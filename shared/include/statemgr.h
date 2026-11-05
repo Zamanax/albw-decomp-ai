@@ -13,6 +13,10 @@ struct StateTimeline {
     void func_00352210(bool loop, f32 frame);  // 0x352210: advance the state's timeline
 };
 
+// sead::FixedSafeString<24> (0x24 bytes, ctor 0x10BDF0). The full sead string family is recovered
+// in logs/manual/H_002CC800/actor_types.h and H_00674F4C; it is not folded in here yet.
+struct StateName;
+
 template <class T>
 struct StateMgrT {
     typedef void (T::*Func)();
@@ -22,7 +26,8 @@ struct StateMgrT {
     s8 mNext;                  // +0x05
     u8 mNum;                   // +0x06
     u8 pad7;
-    u32 mNames[2];             // +0x08
+    s32 mNameCount;            // +0x08 sead::Buffer<FixedSafeString<24>>: count (0x2CCB08, 0x675168)
+    StateName* mNames;         // +0x0C  ... and array; one name per state (setStateName 0x10BEC4)
     StateTimeline* mTimeline;  // +0x10
     T* mOwner;                 // +0x14
     Func* mEnter;              // +0x18

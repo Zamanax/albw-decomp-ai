@@ -829,3 +829,44 @@ One agent per cross-cutting blocker, no check budget. Reports and sources: `logs
   second use alone gives the copy but still stores r0. 0060C038 has no fixed-r0 user, so the original's
   copy implies one existed before register allocation and was then deleted. The if-block order needs
   the alias `Npc* q = p; q->request(q->request854, -1);`.
+
+## Shared headers experiment (branch `shared-headers`, 2026-11-05)
+
+Hypothesis: large actor constructors become matchable once the small shared types are written once,
+correctly. Tool: `tools/headermigrate.py` swaps a source's local struct for a shared header and keeps the
+change only if every entry of the file still matches.
+
+- **Consolidation works and is cheap.** `vec3.h`: 444 of 456 matched sources with a local Vec3 accept
+  it unchanged. `statemgr.h` (`StateMgrT<Owner>`): 72 of the 83 sources with a full StateMgr. Both
+  helper forms exist in the game and are distinguishable in the bytes: `Vec3::set` memberwise vs
+  `setCopy` (`*this = o`, gives the split `ldm/ldr/str/strd` copy), and `StateMgr::exec` (through
+  `this`) vs `execute` (through an alias local). `changeState` exists once per actor type (0x659400,
+  0x65CE98, 0x65D9FC, 0x6665A0), which shows StateMgr was a template in the original.
+- **Varargs:** the compiler's include tree is not in the repo; `shared/include/stdarg.h` uses armcc's
+  intrinsics `__va_start(ap, last)` / `__va_arg(ap, T)`, with `va_list` = `std::__va_list` in C++.
+  armcc exits silently (code 5) on a variadic member defined inside a class template.
+- **Five actor constructors, one DeepSeek agent each (no budget):**
+
+  | Constructor | Size | Refine baseline | With shared types |
+  |---|---|---|---|
+  | 00206FBC En206 | 2.3 KB | 71/567 | 114/574 |
+  | 002CC800 TurtleMother | 2.8 KB | 64/709 | 101/717 (frame 0xfc exact) |
+  | 0018FBA8 Hookshot | 3.5 KB | 69/877 | 83/877 |
+  | 004FD464 EnemyBase | 2.4 KB | 74/611 | 61/596 (338/596 instructions equal modulo registers) |
+  | 00674F4C EnemyBase (soldier) | 1.6 KB | 40/412 | 28/412 (size 99.3%) |
+
+  None matched. The word metric is positional, so one register difference ripples; the agents report
+  layouts, callees, offsets and loop shapes right, and the remaining diff is register allocation,
+  scheduling and unmodelled stack locals (frames 0x44 vs 0x14, 0x14 vs 0xC).
+- **Converged types (four of five agents found them independently):** StateMgr +0x08/+0x0C is a
+  Buffer of `FixedSafeString<24>` state names (folded into statemgr.h); StateMgrT derives from
+  `StateMgrBase` (ctor 0x10A794) with an inline constructor zeroing +0x14..+0x20; the state-table recipe
+  (`mEnter = new Func[2n]; mExec = mEnter + n; mExit = new Func[n]; names = new FixedSafeString<24>[n]`,
+  then per state `setStateName` 0x10BEC4 and table stores); `sead::SafeString` needs a virtual
+  destructor and the engine `operator new[](u32, Heap* = 0, s32 = 4)` (0x10CEE0), or armcc calls
+  `__aeabi_vec_new_cookie` instead of inlining. Recovered headers and best sources: `shared/wip/H_*/`.
+- **Conclusion so far:** shared types remove the layout/callee guesswork (it was not the limiting
+  factor here), but large constructors stay blocked by global register allocation. Next step on this
+  branch: fold StateMgrBase and the sead string family into shared headers (verify with
+  headermigrate), then run permuter-style register searches on the closest constructor (00206FBC)
+  rather than more agent passes.
