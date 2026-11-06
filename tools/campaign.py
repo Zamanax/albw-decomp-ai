@@ -18,17 +18,21 @@ A round is: free work first, then a small paid plan, then a harvest.
                   per shape goes to logs/campaign/search_queue.jsonl for tools/mutate.py (free).
                   Never sent to a paid tier, nor is any member of its shape family. A function whose
                   mutate result is EXHAUSTED leaves the queue and is routed like any other.
-  4. build the agent plan from the remaining near-misses, ranked by expected value
-     EV = family size x (1 - differing instructions (structural OP) / words). One representative
+  4. build the agent plan from the remaining near-misses. Each candidate is routed to the tier it
+     would go to, then ranked within that tier by EV = family size x p, where p is the measured hit
+     rate of that tier on past targets of the same size and structural-OP bucket (hit_model(): every
+     plan_round*.json joined with the ledger, smoothed toward coarser buckets). One representative
      per shape family is sent; famclone harvests the rest once it matches.
+     Reopened functions (shared/reopen.json: they contain a shared-header form proven after they were
+     tried) ignore attempts made before the form's `since`, take up to REOPEN_SHARE of each tier's
+     slots first, and their prompt names the form.
      Routing (the cost rule):
        haiku    - first attempt on anything <= HAIKU_MAX_WORDS words (cheap, ~$0.01-0.05/agent,
                   HAIKU_PER_AGENT targets per agent, grouped by twin origin);
        deepseek - at most MAX_DEEPSEEK per round (hard cap), one target per agent, only for
                   functions Haiku already missed or that are too large for Haiku, with a start at
-                  most DEEPSEEK_MAX_OP structural OPs away, highest EV first (~$0.10-0.30/agent,
-                  ~50-70% hit rate).
-     A function is never sent twice to the same tier.
+                  most DEEPSEEK_MAX_OP structural OPs away (~$0.10-0.30/agent, ~50-70% hit rate).
+     A function is never sent twice to the same tier (except across a reopen).
   5. writes logs/campaign/plan.json (+ a copy per round) and, per target, logs/manual/<ADDR>/CONTEXT.md
      (tools/context.py: disassembly, references vs the start source, related matched sources).
 
@@ -88,6 +92,9 @@ MAX_DEEPSEEK = 4          # hard cap per round (cost + rate limits)
 HAIKU_MAX_WORDS = 80
 HAIKU_PER_AGENT = 1
 DEEPSEEK_MAX_OP = 20
+# Share of each tier's slots that reopened functions (shared/reopen.json: a header form proven after they
+# were tried or ranked) take first; the rest is ranked by measured EV so the regular pool stays measured.
+REOPEN_SHARE = 0.5
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
@@ -114,15 +121,20 @@ def ledger():
     return [json.loads(l) for l in open(LEDGER) if l.strip()]
 
 
-def attempted():
-    """addr -> set of tiers that already tried it (ledger + pre-campaign logs/manual dirs)."""
+def attempted(reopened=None):
+    """addr -> set of tiers that already tried it (ledger + pre-campaign logs/manual dirs). For an addr in
+    `reopened` (addr -> since, "YYYY-MM-DD HH:MM"), attempts before `since` do not count: they were made
+    before a shared-header form it needs existed (shared/reopen.json)."""
+    reopened = reopened or {}
     tried = collections.defaultdict(set)
     for e in ledger():
+        if e["addr"] in reopened and e.get("t", "") < reopened[e["addr"]]:
+            continue
         tried[e["addr"]].add(e["tier"])
     if os.path.isdir(MANUAL):
         for d in os.listdir(MANUAL):
             a = d.replace("0x", "").upper()
-            if not re.fullmatch(r"[0-9A-F]{8}", a):
+            if not re.fullmatch(r"[0-9A-F]{8}", a) or a in reopened:   # pre-campaign dirs predate any reopen
                 continue
             p = os.path.join(MANUAL, d)
             src = lambda q: os.path.isdir(q) and any(f.endswith((".c", ".cpp")) for f in os.listdir(q))
@@ -131,6 +143,84 @@ def attempted():
             if src(os.path.join(p, "ds")):
                 tried[a].add("deepseek")
     return tried
+
+
+def reopen_forms():
+    """Committed shared/reopen.json: header forms proven after their functions were tried."""
+    p = os.path.join(ROOT, "shared", "reopen.json")
+    return {k: v for k, v in json.load(open(p)).items() if not k.startswith("_")} if os.path.exists(p) else {}
+
+
+def form_hits(addrs, forms):
+    """addr -> sorted names of the reopen forms whose markers occur in the function's words."""
+    num = lambda x: int(x, 16) if isinstance(x, str) else x
+    by_word, by_call, insn = collections.defaultdict(set), collections.defaultdict(set), []
+    slots = [(name, num(o), num(v)) for name, f in forms.items() for o, v in f.get("vtable_slot", [])]
+    if slots:   # a literal pointing at an ro vtable with that slot value
+        end = fn.RA + fn.RS
+        for vt in range(fn.RA, end - 4, 4):
+            for name, o, v in slots:
+                if vt + o + 4 <= end and fn.rd32(vt + o) == v:
+                    by_word[vt].add(name)
+    for name, f in forms.items():
+        for w in f.get("words", []):
+            by_word[num(w)].add(name)
+        for c in f.get("calls", []):
+            by_call[num(c)].add(name)
+        insn += [(name, num(m), num(v)) for m, v in f.get("insn", [])]
+    out = {}
+    for a in addrs:
+        s, e = fn.func_range(int(a, 16))
+        got = set()
+        for x in range(s, e, 4):
+            w = fn.rd32(x)
+            got |= by_word.get(w, set())
+            if by_call and (w & 0x0E000000) == 0x0A000000 and (w >> 28) != 0xF:
+                imm = w & 0xFFFFFF
+                got |= by_call.get(x + 8 + ((imm - 0x1000000 if imm & 0x800000 else imm) << 2), set())
+            got |= {name for name, m, v in insn if w & m == v}
+        if got:
+            out[a] = sorted(got)
+    return out
+
+
+SIZE_EDGES, OP_EDGES, PSEUDO = (20, 40, 80, 160), (5, 10, 20), 5.0
+
+
+def hit_model():
+    """Measured match probability per (tier, size bucket, OP bucket): every past plan (target size and
+    structural OP as planned) joined with its ledger outcome. A Haiku agent counts only its first target
+    (later ones got the leftovers of a shared budget). Each level is smoothed toward the coarser one with
+    PSEUDO pseudo-observations: tier -> tier x size -> tier x size x OP. Returns (p(tier, words, op), rows)."""
+    out = {(e["addr"], e["round"], e["tier"]): e["outcome"] for e in ledger()}
+    cnt = collections.defaultdict(lambda: [0, 0])
+    bucket = lambda v, edges: sum(v > x for x in edges)
+    for f in sorted(os.listdir(CAMP)):
+        if not re.fullmatch(r"plan_round\d+\.json", f):
+            continue
+        p = json.load(open(os.path.join(CAMP, f)))
+        for t in p["tasks"]:
+            for i, x in enumerate(t["addrs"]):
+                o = out.get((x, p["round"], t["tier"]))
+                if (t["tier"] == "haiku" and i) or o not in ("MATCH", "MISS", "TIMEOUT", "REFUSED"):
+                    continue
+                m = re.search(r"0x%s: refine best \d+/(\d+) words, (\d+) differing" % x, t["prompt"])
+                if not m:
+                    continue
+                sb, ob = bucket(int(m.group(1)), SIZE_EDGES), bucket(int(m.group(2)), OP_EDGES)
+                for k in ((t["tier"],), (t["tier"], sb), (t["tier"], sb, ob)):
+                    cnt[k][0] += o == "MATCH"
+                    cnt[k][1] += 1
+
+    def p(tier, words, op):
+        sb, ob = bucket(words, SIZE_EDGES), bucket(op, OP_EDGES)
+        m, n = cnt[(tier,)]
+        q = m / float(n) if n else 0.2
+        for k in ((tier, sb), (tier, sb, ob)):
+            m, n = cnt[k]
+            q = (m + PSEUDO * q) / (n + PSEUDO)
+        return q
+    return p, {k: tuple(v) for k, v in cnt.items() if len(k) == 2}
 
 
 def parked():
@@ -302,6 +392,9 @@ def task_prompt(rnd, tier, targets, retry):
             lines.append("  Family: %d functions share this exact shape; a match here is cloned to all of "
                          "them, so it is worth %dx your effort. Name every extern by its address."
                          % (t["fanout"], t["fanout"]))
+        forms = reopen_forms()
+        for f in t.get("forms", []):
+            lines.append("  This function %s" % forms[f]["hint"])
     if retry:
         lines += ["", "A smaller model already tried these and missed: read logs/manual/<ADDR>/ first "
                   "(REPORT.prev.json, best.*, *.txt check logs) and do not repeat its variants; question "
@@ -318,8 +411,11 @@ def cmd_next(a):
         print("refine: %d candidates, %d MATCH registered" % (n, got))
 
     status = load_status()
-    tried, skip = attempted(), parked()
     pool = near_misses(status)
+    forms = reopen_forms()
+    hits = form_hits([t["addr"] for t in pool], forms)
+    reopened = {x: min(forms[f]["since"] for f in fs) for x, fs in hits.items()}
+    tried, skip = attempted(reopened), parked()
     best = structscore.best_structures(status, progress=True)
     fan = shape_fanout(sorted({t["addr"] for t in pool} | set(best)))
     queue = search_queue(best, fan)
@@ -335,8 +431,7 @@ def cmd_next(a):
         sc = best.get(t["addr"], (None, {"err": "unscored"}, None))[1]
         if not sc.get("err"):
             t["n_op"] = sc["op"]  # structural OP of the best source (refine's or an agent's)
-        t["ev"] = t["fanout"] * max(0.05, 1.0 - t["n_op"] / float(t["total"]))
-    pool.sort(key=lambda t: (-t["ev"], t["total"]))
+        t["forms"] = hits.get(t["addr"], [])
 
     # history and parking apply to the whole shape family: a sibling of a dead end is the same dead end
     shape_of = lambda a: fan[a][0] if a in fan else famclone.words(int(a, 16))
@@ -355,24 +450,50 @@ def cmd_next(a):
         except Exception:
             pass
 
-    seen_shapes, hk, ds = set(), [], []
-    n_ds = min(a.deepseek, MAX_DEEPSEEK)
+    # route every candidate to the tier it would go to, then rank each tier by measured EV:
+    # family size x the observed hit rate of that tier on functions of this size and structural OP
+    p_hit, rates = hit_model()
+    cands = {"haiku": [], "deepseek": []}
     for t in pool:
-        if t["shape"] in seen_shapes or t["shape"] in dead or t["shape"] in queued_shapes or t["addr"] in queued:
+        if t["shape"] in dead or t["shape"] in queued_shapes or t["addr"] in queued:
             continue
         tiers = tried.get(t["addr"], set()) | (shape_tiers[t["shape"]] if t["fanout"] > 1 else set())
         if "deepseek" in tiers:
             continue
         if "haiku" in tiers or t["total"] > HAIKU_MAX_WORDS:
-            if len(ds) < n_ds and t["n_op"] <= DEEPSEEK_MAX_OP:
-                ds.append(t)
+            if t["n_op"] > DEEPSEEK_MAX_OP:
+                continue
+            tier = "deepseek"
+        else:
+            tier = "haiku"
+        t["p"] = p_hit(tier, t["total"], t["n_op"])
+        t["ev"] = t["fanout"] * t["p"]
+        cands[tier].append(t)
+
+    seen_shapes = set()
+
+    def pick(cs, n):
+        """Reopened functions first (up to REOPEN_SHARE of the slots), then the rest by EV."""
+        cs.sort(key=lambda t: (-t["ev"], t["total"]))
+        out, ids = [], set()
+        for cap, only_reopened in ((int(n * REOPEN_SHARE + 0.5), True), (n, False)):
+            for t in cs:
+                if len(out) >= cap:
+                    break
+                if (only_reopened and not t["forms"]) or id(t) in ids or t["shape"] in seen_shapes:
+                    continue
+                out.append(t)
+                ids.add(id(t))
                 seen_shapes.add(t["shape"])
-            continue
-        if len(hk) < a.haiku:
-            hk.append(t)
-            seen_shapes.add(t["shape"])
-        if len(hk) >= a.haiku and len(ds) >= n_ds:
-            break
+        return out
+    ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK))
+    hk = pick(cands["haiku"], a.haiku)
+    print("hit model (tier, words <= 20/40/80/160/more: matches/attempts): " + "  ".join(
+        "%s %s %d/%d" % (k[0][:2], ("<=20", "<=40", "<=80", "<=160", ">160")[k[1]], m, n)
+        for k, (m, n) in sorted(rates.items())))
+    print("reopened (shared/reopen.json): %d in the pool, %d eligible, %d planned (%s)" % (
+        len(hits), sum(bool(t["forms"]) for c in cands.values() for t in c), sum(bool(t["forms"]) for t in hk + ds),
+        ", ".join("%s %d" % (f, sum(f in t["forms"] for t in hk + ds)) for f in forms)))
 
     prev = json.load(open(PLAN)).get("round", 0) if os.path.exists(PLAN) else 0
     rnd = 1 + max([e.get("round", 0) for e in ledger()] + [prev])
@@ -411,7 +532,9 @@ def cmd_next(a):
           % (rnd, sum(t["tier"] == "haiku" for t in tasks), len(hk), len(ds),
              sum(t["fanout"] for t in hk + ds)))
     for t in ds:
-        print("  deepseek 0x%s  %d/%d words  family %d" % (t["addr"], t["words"], t["total"], t["fanout"]))
+        print("  deepseek 0x%s  %d/%d words  OP %d  p %.2f  family %d%s" % (
+            t["addr"], t["words"], t["total"], t["n_op"], t["p"], t["fanout"],
+            ("  reopened: " + ",".join(t["forms"])) if t["forms"] else ""))
     print("NEXT  spawn the plan: in a Python eval cell, campaign.run_round(agent, log) "
           "(see .agents/skills/decomp-campaign), then: uv run python tools/campaign.py harvest --commit")
 

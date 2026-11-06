@@ -93,6 +93,14 @@ money, and it happens with the mutator's measured attempt attached.
     the disassembly, the target's references next to the start source's names, and related matched
     sources. Agents batch variants through `fn.py checks` and sweep flags with `fn.py flags`, since
     every round trip costs them time.
+  - **Ranking:** within each tier, EV = family size × the *measured* hit rate of that tier on past
+    targets of the same size and structural-OP bucket (`hit_model()`, re-learned from every round's
+    plan and ledger; `next` prints the table).
+  - **Reopen after a header fix:** when a shared header gains a byte-proven form, add its markers
+    to `shared/reopen.json` (vtable slot, literal words, call targets, instruction encodings).
+    Unmatched functions containing them ignore attempts made before `since`, take up to half of
+    each tier's slots first (`REOPEN_SHARE`), and their prompt names the form. Remove the entry
+    once its functions are worked through.
   - Nobody gets the same function twice at the same tier (`logs/campaign/ledger.jsonl`, plus the
     pre-campaign `logs/manual` dirs); history and parking apply to the whole shape family.
 - **A rolling window of 20 Haiku agents, with time limits.**
