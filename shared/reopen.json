@@ -13,5 +13,23 @@
   "header": "sead_container.h",
   "hint": "pushes onto a sead list: ListImpl::pushBack / OffsetList::pushBack now exist in sead_container.h (thin wrappers over ListNode::insertFront_ 0x0010F1DC); reach the list through a pointer local (see the brief).",
   "calls": ["0x0010F1DC"]
+ },
+ "sead-wide-string": {
+  "since": "2026-11-06 00:10",
+  "header": "sead_string.h",
+  "hint": "works on a WIDE (char16/u16) sead string: sead_string.h now has WSafeString / WBufferedSafeString / WFixedSafeString<N> (vtable ro_006F599C, u16 units, the 0x40000 length cap). Use those types, and copyLocal() for a local built over a member array, copy() for a heap/memory destination (they differ in when mStringTop is fetched).",
+  "words": ["0x006F599C"]
+ },
+ "sead-string-append": {
+  "since": "2026-11-06 00:10",
+  "header": "sead_string.h",
+  "hint": "appends/copies at an offset: BufferedSafeString::append / copyAt now exist in sead_string.h (call them; the out-of-line instance is 0x00689928).",
+  "calls": ["0x00689928"]
+ },
+ "sead-string-copy-ctor": {
+  "since": "2026-11-06 00:10",
+  "header": "sead_string.h",
+  "hint": "constructs a FixedSafeString<N> FROM a string (SafeString or FixedSafeString): that constructor does NOT clear() first. sead_string.h has FixedSafeString(const SafeString&) / (const FixedSafeString&) now; use them instead of a default ctor plus copy().",
+  "words": ["0x006F6C44", "0x006F5C98"]
  }
 }
