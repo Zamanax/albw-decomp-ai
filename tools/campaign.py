@@ -24,7 +24,7 @@ A round is: free work first, then a small paid plan, then a harvest.
      plan_round*.json joined with the ledger, smoothed toward coarser buckets). One representative
      per shape family is sent; famclone harvests the rest once it matches.
      Reopened functions (shared/reopen.json: they contain a shared-header form proven after they were
-     tried) ignore attempts made before the form's `since`, take up to REOPEN_SHARE of each tier's
+     tried) ignore attempts made before the form's `since`, take up to REOPEN_SHARE[tier] of each tier's
      slots first, and their prompt names the form.
      Routing (the cost rule):
        haiku    - first attempt on anything <= HAIKU_MAX_WORDS words (cheap, ~$0.01-0.05/agent,
@@ -93,8 +93,10 @@ HAIKU_MAX_WORDS = 80
 HAIKU_PER_AGENT = 1
 DEEPSEEK_MAX_OP = 20
 # Share of each tier's slots that reopened functions (shared/reopen.json: a header form proven after they
-# were tried or ranked) take first; the rest is ranked by measured EV so the regular pool stays measured.
-REOPEN_SHARE = 0.5
+# were tried or ranked) take first; the rest is ranked by measured EV. Rounds 17-18: Haiku matched 15/60
+# reopened targets but 8/60 regular ones (1/30 in round 18: the regular pool is used up for Haiku), so
+# Haiku fills from the reopened functions first; DeepSeek stays mixed (0/2 reopened, too few to judge).
+REOPEN_SHARE = {"haiku": 1.0, "deepseek": 0.5}
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
@@ -472,11 +474,11 @@ def cmd_next(a):
 
     seen_shapes = set()
 
-    def pick(cs, n):
-        """Reopened functions first (up to REOPEN_SHARE of the slots), then the rest by EV."""
+    def pick(cs, n, tier):
+        """Reopened functions first (up to REOPEN_SHARE[tier] of the slots), then the rest by EV."""
         cs.sort(key=lambda t: (-t["ev"], t["total"]))
         out, ids = [], set()
-        for cap, only_reopened in ((int(n * REOPEN_SHARE + 0.5), True), (n, False)):
+        for cap, only_reopened in ((int(n * REOPEN_SHARE[tier] + 0.5), True), (n, False)):
             for t in cs:
                 if len(out) >= cap:
                     break
@@ -486,8 +488,8 @@ def cmd_next(a):
                 ids.add(id(t))
                 seen_shapes.add(t["shape"])
         return out
-    ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK))
-    hk = pick(cands["haiku"], a.haiku)
+    ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK), "deepseek")
+    hk = pick(cands["haiku"], a.haiku, "haiku")
     print("hit model (tier, words <= 20/40/80/160/more: matches/attempts): " + "  ".join(
         "%s %s %d/%d" % (k[0][:2], ("<=20", "<=40", "<=80", "<=160", ">160")[k[1]], m, n)
         for k, (m, n) in sorted(rates.items())))

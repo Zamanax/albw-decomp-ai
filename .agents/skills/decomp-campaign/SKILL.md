@@ -99,7 +99,7 @@ money, and it happens with the mutator's measured attempt attached.
   - **Reopen after a header fix:** when a shared header gains a byte-proven form, add its markers
     to `shared/reopen.json` (vtable slot, literal words, call targets, instruction encodings).
     Unmatched functions containing them ignore attempts made before `since`, take up to half of
-    each tier's slots first (`REOPEN_SHARE`), and their prompt names the form. Remove the entry
+    the Haiku slots first and half of the DeepSeek ones (`REOPEN_SHARE`), and their prompt names the form. Remove the entry
     once its functions are worked through.
   - Nobody gets the same function twice at the same tier (`logs/campaign/ledger.jsonl`, plus the
     pre-campaign `logs/manual` dirs); history and parking apply to the whole shape family.
