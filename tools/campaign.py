@@ -747,10 +747,13 @@ def cmd_harvest(a):
     total = sum(got.values()) + cloned
     plan["harvested"] = True
     json.dump(plan, open(PLAN, "w"), indent=1)
-    if a.commit and total and clean:
+    # also commit what the mutator (or anything else) registered while the round ran
+    pending = run(["git", "status", "--porcelain", "functions.json", "src/work8/auto"]).strip()
+    if a.commit and (total or pending) and clean:
         run(["git", "add", "functions.json", "src/work8/auto", "shared/construct_exceptions.json"])
-        msg = "Campaign round %d: %d matches (haiku %d, deepseek %d, famclone %d)" % (
-            rnd, total, got["haiku"], got["deepseek"], cloned)
+        msg = "Campaign round %d: %d matches (haiku %d, deepseek %d, famclone %d)%s" % (
+            rnd, total, got["haiku"], got["deepseek"], cloned,
+            " + pending registrations (mutator)" if pending and not total else "")
         body = "Registered via tools/campaign.py harvest (worklist.py register re-verifies each: " \
                "RESULT: MATCH, IDENTITY 0 MISMATCH, forbidden-construct scan)."
         r = subprocess.run(["git", "commit", "-q", "-m", msg, "-m", body], cwd=ROOT, capture_output=True, text=True)
