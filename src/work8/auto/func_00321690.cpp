@@ -1,0 +1,24 @@
+#include "sead_string.h"
+
+struct Ent12 {
+    void* p;
+    u32 b;
+    u32 c;
+};
+
+extern void* data_00711F50;
+extern Ent12 data_007120E4[];
+extern u32 func_00539000(void* p, const SafeString& s);
+extern void func_004994B0(const SafeString* s, void* e);
+extern void func_004EBB28(void* p, const SafeString& s, u32 c);
+
+void func_00321690(void*, u32 a) {
+    if (a >= 0xd) return;
+    sead::FixedSafeString<0x40> s;
+    if (a == 0) {
+        if (func_00539000(data_00711F50, s) == 0) return;
+    } else {
+        func_004994B0(&s, data_007120E4[a].p);
+    }
+    func_004EBB28(data_00711F50, s, data_007120E4[a].c);
+}
