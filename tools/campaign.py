@@ -99,6 +99,7 @@ DEEPSEEK_MAX_OP = 20
 # reopened targets but 8/60 regular ones (1/30 in round 18: the regular pool is used up for Haiku), so
 # Haiku fills from the reopened functions first; DeepSeek stays mixed (0/2 reopened, too few to judge).
 REOPEN_SHARE = {"haiku": 1.0, "deepseek": 0.5}
+REOPEN_MAX_WORDS = 160   # reopened functions are easy regardless of size; the regular cap stays 80
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
@@ -464,8 +465,10 @@ def cmd_next(a):
         tiers = tried.get(t["addr"], set()) | (shape_tiers[t["shape"]] if t["fanout"] > 1 else set())
         if "deepseek" in tiers:
             continue
-        if "haiku" in tiers or t["total"] > HAIKU_MAX_WORDS:
-            if t["n_op"] > DEEPSEEK_MAX_OP:
+        # a reopened target's best source predates the header form, so its structural OP says nothing
+        # about how close it is now: the size cap is raised and the DeepSeek OP gate does not apply
+        if "haiku" in tiers or t["total"] > (REOPEN_MAX_WORDS if t["forms"] else HAIKU_MAX_WORDS):
+            if not t["forms"] and t["n_op"] > DEEPSEEK_MAX_OP:
                 continue
             tier = "deepseek"
         else:
