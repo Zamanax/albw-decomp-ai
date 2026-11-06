@@ -50,6 +50,8 @@ survive lost agent handles, crashed kernels and rate-limited agents.
   constructs, registers MATCH claims through worklist.py register (which re-verifies), records
   every outcome in logs/campaign/ledger.jsonl, runs famclone again, removes stray files agents
   left in the repo root, runs audit.py, and with --commit commits functions.json + src/work8/auto.
+  Then prints the top form candidates from recent misses (tools/formmine.py -> logs/campaign/forms.md):
+  markers whose users match far below the rate expected for their size, i.e. a missing header form.
   A target without a REPORT.json (agent failed, rate limited) is not recorded, so it is retried.
 
 `status`
@@ -474,11 +476,12 @@ def cmd_next(a):
 
     seen_shapes = set()
 
-    def pick(cs, n, tier):
-        """Reopened functions first (up to REOPEN_SHARE[tier] of the slots), then the rest by EV."""
+    def pick(cs, n, tier, regular):
+        """Reopened functions first (up to REOPEN_SHARE[tier] of the slots), then, if `regular`, the rest by EV."""
         cs.sort(key=lambda t: (-t["ev"], t["total"]))
         out, ids = [], set()
-        for cap, only_reopened in ((int(n * REOPEN_SHARE[tier] + 0.5), True), (n, False)):
+        passes = ((int(n * REOPEN_SHARE[tier] + 0.5), True),) + (((n, False),) if regular else ())
+        for cap, only_reopened in passes:
             for t in cs:
                 if len(out) >= cap:
                     break
@@ -488,8 +491,9 @@ def cmd_next(a):
                 ids.add(id(t))
                 seen_shapes.add(t["shape"])
         return out
-    ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK), "deepseek")
-    hk = pick(cands["haiku"], a.haiku, "haiku")
+    ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK), "deepseek", True)
+    # Haiku only on reopened functions unless asked: its regular pool is used up (round 18: 1/30)
+    hk = pick(cands["haiku"], a.haiku, "haiku", a.haiku_regular)
     print("hit model (tier, words <= 20/40/80/160/more: matches/attempts): " + "  ".join(
         "%s %s %d/%d" % (k[0][:2], ("<=20", "<=40", "<=80", "<=160", ">160")[k[1]], m, n)
         for k, (m, n) in sorted(rates.items())))
@@ -736,6 +740,10 @@ def cmd_harvest(a):
         if outcome in ("REJECTED", "REFUSED", "BADREPORT"):
             print("  %s %s %s %s" % (addr, tier, outcome, words))
     print("audit: " + (audit.strip().splitlines() or ["?"])[-1])
+    # the misses point at constructs the shared headers lack (tools/formmine.py, logs/campaign/forms.md)
+    forms = run([PY, os.path.join(ROOT, "tools", "formmine.py"), "--top", "5"]).splitlines()
+    print("form candidates from recent misses (prove on the out-of-line instance, then shared/reopen.json):")
+    print("\n".join("  " + l for l in forms if l.startswith("| 00") or l.startswith("(")))
     total = sum(got.values()) + cloned
     plan["harvested"] = True
     json.dump(plan, open(PLAN, "w"), indent=1)
@@ -789,6 +797,8 @@ def main():
     n.add_argument("--haiku", type=int, default=60, help="Haiku target functions in the plan")
     n.add_argument("--deepseek", type=int, default=MAX_DEEPSEEK, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)
     n.add_argument("--batch", type=int, default=20, help="agents spawned concurrently")
+    n.add_argument("--haiku-regular", action="store_true",
+                   help="also give Haiku regular (non-reopened) targets; off since round 18 (1/30)")
     h = sub.add_parser("harvest")
     h.add_argument("--commit", action="store_true")
     h.add_argument("--force", action="store_true", help="harvest a round again")
