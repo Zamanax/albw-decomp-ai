@@ -19222,6 +19222,13 @@
 "path": "src/work7/ds2/v1A486C_c_nw.cpp",
 "status": "honest"
 },
+"001A4A88": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001A4A88.cpp",
+"status": "honest"
+},
 "001A4B68": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections --apcs=/fpic",
@@ -19931,6 +19938,13 @@
 "path": "src/work8/rules/synth/t8_eval/clone_search/primary/001B0B98/rtti/candidate_dh.c",
 "status": "honest"
 },
+"001B0C48": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001B0C48.c",
+"status": "honest"
+},
 "001B0D2C": {
 "status": "no_source"
 },
@@ -19995,6 +20009,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/game_re2/float/barrier/pass/dehacked/001B2734.cpp",
+"status": "honest"
+},
+"001B296C": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_001B296C.cpp",
 "status": "honest"
 },
 "001B2A50": {
