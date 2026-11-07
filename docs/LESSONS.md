@@ -1085,6 +1085,39 @@ target line of the prompt, with the tool/header form that owns it (`PLAYBOOK` in
 The class is a heuristic (a mixed diff takes its majority), but it is deterministic and free, and it
 puts the first repair family in front of the agent instead of asking it to infer one from tokens.
 
+## Behavioural oracle from an emulator (assessed 2026-11-07, not adopted)
+
+Idea: run the game in Azahar (the Citra fork) and use its GDB stub to capture real inputs/outputs at
+a function, then compare our compiled candidate against the original on those states - a semantic
+oracle next to the byte gate.
+
+What the emulator actually provides: a GDB remote interface (software breakpoints, watchpoints,
+register/memory read-write, single-step), savestates, and deterministic movie playback (`.ctm`) that
+pins RNG and timing. That is enough to build the capture half of an oracle.
+
+Why it does not pay for matching: the acceptance test is byte-exactness, and a semantics oracle
+cannot accept a source that is not byte-identical. The failing populations are schedule-shaped - 364
+near-misses at OP<=5 are semantically identical by construction, and the 6,402 far starts differ in
+instructions the byte diff already localizes. Coverage is the second cost: 8,596 unmatched functions
+span the whole game, and each needs a reachable scene, a savestate and the right inputs.
+
+Where it would add information that the diff does not:
+- data-vs-code ambiguity (the float whose encoding masquerades as a branch, see "Structural score");
+- live object layout at a call site for the helper-layout forms (0x004356B4 and its users);
+- honesty spot-checks of registered matches (identity + `audit.py` already cover what has gone wrong).
+All three are small compared with the measured pipeline wins of 2026-11-07 (band routing, start path,
+diagnose stage).
+
+Cheaper substitute, and the go/no-go: run the original function bytes under Unicorn with synthetic
+inputs (needs only `code.bin`, no game or emulator) and diff against the armcc output. Test on 20
+functions (10 near-miss, 10 far-start) with 20 hand-built input states; adopt only if >= 3 show a
+semantic mismatch the instruction diff did not make obvious. Expected 0-2.
+
+Related operational change from the same source (momo5502's post-mortem): subagents now compact at
+42 % of the window via `task.agentCompactionThresholdOverrides` (applied 2026-11-07, keys `task`,
+`scout`, `reviewer`, `security-reviewer`, `sonic`). The campaign spawns through omp's default `task`
+agent, so the `task` entry is the one that applies to rounds; grandchildren inherit it.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
