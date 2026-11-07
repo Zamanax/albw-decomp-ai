@@ -265,6 +265,26 @@ structural OP on an unproven helper — 0x004356B4 (layout: byte flag at 0x30, 1
 +4/+0x10/+0x1c, vcall slot 4) and the call-site spellings of matched helpers whose users all fail.
 Run S1 over the rest of `logs/campaign/formcensus.json` before proving anything.
 
+### Measured on 2026-11-07 (three carriers, none reached MATCH)
+
+| carrier | best | structure | remaining delta | verdict |
+|---|---|---|---|---|
+| 0x004C0AD0 (user of 0x004356B4, 21 w) | 19/21 | `OP=0 REG=2 MOVED=0` | `mov r0,sp; mov r1,r0` vs `mov r1,sp; mov r0,r1` | register coin-flip; `mutate.py` 4000 checks, no move |
+| 0x001512B4 (user of `Vec3::setAdd`, 13 w) | 10/13 | `OP=0 REG=3 MOVED=0` | ldm/stm dest register `r2` vs `r0` | register coin-flip; `mutate.py` 3000 checks, no move |
+| 0x0057E1CC (string `copy` user, 34 w) | 32/34 | `OP=0 REG=2 MOVED=0` at `-O2` | `mov r8,#0; mov r4,r8` vs `mov r4,#0; mov r8,r4` | inside the header's `calcLength`; source-order independent |
+
+Two conclusions that change the queue:
+
+- **The string copy form transfers.** 0x0057E1CC is the header's `copy()` word for word except two
+  adjacent `mov`s; the form is not the blocker there, the allocator is.
+- **A new kind-4 candidate: straight 3-float VFP block ops.** The five out-of-line Vec3 helpers
+  (`0x115C54/70/D70/D88/DAC`, 6–9 words each) use straight `vldmia rX,{s0,s1,s2}` / `vstmia`,
+  while every spelling tried here emits the split `vldmia rX!,{s}` + `vldmia rX,{s,s}` rotation
+  (armcc's 4-mod-8 alignment split). `__attribute__((aligned(8)))`, `__restrict`, by-value return
+  and array/loop spellings all reproduce the split, not the straight load. Until that spelling is
+  found, the Vec3 family is blocked at codegen, not at the header.
+
+
 ## Tooling gaps
 
 1. `formmine.py --all`: rank over every start (not only recent misses) with log2 size-conditioned
