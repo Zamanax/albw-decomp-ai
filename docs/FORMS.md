@@ -277,13 +277,41 @@ Two conclusions that change the queue:
 
 - **The string copy form transfers.** 0x0057E1CC is the header's `copy()` word for word except two
   adjacent `mov`s; the form is not the blocker there, the allocator is.
-- **A new kind-4 candidate: straight 3-float VFP block ops.** The five out-of-line Vec3 helpers
-  (`0x115C54/70/D70/D88/DAC`, 6–9 words each) use straight `vldmia rX,{s0,s1,s2}` / `vstmia`,
+- **A new kind-4 candidate: straight 3-float VFP block ops.** The out-of-line Vec3 helpers
+  (11 functions, 6–18 words: `0x115C54/70/8C`, `0x115D54/70/88/AC`, `0x115DC8`, `0x115CE4`,
+  `0x115E10`, `0x1DB854`) use straight `vldmia rX,{s0,s1,s2}` / `vstmia`,
   while every spelling tried here emits the split `vldmia rX!,{s}` + `vldmia rX,{s,s}` rotation
-  (armcc's 4-mod-8 alignment split). `__attribute__((aligned(8)))`, `__restrict`, by-value return
+  instead. `__attribute__((aligned(8)))`, `__restrict`, by-value return
   and array/loop spellings all reproduce the split, not the straight load. Until that spelling is
   found, the Vec3 family is blocked at codegen, not at the header.
 
+
+### How big the VLDM family really is (measured 2026-11-07)
+
+`logs/campaign/vldm_family.json` holds the sets. Straight 3-register `vldmia`/`vstmia`
+(`(w & 0xFF900E00) == 0xEC?00A00`, low byte 3):
+
+| layer | unmatched | ≤160 words |
+|---|---|---|
+| callers of the six Vec3 helpers (marker reach) | 1,209 | 776 |
+| functions containing straight `vldmia r,{s0,s1,s2}` | 380 | — |
+| … and `vadd`/`vmul` (inline vector arithmetic) | 239 | 98 |
+| … and a straight `vstmia` store (the unproven half) | 169 | 90 |
+| only the out-of-line helpers themselves | 11 | 11 (6–18 w) |
+| measured near-miss: best source at `OP ≤ 5` | 6 | 6 |
+
+The caller count is not addressable: those functions already `bl` the right address, and their
+best sources sit at median `OP 116–184`, i.e. the shape is not what is left. The provable payoff
+today is **11 helpers + ~6 near-miss users**, so this is a 15-match experiment, not a family
+unlock.
+
+The shape itself is real and reachable in copy/return contexts: 28 matched functions contain a
+straight `vstmia rX,{s0,s1,s2}` (0x002FCAC0: `pos = v` on a member at +0x10c), 13 contain straight
+loads plus `vadd`/`vmul` (0x004F93D8: `Vec3 r={a.x*b.x,...}; return r;`). What no spelling has
+produced is the **out-pointer arithmetic** shape (loads s0–s5, results s6–s8, one block store) —
+40+ variants across member/free/reference-return/POD-init/aligned/restrict/flag-CPU-FPU spellings
+all allocate the results to s0–s2 and store scalar. Until that is reproduced, the form stays a
+kind-4 hypothesis, not a header form.
 
 ## Tooling gaps
 
