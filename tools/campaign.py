@@ -95,11 +95,16 @@ HAIKU_MAX_WORDS = 80
 HAIKU_PER_AGENT = 1
 DEEPSEEK_MAX_OP = 20
 # Share of each tier's slots that reopened functions (shared/reopen.json: a header form proven after they
-# were tried or ranked) take first; the rest is ranked by measured EV. Rounds 17-18: Haiku matched 15/60
-# reopened targets but 8/60 regular ones (1/30 in round 18: the regular pool is used up for Haiku), so
-# Haiku fills from the reopened functions first; DeepSeek stays mixed (0/2 reopened, too few to judge).
-REOPEN_SHARE = {"haiku": 1.0, "deepseek": 0.5}
-REOPEN_MAX_WORDS = 160   # reopened functions are easy regardless of size; the regular cap stays 80
+# were tried or ranked) take first; the rest is ranked by measured EV. Measured over every harvested
+# Haiku target of rounds 1-19, split by the target's size and whether it was reopened:
+#     <=40 words  reopened 13/40 = 33%   regular 105/327 = 32%
+#     41-80       reopened  5/99 =  5%   regular  47/269 = 17%
+#     81-160      reopened  0/36 =  0%   regular   4/70 =  6%
+# Size is the signal; reopened status only matters at 41-80 (a retry is harder than a first try).
+# The previous 100%-reopened share was calibrated on rounds 17-18, when the reopened pool happened to
+# be the <=40 band; the round-22 forms reopened 41-80/81-160 targets, which the table says are 0-5%.
+REOPEN_SHARE = {"haiku": 0.25, "deepseek": 0.5}
+REOPEN_MAX_WORDS = 80    # 81-160 reopened: 0/36 measured; the regular Haiku cap is the same
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
@@ -495,7 +500,8 @@ def cmd_next(a):
                 seen_shapes.add(t["shape"])
         return out
     ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK), "deepseek", True)
-    # Haiku only on reopened functions unless asked: its regular pool is used up (round 18: 1/30)
+    # Haiku: the regular pool is on by default (<=40 words 32%, 41-80 17% measured); REOPEN_SHARE caps
+    # the reopened retries at a quarter of the slots, since 41-80+ reopened targets convert at 0-5%
     hk = pick(cands["haiku"], a.haiku, "haiku", a.haiku_regular)
     print("hit model (tier, words <= 20/40/80/160/more: matches/attempts): " + "  ".join(
         "%s %s %d/%d" % (k[0][:2], ("<=20", "<=40", "<=80", "<=160", ">160")[k[1]], m, n)
@@ -803,8 +809,9 @@ def main():
     n.add_argument("--haiku", type=int, default=60, help="Haiku target functions in the plan")
     n.add_argument("--deepseek", type=int, default=MAX_DEEPSEEK, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)
     n.add_argument("--batch", type=int, default=20, help="agents spawned concurrently")
-    n.add_argument("--haiku-regular", action="store_true",
-                   help="also give Haiku regular (non-reopened) targets; off since round 18 (1/30)")
+    n.add_argument("--no-haiku-regular", dest="haiku_regular", action="store_false",
+                   help="reopened targets only: the regular pool is 32%% at <=40 words and 17%% at 41-80 "
+                        "(rounds 1-19), so it is on by default and REOPEN_SHARE caps the retries")
     h = sub.add_parser("harvest")
     h.add_argument("--commit", action="store_true")
     h.add_argument("--force", action="store_true", help="harvest a round again")

@@ -1023,6 +1023,27 @@ What the failures teach:
 - **Retry per family, not per function.** `famclone` cloned 6 more functions from the mutator's
   matches as soon as the queue was re-scored; one match per shape is what matters.
 
+## Cheap-tier allocation: size, not reopened status (2026-11-07)
+
+Every harvested Haiku target of rounds 1-19, split by the target's original size and by whether it
+was reopened (`shared/reopen.json`). This is the measurement the routing constants had never had:
+
+| size | reopened | regular |
+|---|---|---|
+| ≤40 words | 13/40 = 33 % | 105/327 = 32 % |
+| 41-80 | 5/99 = 5 % | 47/269 = 17 % |
+| 81-160 | 0/36 = 0 % | 4/70 = 6 % |
+
+Size is the signal; a reopened retry is only as good as its band (the previous 100 %-reopened share
+came from rounds 17-18, when the reopened pool happened to be the ≤40 band). The round-22 forms
+reopened 41-80/81-160 targets, which convert at 0-5 %. Changes: `REOPEN_SHARE["haiku"]` 1.0 → 0.25,
+`REOPEN_MAX_WORDS` 160 → 80, and `--haiku-regular` is now the default (opt out with
+`--no-haiku-regular`). The round-24 plan moved from 1/60 to 49/60 Haiku targets in the ≤40 band;
+measured expectation at those rates is ~18 matches instead of ~2.
+
+The corollary for the 7,708-source pool: 1,517 untried ≤40-word targets at 32 % and 1,822 at 41-80 at
+17 % were idle while the cheap tier spent its slots on 41-80/81-160 retries.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
