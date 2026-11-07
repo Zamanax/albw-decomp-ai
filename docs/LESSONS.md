@@ -1065,6 +1065,26 @@ matched **3/364**, all under `-Ono_tailcall`. They were sitting unregistered in 
 now registered (001A4A88, 001B0C48, 001B296C). So a deterministic pre-flight is worth running, but
 its direct yield on an already-swept band is ~1%.
 
+## Diagnose stage: repair class in the prompt (2026-11-07)
+
+The agent brief asks for a diagnosis before editing, but it was left to the agent every time. The
+start's STRUCTURE OPS are now mapped to one repair class and carried in CONTEXT.md and in the
+target line of the prompt, with the tool/header form that owns it (`PLAYBOOK` in `tools/context.py`):
+
+| class | best sources | of which ≤40 words | what to try first |
+|---|---:|---:|---|
+| alu | 4,314 | 870 | the constant/offset/signedness of the operand |
+| memory | 1,770 | 571 | struct layout, aggregate-copy spelling (`setCopy` vs memberwise) |
+| vfp | 644 | 188 | the VFP block shape / result registers |
+| register | 462 | 194 | declaration and statement order (`mutate.py`) |
+| shape | 148 | 87 | nothing structural; register/order only |
+| address | 143 | 23 | the global/ro symbol (the pool shifts with a wrong name) |
+| frame | 142 | 23 | a local or by-value parameter adding stack |
+| call | 85 | 22 | callee spelling: address-named extern, inline vs out-of-line, tail call |
+
+The class is a heuristic (a mixed diff takes its majority), but it is deterministic and free, and it
+puts the first repair family in front of the agent instead of asking it to infer one from tokens.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),

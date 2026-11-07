@@ -402,6 +402,8 @@ def task_prompt(rnd, tier, targets, retry):
         if ops:
             lines.append("  Remaining structural diff (original `-`, start `+`): "
                          + ", ".join("`%s`" % o for o in ops))
+            lines.append("  Repair class: %s - %s" % (context.classify_ops(ops),
+                                                      context.PLAYBOOK[context.classify_ops(ops)]))
         if t["fanout"] > 1:
             lines.append("  Family: %d functions share this exact shape; a match here is cloned to all of "
                          "them, so it is worth %dx your effort. Name every extern by its address."

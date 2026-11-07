@@ -41,6 +41,57 @@ TOKEN = re.compile(r"(?:func|data|g|ro|bss|FUN|DAT|PTR)_([0-9A-Fa-f]{8})(?![0-9A
 MAX_RELATED = 5
 MAX_LINES = 8
 
+# Repair classes for the start's remaining structural differences. The diagnose stage of the agent
+# brief is otherwise done from scratch every time: this maps the opaque STRUCTURE OPS tokens onto the
+# repair family (and the tool/header form that owns it) so the first attempt goes to the right place.
+PLAYBOOK = {
+    "call": "a call is missing/extra or tail-called: check the callee first (address-named extern, "
+            "inline vs out-of-line, tail call) before touching the body",
+    "frame": "the stack frame differs: a local or a by-value parameter is being added; check the "
+             "signature and the temporaries",
+    "address": "a literal address differs: the global/ro object is named wrong (or the pool shifted "
+               "with it); fix the symbol, not the shape",
+    "vfp": "the VFP block shape differs: set vs setCopy, or the result-register allocation; see the "
+           "two copy helpers in vec3.h",
+    "memory": "a field offset or copy form differs: check the struct layout and the aggregate-copy "
+              "spelling (setCopy vs memberwise) against the disassembly",
+    "register": "only register/statement order is left: permute declarations and statement order "
+                "(mutate.py is the free tool for exactly this)",
+    "alu": "an immediate or ALU operand differs: check the constant, the field offset, or the "
+           "signedness of the type",
+    "shape": "the structural shape already matches: only register/statement order is left",
+}
+
+
+def classify_ops(ops):
+    """Map STRUCTURE OPS tokens to one repair class (see PLAYBOOK)."""
+    ops = [o.strip().lstrip("+- ").strip() for o in ops or []]
+    ops = [o for o in ops if o and o != "..."]
+    if not ops:
+        return "shape"
+    tags = []
+    for o in ops:
+        w = o.split()[0] if o.split() else ""
+        if w in ("bl", "blx", "b", "bx"):
+            tags.append("call")
+        elif w in ("push", "pop", "vpush", "vpop"):
+            tags.append("frame")
+        elif "ADDR" in o:
+            tags.append("address")
+        elif w.startswith("v"):
+            tags.append("vfp")
+        elif w in ("ldm", "stm", "ldmia", "stmia", "ldrd", "strd", "ldr", "str", "ldrb", "strb",
+                   "ldrh", "strh"):
+            tags.append("memory")
+        elif w in ("mov", "mvn", "movs", "moveq", "movne", "movgt", "movle"):
+            tags.append("register")
+        else:
+            tags.append("alu")
+    for k in ("call", "frame", "address", "vfp", "memory", "register", "alu"):
+        if tags.count(k) * 2 >= len(tags):
+            return k
+    return max(set(tags), key=tags.count)
+
 _related = None  # (addr -> [paths], path -> text length)
 _branches = None  # target -> [branch source pcs]
 
@@ -253,6 +304,8 @@ def build(addr, start=None, index=None):
                 out.append("- remaining structural differences (original `-`, start `+`): "
                            + ", ".join(f"`{o}`" for o in ops[:12])
                            + (" ..." if len(ops) > 12 else ""))
+                cls = classify_ops(ops)
+                out.append(f"- repair class: **{cls}** - {PLAYBOOK[cls]}")
             if sc["op"] == 0:
                 out.append("- structural shape is already right: only register/statement-order work is left")
         elif sc:
