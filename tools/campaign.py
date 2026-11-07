@@ -397,7 +397,11 @@ def task_prompt(rnd, tier, targets, retry):
         lines.append("- 0x%s: refine best %d/%d words, %d differing instructions. Start: %s. Twin: %s. "
                      "Context: logs/manual/%s/CONTEXT.md (disassembly, what the target references and whether "
                      "the start names it, related matched sources) - read it before anything else."
-                     % (t["addr"], t["words"], t["total"], t["n_op"], src, org, t["addr"]))
+                     % (t["addr"], t["words"], t["total"], t.get("n_op", -1), src, org, t["addr"]))
+        ops = t.get("ops") or []
+        if ops:
+            lines.append("  Remaining structural diff (original `-`, start `+`): "
+                         + ", ".join("`%s`" % o for o in ops))
         if t["fanout"] > 1:
             lines.append("  Family: %d functions share this exact shape; a match here is cloned to all of "
                          "them, so it is worth %dx your effort. Name every extern by its address."
@@ -441,6 +445,7 @@ def cmd_next(a):
         sc = best.get(t["addr"], (None, {"err": "unscored"}, None))[1]
         if not sc.get("err"):
             t["n_op"] = sc["op"]  # structural OP of the best source (refine's or an agent's)
+            t["ops"] = (sc.get("ops") or [])[:6]
         it = best.get(t["addr"], (None, None, None))[0]
         t["start"] = os.path.relpath(it["path"], ROOT) if it and it.get("path") else None
         t["forms"] = hits.get(t["addr"], [])
