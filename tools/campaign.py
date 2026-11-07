@@ -392,7 +392,7 @@ def task_prompt(rnd, tier, targets, retry):
              "arrives then, and you are stopped at %d minutes." % (rnd, tier, checks, stall, soft // 60, hard // 60),
              "", "Targets:"]
     for t in targets:
-        src = "logs/refine/%s/best.c (language %s)" % (t["addr"], t["ext"])
+        src = "%s (language %s)" % (t.get("start") or "logs/refine/%s/best.c" % t["addr"], t["ext"])
         org = t["origin"].split(":", 1)[1] if t["origin"].startswith("twin:") else "none (synth skeleton)"
         lines.append("- 0x%s: refine best %d/%d words, %d differing instructions. Start: %s. Twin: %s. "
                      "Context: logs/manual/%s/CONTEXT.md (disassembly, what the target references and whether "
@@ -441,6 +441,8 @@ def cmd_next(a):
         sc = best.get(t["addr"], (None, {"err": "unscored"}, None))[1]
         if not sc.get("err"):
             t["n_op"] = sc["op"]  # structural OP of the best source (refine's or an agent's)
+        it = best.get(t["addr"], (None, None, None))[0]
+        t["start"] = os.path.relpath(it["path"], ROOT) if it and it.get("path") else None
         t["forms"] = hits.get(t["addr"], [])
 
     # history and parking apply to the whole shape family: a sibling of a dead end is the same dead end
@@ -530,6 +532,7 @@ def cmd_next(a):
     # target's check logs end, so live progress and timeout reports count only this round's checks;
     # and precompute each target's CONTEXT.md (saves the agents their first 5-10 orientation turns)
     index = context.related_index()
+    start_of = {x["addr"]: x.get("start") for x in pool}
     for t in tasks:
         t["soft_s"], t["hard_s"] = TIME[t["tier"]]
         t["log_base"] = {}
@@ -538,7 +541,7 @@ def cmd_next(a):
             if os.path.exists(r):
                 shutil.move(r, os.path.join(MANUAL, addr, "REPORT.prev.json"))
             t["log_base"][addr] = {rel: len(lines) for rel, lines in check_logs(addr).items()}
-            start = "logs/refine/%s/best.c" % addr
+            start = start_of.get(addr) or ("logs/refine/%s/best.c" % addr)
             context.build(int(addr, 16), start=start if os.path.exists(os.path.join(ROOT, start)) else None, index=index)
     plan = dict(round=rnd, created=time.strftime("%Y-%m-%d %H:%M:%S"), batch=a.batch, tasks=tasks)
     json.dump(plan, open(PLAN, "w"), indent=1)

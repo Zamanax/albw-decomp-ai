@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_CC = "4.1/b1049"
 DEFAULT_FLAGS = "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections"
-SCORE_VERSION = 9
+SCORE_VERSION = 10   # 10: the key includes the file extension (a .cpp and a .c with the same text compile differently)
 SDIR = os.path.join(ROOT, "logs", "structure")
 CACHE = os.path.join(SDIR, "cache.jsonl")
 CACHE_DIR = os.path.join(SDIR, "cache")
@@ -87,7 +87,8 @@ def _key(addr, path, flags, cc):
         text = open(path, "rb").read()
     except OSError:
         return None
-    h = hashlib.sha1(b"%d|%08X|%s|%s|" % (SCORE_VERSION, addr, (cc or "").encode(), (flags or "").encode()))
+    h = hashlib.sha1(b"%d|%08X|%s|%s|%s|" % (SCORE_VERSION, addr, (cc or "").encode(), (flags or "").encode(),
+                                            os.path.splitext(path)[1].encode()))
     h.update(text)
     return h.hexdigest()
 

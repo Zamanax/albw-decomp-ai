@@ -12,6 +12,30 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fn
 
 ROOT = fn.ROOT
+DEFAULT_FLAGS = "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections"
+
+
+def _start_score(addr, tag, start):
+    """fn.py check's structure line for the start source (cached across runs)."""
+    import structscore
+    flags, cc = DEFAULT_FLAGS, "4.1/b1049"
+    st = os.path.join(ROOT, "logs", "refine", tag, "state.json")
+    if os.path.exists(st):
+        try:
+            s = json.load(open(st, encoding="utf-8"))
+            b = s.get("best") or {}
+            flags = b.get("flags") or s.get("flags") or flags
+            cc = b.get("cc") or s.get("cc") or cc
+        except (ValueError, OSError):
+            pass
+    it = dict(addr=addr, path=start if os.path.isabs(start) else os.path.join(ROOT, start),
+              flags=flags, cc=cc, origin="context")
+    try:
+        return structscore.score_many([it], jobs=1)[0]
+    except Exception:
+        return None
+
+
 # extern tokens as matched sources (func_/data_/g_/ro_/bss_) and Ghidra output (FUN_/DAT_/PTR_) name them
 TOKEN = re.compile(r"(?:func|data|g|ro|bss|FUN|DAT|PTR)_([0-9A-Fa-f]{8})(?![0-9A-Za-z])")
 MAX_RELATED = 5
@@ -216,6 +240,23 @@ def build(addr, start=None, index=None):
         else:
             out.append("- start names no address outside the target's references")
         out.append(f"- start names {len(matched)} of {len(refs)} target references")
+        out.append("")
+
+        sc = _start_score(addr, tag, start)
+        out.append("## Start source status (one `fn.py check`, the start's winning flags)")
+        out.append("")
+        if sc and not sc.get("err"):
+            out.append(f"- `STRUCTURE: OP={sc['op']} REG={sc['reg']} MOVED={sc['moved']}, "
+                       f"{sc['words']}/{sc['total']} words`")
+            ops = sc.get("ops") or []
+            if ops:
+                out.append("- remaining structural differences (original `-`, start `+`): "
+                           + ", ".join(f"`{o}`" for o in ops[:12])
+                           + (" ..." if len(ops) > 12 else ""))
+            if sc["op"] == 0:
+                out.append("- structural shape is already right: only register/statement-order work is left")
+        elif sc:
+            out.append(f"- the start does not compile: {str(sc.get('err'))[:300]}")
         out.append("")
 
     out.append("## Related matched sources")
