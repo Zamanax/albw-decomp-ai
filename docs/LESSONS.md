@@ -1044,6 +1044,27 @@ measured expectation at those rates is ~18 matches instead of ~2.
 The corollary for the 7,708-source pool: 1,517 untried ≤40-word targets at 32 % and 1,822 at 41-80 at
 17 % were idle while the cheap tier spent its slots on 41-80/81-160 retries.
 
+## Start sources were handed over as C (2026-11-07)
+
+6,335 of the 8,809 refine states are C++ (`.cpp`), but every plan prompt and every CONTEXT.md
+pointed at `logs/refine/<addr>/best.c` - a C file name. Of a random sample of 30 such starts, **30/30
+fail to compile as C** (`#77-D: this declaration has no storage class`), so the first check an agent
+makes on its start either fails or must be preceded by a copy/rename. The fix: the planner and
+`context.py` now use the state's `best.path` (the wave file with the real extension), and the score
+cache key includes the file extension - before that, a `.c` and a `.cpp` with identical text shared
+one cache key, so a C compile error poisoned the C++ score of the same source (observed on
+0x005AE9C0: CONTEXT reported "does not compile" for a valid C++ wave).
+
+The same change gives every target its start's `STRUCTURE` line and top structural differences in
+CONTEXT.md and in the one-line prompt, so the agent starts at the remaining gap instead of spending
+its first turns re-deriving it.
+
+**Flag pre-flight, measured:** sweeping every best source of the near-miss band (364 targets,
+7,232 checks, 2 min) under every flag variant (`-O2/-O3`, `/fpic`, `Cortex-A9`, `-Ono_tailcall`)
+matched **3/364**, all under `-Ono_tailcall`. They were sitting unregistered in `logs/manual` and are
+now registered (001A4A88, 001B0C48, 001B296C). So a deterministic pre-flight is worth running, but
+its direct yield on an already-swept band is ~1%.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
