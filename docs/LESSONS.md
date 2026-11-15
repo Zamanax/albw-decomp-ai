@@ -1118,6 +1118,63 @@ Related operational change from the same source (momo5502's post-mortem): subage
 `scout`, `reviewer`, `security-reviewer`, `sonic`). The campaign spawns through omp's default `task`
 agent, so the `task` entry is the one that applies to rounds; grandchildren inherit it.
 
+## One-turn screen: what a single Haiku turn is worth (measured 2026-11-15)
+
+Question: can one Haiku turn without tools replace the Haiku agent (the "one-shot" ideal)? Test on 80
+Haiku targets of rounds 15-18 (all 37 the agent matched, 43 random of the 167 it missed; regular pool,
+not reopened), with the same `CONTEXT.md` and start source the agent had, all inlined in one prompt.
+The turn writes 4 candidates; a harness compiles each under the 20 flag variants.
+
+| | agent-matched (37) | agent-missed (43) | estimated rate on the pool |
+|---|---|---|---|
+| one turn (24 s, $0.0075) | 7 | 0 | 3 % |
+| three turns, each fed the best candidate and its checker diff | 19 | 1 | 11 % |
+| the full Haiku agent (~2 min, $0.033) | 37 | 0 | 18 % |
+
+- **It does not replace the agent.** Three stateless turns cost what one agent run costs and find
+  fewer matches. The agent's loop (its own checks, 6 at the median before a match) is the cheap part.
+- **The mutator does not close the gap.** 8 leftovers at `OP=0` after three turns: `mutate.py` at
+  3,000 checks matched 0 of 8. The agent had matched 7 of those 8.
+- **The first turn predicts the agent.** Best candidate of turn 1, by structural OP, against what the
+  agent did with the same target (shares re-weighted to the pool):
+
+  | turn-1 best | share of pool | agent matched |
+  |---|---|---|
+  | MATCH | 3 % | 100 % |
+  | OP 0 | 6 % | 67 % |
+  | OP 1-2 | 9 % | 34 % |
+  | OP 3-5 | 27 % | 9 % |
+  | OP 6-10 | 26 % | 11 % |
+  | OP > 10 | 26 % | 6 % |
+
+  Gate per band: ≤40 words at OP ≤ 2 is 29 % of the pool and 65 % of the agent's matches (agent hit
+  rate 44 %, $0.09 per match with the screen against $0.13 for the agent on everything); 41-80 words at
+  OP ≤ 5 is 14 % of the pool and 55 % of the matches ($0.22 against $0.37). Small samples: 26 and 11
+  agent matches.
+- **The orchestrator was the largest cost line.** Campaign sessions from 2026-11-04 at API prices:
+  the Opus main session $65.8, all Haiku agents $36.9, DeepSeek $26.2. It also shares the Anthropic
+  cap that stopped round 22 (`429`, retry-after 71 h).
+- **DeepSeek is not cheaper per match.** At 41-80 words: $0.23 per match against Haiku's $0.30, and
+  4-8 min per agent against 2.
+- **The agents are not slow.** Rounds 14-19: a Haiku agent is active 1.3 min (match) / 2.2 min
+  (miss) at the median, and every match came within 2 min of its first check. A round cycle took
+  20-50 min because of the orchestration between rounds.
+
+Changes (`tools/campaign.py`): a `screen` tier in front of the Haiku agent (`SCREEN_PASS`, candidates
+under `logs/manual/<ADDR>/screen/`), DeepSeek off by default, and `run_loop`, which chains rounds
+from one eval cell with no model turn between them. Pilot files: `logs/pilot_oneshot/`.
+
+First rounds with it (26-28, 2026-11-15, planned smallest first, so the ≤ 20-word residue): 200 screens
+gave 10 direct matches (5 %), the mutator matched 2 of 8 queued screen candidates, and the gated Haiku
+agent matched 5 of 22 (23 %, below the pilot's 44 %: this band is what 95 % matching left behind, and
+it includes documented walls such as 001150B8 and 001512B4). 17 registrations for $1.40 at API prices
+(200 screens $1.15, 22 agents $0.25); a round of 120 screens + 13 agents ran 4 min, 6.5 min with its
+harvest and plan.
+
+Large functions (> 80 words) are outside this: the agents have matched ~45 of them from scratch at
+81-160 words and 4 above; the other 1,000+ large matches are shape families and the `fam_sti`
+generator. Lifted pseudocode as a start is the dead end recorded at the top of this file.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),

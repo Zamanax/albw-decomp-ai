@@ -59,7 +59,7 @@ back that way in this update.
 | `funcs.json` | The function table: start addresses, call targets, pointers. Addresses only, no code |
 | `tools/fn.py` | Disassembly, cross-references, and the byte-exact checker |
 | `tools/audit.py` | Offline invariant audit of `functions.json` + status-table stats |
-| `tools/campaign.py` | Session driver: free family cloning + refine, then a cost-routed subagent plan (Haiku / at most 4 DeepSeek) and its harvest; see `.agents/skills/decomp-campaign` |
+| `tools/campaign.py` | Session driver: `run_loop` chains rounds of free work (family cloning, mutator), a one-turn Haiku screen, gated Haiku agents and a harvest; see `.agents/skills/decomp-campaign` |
 
 ## Requirements
 

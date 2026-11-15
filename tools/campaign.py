@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-"""Campaign driver: one round of the cost-routed multi-agent matching loop.
+"""Campaign driver: the cost-routed multi-agent matching loop.
 
-  python tools/campaign.py next    [--refine N] [--haiku N] [--deepseek N] [--batch N]
-  campaign.run_round(agent, log)   (in an omp Python eval cell: spawns and supervises the plan)
+  campaign.run_loop(agent, log)    (in an omp Python eval cell: rounds until nothing is left, no model turns)
+  python tools/campaign.py next    [--screen N] [--haiku N] [--haiku-rest] [--deepseek N] [--batch N] [--refine N]
+  campaign.run_round(agent, log)   (same kind of cell: spawns and supervises the current plan only)
   python tools/campaign.py harvest [--commit]
   python tools/campaign.py status
 
-A round is: free work first, then a small paid plan, then a harvest.
+A round is: free work first, then a paid plan, then a harvest. run_loop chains rounds.
 
 `next`
   1. famclone --apply: clone existing matches onto shape-identical functions (free).
@@ -26,24 +27,36 @@ A round is: free work first, then a small paid plan, then a harvest.
      Reopened functions (shared/reopen.json: they contain a shared-header form proven after they were
      tried) ignore attempts made before the form's `since`, take up to REOPEN_SHARE[tier] of each tier's
      slots first, and their prompt names the form.
-     Routing (the cost rule):
-       haiku    - first attempt on anything <= HAIKU_MAX_WORDS words (cheap, ~$0.01-0.05/agent,
-                  HAIKU_PER_AGENT targets per agent, grouped by twin origin);
-       deepseek - at most MAX_DEEPSEEK per round (hard cap), one target per agent, only for
-                  functions Haiku already missed or that are too large for Haiku, with a start at
-                  most DEEPSEEK_MAX_OP structural OPs away (~$0.10-0.30/agent, ~50-70% hit rate).
+     Routing (the cost rule; measurements in docs/LESSONS.md "One-turn screen"):
+       screen   - every function <= HAIKU_MAX_WORDS words that no tier has tried: ONE Haiku turn without
+                  tools writes SCREEN_K candidate sources (~$0.007, ~25 s). run_round compiles them
+                  (default flags, then the flag sweep on the best SCREEN_SWEEP), a clean match is
+                  registered by harvest, and the best candidate becomes the function's start source;
+       haiku    - the full agent (~$0.02-0.04, ~2 min), only for screened functions whose best source
+                  is within SCREEN_PASS structural OPs (the agent matches 44-67% of those and ~10% of
+                  the rest); --haiku-rest adds the <= 40-word functions that failed the gate;
+       deepseek - off by default (--deepseek N, hard cap MAX_DEEPSEEK per round), one target per agent,
+                  only for functions Haiku already missed or that are too large for Haiku, with a start
+                  at most DEEPSEEK_MAX_OP structural OPs away (~$0.10-0.30/agent).
      A function is never sent twice to the same tier (except across a reopen).
   5. writes logs/campaign/plan.json (+ a copy per round) and, per target, logs/manual/<ADDR>/CONTEXT.md
      (tools/context.py: disassembly, references vs the start source, related matched sources).
 
-Agents read docs/AGENT_BRIEF.md and write logs/manual/<ADDR>/REPORT.json per target, so results
-survive lost agent handles, crashed kernels and rate-limited agents.
+Haiku and DeepSeek agents read docs/AGENT_BRIEF.md and write logs/manual/<ADDR>/REPORT.json per target. A
+screen agent gets everything in its prompt (logs/manual/<ADDR>/screen/PROMPT.md), writes
+logs/manual/<ADDR>/screen/s1..sK.{c,cpp}, and run_round writes its REPORT.json from the compiled
+candidates. Results therefore survive lost agent handles, crashed kernels and rate-limited agents.
 
 `run_round(agent, log)` (eval kernel only: it needs omp's agent())
-  Rolling window of --batch Haiku agents (a new one starts as soon as any finishes) plus all DeepSeek
-  agents; TIME[tier] = (wrap-up message, hard stop) per agent; a stopped agent's unreported targets
-  get a timeout REPORT.json from their best logged check. Logs events live and a progress table of
-  the running agents every minute (fn.py check_log.jsonl: checks and best pct per target).
+  Rolling window of --batch Anthropic agents (Haiku agents and screens share it; a new one starts as soon
+  as any finishes) plus all DeepSeek agents; TIME[tier] = (wrap-up message, hard stop) per agent; a
+  stopped agent's unreported targets get a timeout REPORT.json from their best logged check. Logs events
+  live and a progress table of the running agents every minute (fn.py check_log.jsonl).
+
+`run_loop(agent, log, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False)` (eval kernel only)
+  harvest --commit -> next -> run_round with `mutate.py queue --register` alongside, until the plan is
+  empty (or `rounds` rounds), then `mutate.py tidy --register` and a last harvest. No model turn is spent
+  between rounds. Stops when most targets of a round got no report (rate limit, credits).
 
 `harvest`
   Reads the REPORT.json of every planned target, scans the claimed source for forbidden
@@ -85,8 +98,11 @@ QUEUE = structscore.QUEUE
 MANUAL = os.path.join(ROOT, "logs", "manual")
 CAND_FILE = os.path.join(ROOT, "logs", "triage", "unindexed_candidate.txt")
 
-MODELS = {"haiku": "anthropic/claude-haiku-5-5",
+MODELS = {"screen": "anthropic/claude-haiku-5-5",
+          "haiku": "anthropic/claude-haiku-5-5",
           "deepseek": "openrouter/deepseek/deepseek-v4.1-flash-1017"}
+TIERS = ("screen", "haiku", "deepseek")   # cheapest first
+POOL = {"screen": "anthropic", "haiku": "anthropic", "deepseek": "openrouter"}   # run_round's concurrency windows
 MAX_DEEPSEEK = 4          # hard cap per round (cost + rate limits)
 # Measured on rounds 1-14 (505 Haiku, 42 DeepSeek targets): Haiku matched 33-37% of functions <= 40 words,
 # 18% at 41-80 and 6% (4/70) at 81-160; 27% as an agent's only target but 15% with 2 and 7% with 3
@@ -94,6 +110,19 @@ MAX_DEEPSEEK = 4          # hard cap per round (cost + rate limits)
 HAIKU_MAX_WORDS = 80
 HAIKU_PER_AGENT = 1
 DEEPSEEK_MAX_OP = 20
+# One-turn screen, measured 2026-11-15 on 80 Haiku targets of rounds 15-18 (all 37 the agent matched and 43
+# of the 167 it missed; docs/LESSONS.md "One-turn screen"). One Haiku turn without tools, writing 4 candidates,
+# costs $0.0075 and 24 s and matches ~3% of the pool outright; three such turns with feedback reach 11%
+# against the agent's 18% at the same price, so the turn does not replace the agent. Its best candidate's
+# structural OP predicts the agent instead: at OP <= 2 the agent matched 44-67%, elsewhere ~10%.
+# SCREEN_PASS is that gate per size band, (max words, max OP of the best source):
+#     <= 40 words, OP <= 2: 29% of the pool, 65% of the agent's matches;
+#     41-80 words, OP <= 5: 14% of the pool, 55% of the agent's matches.
+SCREEN_K = 4
+SCREEN_PASS = ((40, 2), (80, 5))
+SCREEN_SWEEP = 2          # candidates (best first at the default flags) that also get the flag sweep
+SCREEN_HEALTHY = 0.75     # share of a round's screens that must leave candidates before a blank one is a MISS
+BRIEF_SECTIONS = ("Shared library", "Done means", "Honesty", "Proven constructs")   # inlined in the screen prompt
 # Share of each tier's slots that reopened functions (shared/reopen.json: a header form proven after they
 # were tried or ranked) take first; the rest is ranked by measured EV. Measured over every harvested
 # Haiku target of rounds 1-19, split by the target's size and whether it was reopened:
@@ -103,14 +132,15 @@ DEEPSEEK_MAX_OP = 20
 # Size is the signal; reopened status only matters at 41-80 (a retry is harder than a first try).
 # The previous 100%-reopened share was calibrated on rounds 17-18, when the reopened pool happened to
 # be the <=40 band; the round-22 forms reopened 41-80/81-160 targets, which the table says are 0-5%.
-REOPEN_SHARE = {"haiku": 0.25, "deepseek": 0.5}
+REOPEN_SHARE = {"screen": 0.0, "haiku": 0.25, "deepseek": 0.5}
 REOPEN_MAX_WORDS = 80    # 81-160 reopened: 0/36 measured; the regular Haiku cap is the same
 BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
 # DeepSeek's at p50 5 / max 20 min, while the slowest agents ran 40-70 min - a tail that held up whole
 # rounds and produced nothing.
-TIME = {"haiku": (900, 1200), "deepseek": (1500, 2100)}
+# A screen is one turn: p50 24 s, p90 48 s over 211 turns. It has no wrap-up (soft = hard).
+TIME = {"screen": (240, 240), "haiku": (900, 1200), "deepseek": (1500, 2100)}
 WRAP_UP = ("WRAP UP: your time budget is used. Stop exploring now. Write logs/manual/<ADDR>/REPORT.json for "
            "every target (MATCH only if fn.py check printed RESULT: MATCH and IDENTITY ... 0 MISMATCH for that "
            "file and flags, otherwise MISS with your best words), then reply DONE. You will be stopped in %d minutes.")
@@ -214,10 +244,13 @@ def hit_model():
                 o = out.get((x, p["round"], t["tier"]))
                 if (t["tier"] == "haiku" and i) or o not in ("MATCH", "MISS", "TIMEOUT", "REFUSED"):
                     continue
-                m = re.search(r"0x%s: refine best \d+/(\d+) words, (\d+) differing" % x, t["prompt"])
-                if not m:
-                    continue
-                sb, ob = bucket(int(m.group(1)), SIZE_EDGES), bucket(int(m.group(2)), OP_EDGES)
+                size = (t.get("sizes") or {}).get(x)   # [words, structural OP] as planned
+                if size is None:                       # plans older than the screen tier: in the prompt
+                    m = re.search(r"0x%s: refine best \d+/(\d+) words, (\d+) differing" % x, t.get("prompt", ""))
+                    if not m:
+                        continue
+                    size = (int(m.group(1)), int(m.group(2)))
+                sb, ob = bucket(size[0], SIZE_EDGES), bucket(size[1], OP_EDGES)
                 for k in ((t["tier"],), (t["tier"], sb), (t["tier"], sb, ob)):
                     cnt[k][0] += o == "MATCH"
                     cnt[k][1] += 1
@@ -392,12 +425,16 @@ def task_prompt(rnd, tier, targets, retry):
              "arrives then, and you are stopped at %d minutes." % (rnd, tier, checks, stall, soft // 60, hard // 60),
              "", "Targets:"]
     for t in targets:
-        src = "%s (language %s)" % (t.get("start") or "logs/refine/%s/best.c" % t["addr"], t["ext"])
+        start = t.get("start") or "logs/refine/%s/best.c" % t["addr"]
+        src = "%s (language %s)" % (start, os.path.splitext(start)[1] if t.get("start") else t["ext"])
         org = t["origin"].split(":", 1)[1] if t["origin"].startswith("twin:") else "none (synth skeleton)"
         lines.append("- 0x%s: refine best %d/%d words, %d differing instructions. Start: %s. Twin: %s. "
                      "Context: logs/manual/%s/CONTEXT.md (disassembly, what the target references and whether "
                      "the start names it, related matched sources) - read it before anything else."
                      % (t["addr"], t["words"], t["total"], t.get("n_op", -1), src, org, t["addr"]))
+        if "/screen/" in start.replace("\\", "/"):
+            lines.append("  The start is the best of %d candidates a one-turn screen wrote; the others are next "
+                         "to it in logs/manual/%s/screen/." % (SCREEN_K, t["addr"]))
         ops = t.get("ops") or []
         if ops:
             lines.append("  Remaining structural diff (original `-`, start `+`): "
@@ -416,6 +453,133 @@ def task_prompt(rnd, tier, targets, retry):
                   "(REPORT.prev.json, best.*, *.txt check logs) and do not repeat its variants; question "
                   "the twin and the signature, re-derive from `fn.py show`."]
     return "\n".join(lines)
+
+
+# ------------------------------------------------------------------ screen (one Haiku turn without tools)
+
+def screen_dir(addr):
+    """A subdirectory on purpose: attempted() reads a source directly under logs/manual/<ADDR>/ as an
+    agent's attempt, and a screen must not use up the Haiku agent's turn."""
+    return os.path.join(MANUAL, addr, "screen")
+
+
+def screen_candidates(addr):
+    d = screen_dir(addr)
+    return sorted(os.path.join(d, f) for f in (os.listdir(d) if os.path.isdir(d) else [])
+                  if re.fullmatch(r"s\d+\.(?:c|cpp)", f))
+
+
+def screen_pass(t):
+    """The full agent's gate: the best known source is within SCREEN_PASS structural OPs for its size."""
+    return next((t["n_op"] <= op for words, op in SCREEN_PASS if t["total"] <= words), False)
+
+
+def brief_sections(names=BRIEF_SECTIONS):
+    """The named `## ` sections of docs/AGENT_BRIEF.md: a screen turn follows the agents' rules and proven
+    constructs without spending a turn on reading the brief."""
+    text = open(os.path.join(ROOT, "docs", "AGENT_BRIEF.md"), encoding="utf-8").read()
+    parts = {m.group(1): m.group(0).strip() for m in re.finditer(r"^## ([^\n]*)\n.*?(?=^## |\Z)", text, re.S | re.M)}
+    out = []
+    for n in names:
+        hit = [v for k, v in parts.items() if k.startswith(n)]
+        if not hit:
+            sys.exit("docs/AGENT_BRIEF.md has no '## %s' section, which the screen prompt inlines" % n)
+        out.append(hit[0])
+    return "\n\n".join(out)
+
+
+def screen_prompt(t, brief):
+    """The whole task in one message: the agent reads nothing and runs nothing."""
+    addr = t["addr"]
+    read = lambda rel: open(os.path.join(ROOT, rel), encoding="utf-8", errors="replace").read().rstrip()
+    start = t.get("start") or "logs/refine/%s/best.c" % addr
+    ext = os.path.splitext(start)[1] if t.get("start") else t["ext"]
+    files = ", ".join("`logs/manual/%s/screen/s%d.{c|cpp}`" % (addr, i) for i in range(1, SCREEN_K + 1))
+    forms = reopen_forms()
+    lines = [
+        "ONE-TURN TASK. Do NOT read any file, do NOT run any command, do NOT search. Everything you need is in "
+        "this message.",
+        "",
+        "Write %d DIFFERENT candidate sources for function 0x%s of a matching decompilation (armcc 4.1 b1049, "
+        "ARM, flags `%s`). Each must compile to exactly the target's bytes; a harness compiles and checks them "
+        "after you finish. In a SINGLE response, call the write tool %d times in parallel: %s (`.cpp` if the "
+        "source is C++ or includes a shared header, `.c` for C99). Then answer `DONE`. No explanations."
+        % (SCREEN_K, addr, DEFAULT_FLAGS, SCREEN_K, files),
+        "",
+        "Rules for every candidate:",
+        "- Define the function as `func_%s`; name every extern after its address (`func_XXXXXXXX`, "
+        "`data_XXXXXXXX`, `ro_XXXXXXXX`)." % addr,
+        "- Write it from the disassembly: every callee, offset, immediate, literal-pool value, store order and "
+        "return value must agree with it. The start source below is often a different function of similar "
+        "shape; reuse its declarations only where they fit.",
+        "- The %d candidates must differ in ways that change codegen (named locals vs direct expressions, "
+        "statement order, if/else polarity, early return vs nested if, pointer local vs member access, C vs "
+        "C++ with a header type, signed vs unsigned, return type), not in comments or names." % SCREEN_K,
+        "- Self-contained: declare every type and extern you use, or include a shared header named below.",
+    ]
+    lines += ["- This function %s" % forms[f]["hint"] for f in t.get("forms", [])]
+    lines += ["", brief, "", "# Target context", "", read("logs/manual/%s/CONTEXT.md" % addr), "",
+              "# Start source (%s)" % ext, "", "```", read(start), "```", ""]
+    return "\n".join(lines)
+
+
+def screen_reports(addrs):
+    """Write REPORT.json for screened targets from their candidates: every candidate at the default flags,
+    then the flag sweep (refine.flag_variants) on the SCREEN_SWEEP best of each target without a match.
+    MATCH needs a byte match with 0 identity mismatches and no forbidden construct; harvest re-verifies and
+    registers it. Otherwise MISS carrying the best candidate, which structscore.agent_sources then offers
+    as the function's start source. A target without candidates gets no report here (see run_round)."""
+    import refine
+    variants = refine.flag_variants(DEFAULT_FLAGS)
+    cands = {a: screen_candidates(a) for a in addrs}
+    dirty = {p: bool(FORBID.search(open(p, errors="replace").read())) for ps in cands.values() for p in ps}
+    scores = collections.defaultdict(dict)   # addr -> {(path, flags): score}
+
+    def score(keys):
+        items = [dict(addr=int(a, 16), path=p, flags=fl, cc=structscore.DEFAULT_CC) for a, p, fl in keys]
+        for (a, p, fl), sc in zip(keys, structscore.score_many(items)):
+            if not sc.get("err"):
+                scores[a][(p, fl)] = sc
+
+    def clean(a, k):
+        sc = scores[a][k]
+        return sc["match"] and not sc.get("identity_bad") and not dirty[k[0]]
+
+    def ranked(a):
+        return sorted(scores[a], key=lambda k: (not clean(a, k), dirty[k[0]], structscore.rank(scores[a][k])))
+
+    score([(a, p, DEFAULT_FLAGS) for a in addrs for p in cands[a]])
+    sweep = []
+    for a in addrs:
+        ks = ranked(a)
+        if ks and not clean(a, ks[0]):
+            sweep += [(a, p, fl) for p, _ in ks[:SCREEN_SWEEP] for fl in variants[1:]]
+    score(sweep)
+    for a in addrs:
+        if not cands[a]:
+            continue
+        ks = ranked(a)
+        best = ks[0] if ks else None
+        sc = scores[a][best] if best else {}
+        compiled = len({p for p, _ in ks})
+        rep = dict(addr=a, tier="screen", status="MATCH" if best and clean(a, best) else "MISS",
+                   file=os.path.relpath(best[0], ROOT).replace("\\", "/") if best else None,
+                   flags=best[1] if best else None,
+                   words="%d/%d" % (sc["words"], sc["total"]) if best else "",
+                   screen=dict(candidates=len(cands[a]), compiled=compiled,
+                               op=sc.get("op"), reg=sc.get("reg"), moved=sc.get("moved")),
+                   note="screen: %d candidates, %d compiled%s" % (
+                       len(cands[a]), compiled,
+                       "; best OP=%d REG=%d MOVED=%d" % (sc["op"], sc["reg"], sc["moved"]) if best else ""))
+        json.dump(rep, open(os.path.join(MANUAL, a, "REPORT.json"), "w"), indent=1)
+
+
+def screen_blank(addr):
+    """MISS for a screen whose agent finished a healthy round without leaving a candidate."""
+    json.dump(dict(addr=addr, tier="screen", status="MISS", file=None, flags=None, words="",
+                   screen=dict(candidates=0, compiled=0, op=None, reg=None, moved=None),
+                   note="screen: the agent wrote no candidate"),
+              open(os.path.join(MANUAL, addr, "REPORT.json"), "w"), indent=1)
 
 
 def cmd_next(a):
@@ -447,6 +611,7 @@ def cmd_next(a):
         sc = best.get(t["addr"], (None, {"err": "unscored"}, None))[1]
         if not sc.get("err"):
             t["n_op"] = sc["op"]  # structural OP of the best source (refine's or an agent's)
+            t["words"] = sc["words"]
             t["ops"] = (sc.get("ops") or [])[:6]
         it = best.get(t["addr"], (None, None, None))[0]
         t["start"] = os.path.relpath(it["path"], ROOT) if it and it.get("path") else None
@@ -472,7 +637,7 @@ def cmd_next(a):
     # route every candidate to the tier it would go to, then rank each tier by measured EV:
     # family size x the observed hit rate of that tier on functions of this size and structural OP
     p_hit, rates = hit_model()
-    cands = {"haiku": [], "deepseek": []}
+    cands = {tier: [] for tier in TIERS}
     for t in pool:
         if t["shape"] in dead or t["shape"] in queued_shapes or t["addr"] in queued:
             continue
@@ -485,8 +650,12 @@ def cmd_next(a):
             if not t["forms"] and t["n_op"] > DEEPSEEK_MAX_OP:
                 continue
             tier = "deepseek"
-        else:
+        elif "screen" not in tiers:
+            tier = "screen"   # one cheap turn first: its best candidate decides whether the agent is worth it
+        elif screen_pass(t) or (a.haiku_rest and t["total"] <= SCREEN_PASS[0][0]):
             tier = "haiku"
+        else:
+            continue
         t["p"] = p_hit(tier, t["total"], t["n_op"])
         t["ev"] = t["fanout"] * t["p"]
         cands[tier].append(t)
@@ -509,23 +678,28 @@ def cmd_next(a):
                 seen_shapes.add(t["shape"])
         return out
     ds = pick(cands["deepseek"], min(a.deepseek, MAX_DEEPSEEK), "deepseek", True)
-    # Haiku: the regular pool is on by default (<=40 words 32%, 41-80 17% measured); REOPEN_SHARE caps
-    # the reopened retries at a quarter of the slots, since 41-80+ reopened targets convert at 0-5%
+    # Haiku: screened functions inside the SCREEN_PASS gate (--haiku-rest: also the <= 40-word ones outside
+    # it, ~13% for the agent); REOPEN_SHARE caps the reopened retries at a quarter of the slots
     hk = pick(cands["haiku"], a.haiku, "haiku", a.haiku_regular)
+    scr = pick(cands["screen"], a.screen, "screen", True)
+    planned = scr + hk + ds
     print("hit model (tier, words <= 20/40/80/160/more: matches/attempts): " + "  ".join(
         "%s %s %d/%d" % (k[0][:2], ("<=20", "<=40", "<=80", "<=160", ">160")[k[1]], m, n)
         for k, (m, n) in sorted(rates.items())))
     print("reopened (shared/reopen.json): %d in the pool, %d eligible, %d planned (%s)" % (
-        len(hits), sum(bool(t["forms"]) for c in cands.values() for t in c), sum(bool(t["forms"]) for t in hk + ds),
-        ", ".join("%s %d" % (f, sum(f in t["forms"] for t in hk + ds)) for f in forms)))
+        len(hits), sum(bool(t["forms"]) for c in cands.values() for t in c), sum(bool(t["forms"]) for t in planned),
+        ", ".join("%s %d" % (f, sum(f in t["forms"] for t in planned)) for f in forms)))
+    print("eligible: " + ", ".join("%s %d" % (tier, len(cands[tier])) for tier in TIERS))
 
     prev = json.load(open(PLAN)).get("round", 0) if os.path.exists(PLAN) else 0
     rnd = 1 + max([e.get("round", 0) for e in ledger()] + [prev])
     tasks = []
     tag = time.strftime("%m%d%H%M")   # labels must be unique across sessions: the harness keys agents by label
+    sizes = lambda ts: {x["addr"]: [x["total"], x["n_op"]] for x in ts}   # hit_model() reads these back
     for t in ds:
         tasks.append(dict(name="c%s_ds_%s" % (tag, t["addr"]), tier="deepseek", model=MODELS["deepseek"],
-                          addrs=[t["addr"]], prompt=task_prompt(rnd, "deepseek", [t], retry="haiku" in tried.get(t["addr"], ()))))
+                          addrs=[t["addr"]], sizes=sizes([t]),
+                          prompt=task_prompt(rnd, "deepseek", [t], retry="haiku" in tried.get(t["addr"], ()))))
     groups = collections.OrderedDict()
     for t in hk:
         groups.setdefault(t["origin"], []).append(t)
@@ -533,13 +707,20 @@ def cmd_next(a):
         for i in range(0, len(ts), HAIKU_PER_AGENT):
             ch = ts[i:i + HAIKU_PER_AGENT]
             tasks.append(dict(name="c%s_hk_%s" % (tag, ch[0]["addr"]), tier="haiku", model=MODELS["haiku"],
-                              addrs=[x["addr"] for x in ch], prompt=task_prompt(rnd, "haiku", ch, retry=False)))
+                              addrs=[x["addr"] for x in ch], sizes=sizes(ch),
+                              prompt=task_prompt(rnd, "haiku", ch, retry=False)))
+    for t in scr:   # the prompt inlines CONTEXT.md, so it is written below, once that exists
+        tasks.append(dict(name="c%s_sc_%s" % (tag, t["addr"]), tier="screen", model=MODELS["screen"],
+                          addrs=[t["addr"]], sizes=sizes([t]),
+                          prompt_file="logs/manual/%s/screen/PROMPT.md" % t["addr"]))
 
     # stale reports would be harvested as this round's answer: set them aside; remember where each
     # target's check logs end, so live progress and timeout reports count only this round's checks;
     # and precompute each target's CONTEXT.md (saves the agents their first 5-10 orientation turns)
     index = context.related_index()
+    by_addr = {x["addr"]: x for x in pool}
     start_of = {x["addr"]: x.get("start") for x in pool}
+    brief = brief_sections() if scr else ""
     for t in tasks:
         t["soft_s"], t["hard_s"] = TIME[t["tier"]]
         t["log_base"] = {}
@@ -550,12 +731,18 @@ def cmd_next(a):
             t["log_base"][addr] = {rel: len(lines) for rel, lines in check_logs(addr).items()}
             start = start_of.get(addr) or ("logs/refine/%s/best.c" % addr)
             context.build(int(addr, 16), start=start if os.path.exists(os.path.join(ROOT, start)) else None, index=index)
+            if t["tier"] == "screen":
+                for old in screen_candidates(addr):   # a reopened function is screened again
+                    os.remove(old)
+                os.makedirs(screen_dir(addr), exist_ok=True)
+                with open(os.path.join(ROOT, t["prompt_file"]), "w", encoding="utf-8", newline="\n") as fh:
+                    fh.write(screen_prompt(by_addr[addr], brief))
     plan = dict(round=rnd, created=time.strftime("%Y-%m-%d %H:%M:%S"), batch=a.batch, tasks=tasks)
     json.dump(plan, open(PLAN, "w"), indent=1)
     json.dump(plan, open(os.path.join(CAMP, "plan_round%03d.json" % rnd), "w"), indent=1)
-    print("round %d plan: %d haiku agents (%d functions), %d deepseek agents; family reach %d functions"
-          % (rnd, sum(t["tier"] == "haiku" for t in tasks), len(hk), len(ds),
-             sum(t["fanout"] for t in hk + ds)))
+    print("round %d plan: %d screens, %d haiku agents (%d functions), %d deepseek agents; family reach %d functions"
+          % (rnd, len(scr), sum(t["tier"] == "haiku" for t in tasks), len(hk), len(ds),
+             sum(t["fanout"] for t in planned)))
     for t in ds:
         print("  deepseek 0x%s  %d/%d words  OP %d  p %.2f  family %d%s" % (
             t["addr"], t["words"], t["total"], t["n_op"], t["p"], t["fanout"],
@@ -584,12 +771,13 @@ def mmss(s):
 def run_round(spawn, log=print, poll=10, table_every=60):
     """Run the current plan from an omp Python eval cell: `campaign.run_round(agent, log)`.
 
-    A rolling window, not batches: up to plan["batch"] Haiku agents run at once and a new one starts
-    the moment any finishes; every DeepSeek agent starts at once (MAX_DEEPSEEK caps them). An agent
-    past its soft limit (plan task soft_s) gets WRAP_UP once; past hard_s it is stopped and each of its
-    targets without a REPORT.json gets a timeout MISS carrying the best logged check, so harvest records
-    it instead of re-planning it. Events are logged as they happen, and every table_every seconds a
-    table of the running agents with each target's checks and best logged pct (fn.py check_log.jsonl).
+    A rolling window, not batches: up to plan["batch"] Anthropic agents run at once (Haiku agents first,
+    then screens) and a new one starts the moment any finishes; every DeepSeek agent starts at once
+    (MAX_DEEPSEEK caps them). An agent past its soft limit (plan task soft_s) gets WRAP_UP once; past
+    hard_s it is stopped and each of its targets without a REPORT.json gets a timeout MISS carrying the
+    best logged check, so harvest records it instead of re-planning it. A finished screen's candidates are
+    compiled here and its REPORT.json written (screen_reports). Events are logged as they happen, and
+    every table_every seconds a table of the running agents with each target's checks and best logged pct.
     Results stay file-based: a dead kernel loses nothing, run it again and only unreported tasks start."""
     plan = json.load(open(PLAN))
     if plan.get("harvested"):
@@ -598,33 +786,45 @@ def run_round(spawn, log=print, poll=10, table_every=60):
     rerun = time.strftime("r%H%M") if plan.get("started") else ""   # labels must stay unique
     plan["started"] = plan.get("started") or time.strftime("%Y-%m-%d %H:%M:%S")
     json.dump(plan, open(PLAN, "w"), indent=1)
+    screens = [x for t in plan["tasks"] if t["tier"] == "screen" for x in t["addrs"]]
+    late = [x for x in screens if not reported(x) and screen_candidates(x)]
+    if late:   # their agents finished before an earlier run of this cell died: only the compile is left
+        screen_reports(late)
     todo = [t for t in plan["tasks"] if not all(reported(x) for x in t["addrs"])]
-    queue = {tier: [t for t in todo if t["tier"] == tier] for tier in ("deepseek", "haiku")}
-    slots = {"deepseek": MAX_DEEPSEEK, "haiku": plan.get("batch", 20)}
+    queue = {tier: [t for t in todo if t["tier"] == tier] for tier in ("deepseek", "haiku", "screen")}
+    slots = {"openrouter": MAX_DEEPSEEK, "anthropic": plan.get("batch", 20)}
     total = {tier: len(q) for tier, q in queue.items()}
+    short = {"deepseek": "ds", "haiku": "hk", "screen": "sc"}
     done = collections.Counter()
     running, t_start, t_table = {}, time.time(), 0.0
-    log("round %d: %d haiku + %d deepseek agents to run (%d already reported), window %d haiku"
-        % (plan["round"], total["haiku"], total["deepseek"], len(plan["tasks"]) - len(todo), slots["haiku"]))
+    if screens:
+        poll = min(poll, 3)   # a screen lasts ~24 s: a 10 s poll leaves its slot idle a third of the time
+    scorer, scoring = ThreadPoolExecutor(1), []   # candidates compile off the loop, so slots refill meanwhile
+    log("round %d: %s to run (%d tasks already reported), window %d Anthropic agents"
+        % (plan["round"], " + ".join("%d %s" % (total[tier], tier) for tier in TIERS),
+           len(plan["tasks"]) - len(todo), slots["anthropic"]))
 
     def tag(t):
-        return "%s %s" % ("ds" if t["tier"] == "deepseek" else "hk", "+".join(t["addrs"]))
+        return "%s %s" % (short[t["tier"]], "+".join(t["addrs"]))
 
     def outcomes(t):
         return ", ".join("%s %s" % (x, reported(x) or "NOREPORT") for x in t["addrs"])
 
-    while any(queue.values()) or running:
+    while any(queue.values()) or running or scoring:
         now = time.time()
         for tier, q in queue.items():
-            while q and sum(r["t"]["tier"] == tier for r in running.values()) < slots[tier]:
+            while q and sum(POOL[r["t"]["tier"]] == POOL[tier] for r in running.values()) < slots[POOL[tier]]:
                 t = q.pop(0)
+                prompt = (open(os.path.join(ROOT, t["prompt_file"]), encoding="utf-8").read()
+                          if t.get("prompt_file") else t["prompt"])
                 running[t["name"]] = dict(t=t, t0=now, wrapped=False,
-                                          h=spawn(t["prompt"], label=t["name"] + rerun, model=t["model"]))
+                                          h=spawn(prompt, label=t["name"] + rerun, model=t["model"]))
+        finished = []
         for name, r in list(running.items()):
             t, el = r["t"], now - r["t0"]
             if r["h"].done():
                 try:
-                    r["h"].wait(1)   # consume the reply: results are read from REPORT.json, not messages
+                    r["h"].wait(1)   # consume the reply: results are read from files, not messages
                 except Exception:
                     pass
                 why = "done"
@@ -633,8 +833,9 @@ def run_round(spawn, log=print, poll=10, table_every=60):
                     r["h"].cancel()
                 except Exception:
                     pass
-                for x in t["addrs"]:
-                    timeout_report(x, t.get("log_base", {}).get(x))
+                if t["tier"] != "screen":
+                    for x in t["addrs"]:
+                        timeout_report(x, t.get("log_base", {}).get(x))
                 why = "STOPPED at hard limit"
             else:
                 if el > t.get("soft_s", TIME[t["tier"]][0]) and not r["wrapped"]:
@@ -648,30 +849,95 @@ def run_round(spawn, log=print, poll=10, table_every=60):
                 continue
             del running[name]
             done[t["tier"]] += 1
-            log("[%s] %-4s %s  %s  -> %s" % (mmss(now - t_start), why, tag(t), mmss(el), outcomes(t)))
+            finished.append((t, why, el))
+        got = [x for t, _, _ in finished if t["tier"] == "screen" for x in t["addrs"] if screen_candidates(x)]
+        if got:
+            blank = sum(t["tier"] == "screen" for t, _, _ in finished) - len(got)
+            scoring.append((scorer.submit(screen_reports, got), got, blank))
+        for job in [j for j in scoring if j[0].done()]:
+            scoring.remove(job)
+            job[0].result()
+            c = collections.Counter(reported(x) for x in job[1])
+            log("[%s] screens %d/%d: +%d compiled (%s)%s" % (
+                mmss(now - t_start), done["screen"], total["screen"], len(job[1]),
+                ", ".join("%s %d" % kv for kv in sorted(c.items())),
+                ", %d without candidates" % job[2] if job[2] else ""))
+        for t, why, el in finished:
+            if t["tier"] != "screen":
+                log("[%s] %-4s %s  %s  -> %s" % (mmss(now - t_start), why, tag(t), mmss(el), outcomes(t)))
         if running and now - t_table >= table_every:
             t_table = now
             rep = collections.Counter(s for t in plan["tasks"] for x in t["addrs"] for s in [reported(x)] if s)
             run_n = collections.Counter(r["t"]["tier"] for r in running.values())
-            lines = ["[%s] haiku %d/%d done, %d running, %d queued | deepseek %d/%d done, %d running | reports: %s"
-                     % (mmss(now - t_start), done["haiku"], total["haiku"], run_n["haiku"], len(queue["haiku"]),
-                        done["deepseek"], total["deepseek"], run_n["deepseek"],
-                        ", ".join("%s %d" % kv for kv in sorted(rep.items())) or "none yet")]
+            lines = ["[%s] %s | reports: %s" % (mmss(now - t_start), " | ".join(
+                "%s %d/%d done, %d running, %d queued" % (tier, done[tier], total[tier], run_n[tier], len(queue[tier]))
+                for tier in TIERS if total[tier]), ", ".join("%s %d" % kv for kv in sorted(rep.items())) or "none yet")]
             for r in sorted(running.values(), key=lambda r: r["t0"]):
                 t, cells = r["t"], []
+                if t["tier"] == "screen":   # one turn each: the header line counts them
+                    continue
                 for x in t["addrs"]:
                     n, b = progress(x, t.get("log_base", {}).get(x))
                     st = reported(x)
                     cells.append("%s %s" % (x, st if st else "%2d checks best %s" % (
                         n, ("MATCH" if b["match"] else "%.1f%%" % b["pct"]) if b else "-")))
-                lines.append("   %-2s %6s%s  %s" % ("ds" if t["tier"] == "deepseek" else "hk", mmss(now - r["t0"]),
+                lines.append("   %-2s %6s%s  %s" % (short[t["tier"]], mmss(now - r["t0"]),
                                                     "*" if r["wrapped"] else " ", " | ".join(cells)))
             log("\n".join(lines))
-        if running or any(queue.values()):
+        if running or any(queue.values()) or scoring:
             time.sleep(poll)
+    scorer.shutdown()
+    # a screen that left no candidate is a MISS only in a healthy round: after a rate limit or an API
+    # failure nothing was tried, so those targets stay unreported and the next plan takes them again
+    blank = [x for x in screens if not reported(x)]
+    if blank and 1 - len(blank) / float(len(screens)) >= SCREEN_HEALTHY:
+        for x in blank:
+            screen_blank(x)
     rep = collections.Counter(reported(x) or "NOREPORT" for t in plan["tasks"] for x in t["addrs"])
     log("round %d finished in %s: %s. NEXT  uv run python tools/campaign.py harvest --commit"
         % (plan["round"], mmss(time.time() - t_start), ", ".join("%s %d" % kv for kv in sorted(rep.items()))))
+
+
+def run_loop(spawn, log=print, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False, mutate_budget=1000):
+    """Rounds with no model turn between them, from one omp Python eval cell (cell timeout 0):
+    `campaign.run_loop(agent, log)`.
+
+    Each round: harvest --commit (the previous round, or one left unfinished), next with these sizes, then
+    run_round while `mutate.py queue --register --budget mutate_budget` searches the register/order queue
+    (42 of the mutator's 48 matches needed <= 1,000 checks, a third of the default budget). Ends when the
+    plan is empty or after `rounds` rounds, with `mutate.py tidy --register` and a last harvest --commit.
+    Stops early when more than half of a round's targets got no report: the agents are failing (Anthropic
+    429, OpenRouter 402), and the unreported targets are simply planned again by the next run."""
+    tool = lambda name, *args: run([PY, os.path.join(ROOT, "tools", name)] + [str(x) for x in args], timeout=None)
+    tail = lambda out, n: "\n".join("  " + l for l in out.strip().splitlines()[-n:])
+    n = 0
+    while True:
+        log("harvest:\n" + tail(tool("campaign.py", "harvest", "--commit"), 14))
+        args = ["--screen", screen, "--haiku", haiku, "--deepseek", deepseek] + (["--haiku-rest"] if haiku_rest else [])
+        log("next:\n" + tail(tool("campaign.py", "next", *args), 8))
+        plan = json.load(open(PLAN))
+        if plan.get("harvested") or not plan["tasks"]:
+            log("nothing left to plan for these tiers")
+            break
+        mlog = os.path.join(CAMP, "mutate_round%03d.log" % plan["round"])
+        with open(mlog, "w") as fh:
+            mut = subprocess.Popen([PY, os.path.join(ROOT, "tools", "mutate.py"), "queue", "--register",
+                                    "--budget", str(mutate_budget)], cwd=ROOT, stdout=fh, stderr=subprocess.STDOUT)
+            run_round(spawn, log)
+            mut.wait()
+        res = collections.Counter(re.findall(r"^[0-9A-F]{8}: (MATCH|IDENTITY|EXHAUSTED)\b", open(mlog).read(), re.M))
+        log("mutator: %s" % (", ".join("%s %d" % kv for kv in sorted(res.items())) or "queue empty"))
+        addrs = [x for t in plan["tasks"] for x in t["addrs"]]
+        lost = sum(not reported(x) for x in addrs)
+        n += 1
+        if lost > len(addrs) / 2.0:
+            log("STOP: %d of %d targets got no report - the agents are failing (rate limit? credits?). "
+                "Run the cell again later; nothing is lost." % (lost, len(addrs)))
+            break
+        if rounds and n >= rounds:
+            break
+    log("tidy:\n" + tail(tool("mutate.py", "tidy", "--register"), 3))
+    log("harvest:\n" + tail(tool("campaign.py", "harvest", "--commit"), 14))
 
 
 # ------------------------------------------------------------------ harvest
@@ -708,12 +974,12 @@ def cmd_harvest(a):
         for addr in t["addrs"]:
             rp = os.path.join(MANUAL, addr, "REPORT.json")
             if not os.path.exists(rp):
-                rows.append((addr, t["tier"], "NOREPORT", ""))
+                rows.append((addr, t["tier"], "NOREPORT", "", None))
                 continue
             try:
                 r = json.load(open(rp))
             except Exception:
-                rows.append((addr, t["tier"], "BADREPORT", ""))
+                rows.append((addr, t["tier"], "BADREPORT", "", None))
                 continue
             outcome, words = ("TIMEOUT" if r.get("timeout") else "MISS"), str(r.get("words", ""))
             if addr in status:
@@ -735,27 +1001,29 @@ def cmd_harvest(a):
                     else:
                         outcome = "REFUSED"
                         words = (out.strip().splitlines() or [""])[0][:80]
-            rows.append((addr, t["tier"], outcome, words))
+            rows.append((addr, t["tier"], outcome, words, (r.get("screen") or {}).get("op")))
 
     with open(LEDGER, "a") as fh:
-        for addr, tier, outcome, words in rows:
+        for addr, tier, outcome, words, op in rows:
             if outcome not in ("NOREPORT", "ALREADY"):
-                fh.write(json.dumps(dict(addr=addr, tier=tier, round=rnd, outcome=outcome,
-                                         words=words, t=time.strftime("%Y-%m-%d %H:%M"))) + "\n")
+                e = dict(addr=addr, tier=tier, round=rnd, outcome=outcome, words=words, t=time.strftime("%Y-%m-%d %H:%M"))
+                if op is not None:
+                    e["op"] = op   # a screen's best candidate: structural OPs from the target
+                fh.write(json.dumps(e) + "\n")
     cloned = famclone_apply()
     junk = clean_root()
     audit = run([PY, os.path.join(ROOT, "tools", "audit.py")])
     clean = "RESULT: CLEAN (0 errors" in audit
 
-    c = collections.Counter((tier, o) for _, tier, o, _ in rows)
-    for tier in ("haiku", "deepseek"):
+    c = collections.Counter((tier, o) for _, tier, o, _, _ in rows)
+    for tier in TIERS:
         n = sum(v for (ti, _), v in c.items() if ti == tier)
         if n:
             print("%-8s %3d targets: %s" % (tier, n, ", ".join("%s %d" % (o, v) for (ti, o), v in sorted(c.items()) if ti == tier)))
     print("famclone: %d more registered" % cloned)
     if junk:
         print("removed stray root files: %s" % junk)
-    for addr, tier, outcome, words in rows:
+    for addr, tier, outcome, words, _ in rows:
         if outcome in ("REJECTED", "REFUSED", "BADREPORT"):
             print("  %s %s %s %s" % (addr, tier, outcome, words))
     print("audit: " + (audit.strip().splitlines() or ["?"])[-1])
@@ -770,8 +1038,8 @@ def cmd_harvest(a):
     pending = run(["git", "status", "--porcelain", "functions.json", "src/work8/auto"]).strip()
     if a.commit and (total or pending) and clean:
         run(["git", "add", "functions.json", "src/work8/auto", "shared/construct_exceptions.json"])
-        msg = "Campaign round %d: %d matches (haiku %d, deepseek %d, famclone %d)%s" % (
-            rnd, total, got["haiku"], got["deepseek"], cloned,
+        msg = "Campaign round %d: %d matches (screen %d, haiku %d, deepseek %d, famclone %d)%s" % (
+            rnd, total, got["screen"], got["haiku"], got["deepseek"], cloned,
             " + pending registrations (mutator)" if pending and not total else "")
         body = "Registered via tools/campaign.py harvest (worklist.py register re-verifies each: " \
                "RESULT: MATCH, IDENTITY 0 MISMATCH, forbidden-construct scan)."
@@ -787,7 +1055,7 @@ def cmd_harvest(a):
 def cmd_status(a):
     led = ledger()
     c = collections.Counter((e["tier"], e["outcome"]) for e in led)
-    for tier in ("haiku", "deepseek"):
+    for tier in TIERS:
         n = sum(v for (t, _), v in c.items() if t == tier)
         m = c[(tier, "MATCH")]
         if n:
@@ -816,12 +1084,16 @@ def main():
     n.add_argument("--queue-only", action="store_true",
                    help="only re-score and rewrite the search queue (no famclone, no plan)")
     n.add_argument("--refine", type=int, default=0, help="refine N new candidates first (free)")
-    n.add_argument("--haiku", type=int, default=60, help="Haiku target functions in the plan")
-    n.add_argument("--deepseek", type=int, default=MAX_DEEPSEEK, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)
+    n.add_argument("--screen", type=int, default=300,
+                   help="one-turn Haiku screens of never-tried functions <= %d words" % HAIKU_MAX_WORDS)
+    n.add_argument("--haiku", type=int, default=80, help="full Haiku agents (screened functions inside the gate)")
+    n.add_argument("--haiku-rest", action="store_true",
+                   help="also plan the screened <= %d-word functions outside the gate (~13%% for the agent)"
+                        % SCREEN_PASS[0][0])
+    n.add_argument("--deepseek", type=int, default=0, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)
     n.add_argument("--batch", type=int, default=20, help="agents spawned concurrently")
     n.add_argument("--no-haiku-regular", dest="haiku_regular", action="store_false",
-                   help="reopened targets only: the regular pool is 32%% at <=40 words and 17%% at 41-80 "
-                        "(rounds 1-19), so it is on by default and REOPEN_SHARE caps the retries")
+                   help="full Haiku agents for reopened functions only (shared/reopen.json)")
     h = sub.add_parser("harvest")
     h.add_argument("--commit", action="store_true")
     h.add_argument("--force", action="store_true", help="harvest a round again")

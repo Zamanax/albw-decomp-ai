@@ -1,144 +1,155 @@
 ---
 name: decomp-campaign
-description: "Default way to make progress in a session with subagents: cost-routed rounds (free harvest, cheap Haiku agents, at most 4 DeepSeek agents) driven by tools/campaign.py. Use when asked to 'continue the decomp', 'run a session', 'match more functions' with agents."
+description: "Default way to make progress in a session with subagents: one eval cell (campaign.run_loop) chains cost-routed rounds with no model turn between them - a one-turn Haiku screen first, the full Haiku agent only inside the screen's gate, DeepSeek off by default. Use when asked to 'continue the decomp', 'run a session', 'match more functions' with agents."
 ---
 
-# Start of session (4 commands)
+# Start of session (one command, one cell)
 
 ```
-uv run python tools/campaign.py status                       # where we are
-uv run python tools/campaign.py harvest --commit             # collect a round left unfinished, if any
-uv run python tools/campaign.py next --refine 1000           # free work + the next paid plan
-uv run python tools/mutate.py queue --register               # free: search the register/order queue
+uv run python tools/campaign.py status       # where we are
 ```
 
-`next` already did the free work (famclone harvest, refine on 1,000 new candidates, a structural
-score of every unmatched function's best source, the search queue) and wrote
-`logs/campaign/plan.json`. `mutate.py queue` then searches `logs/campaign/search_queue.jsonl` — the
-functions whose only difference is a register or an instruction position — and registers what it
-matches; those never appear in the plan. Both stages are free; the plan is the only thing that costs.
-Spawn and supervise it with this eval cell (Python), unchanged:
+Then this eval cell (Python, cell `timeout: 0`), unchanged:
 
 ```python
 import sys, importlib; sys.path.insert(0, "tools")
 import campaign; importlib.reload(campaign)
-campaign.run_round(agent, log)
+campaign.run_loop(agent, log)
 ```
 
-`run_round` keeps a rolling window of `plan["batch"]` (20) Haiku agents, starting the next one as
-soon as any finishes, and runs every DeepSeek agent alongside. Each agent has a wall-clock budget,
-`TIME` in `campaign.py`: at the soft limit it gets one WRAP UP message, and at the hard limit it is
-stopped. Each of its targets still missing a report then gets a timeout `REPORT.json` built from its
-best logged check. A logged MATCH is still registered, and harvest re-verifies it.
+That is the whole session. `run_loop` repeats, with no model turn in between:
 
-Progress is visible in three places:
-- the cell's live log: start, finish, wrap-up and stop events, plus a table of the running agents
-  every minute (age, `*` after wrap-up, checks and best % per target, read from `fn.py`'s
-  `check_log.jsonl`);
-- Agent Hub (`Alt+A`) for each agent's transcript;
-- `campaign.py status` from a shell.
+1. `campaign.py harvest --commit` - collects the previous round (or one left unfinished), registers
+   and commits.
+2. `campaign.py next --screen 300 --haiku 80 --deepseek 0` - free work (famclone, structural scores,
+   the search queue) and the next plan.
+3. `run_round` - spawns and supervises the plan, while `mutate.py queue --register --budget 1000`
+   searches the register/order queue alongside.
 
-If the cell or kernel dies mid-round, run the same cell again. Only tasks without reports start,
-under fresh labels, and nothing finished is lost: every finished target already wrote its
-`REPORT.json`.
+It ends when the plan is empty (then `mutate.py tidy --register` and a last harvest), or stops early
+when more than half of a round's targets got no report. **Do not supervise it turn by turn and do not
+run the steps by hand between rounds.** The Opus session that used to do that cost more than all
+Haiku agents together ($65.8 against $36.9 over rounds 1-22) and shares their Anthropic cap. When the
+cell returns, read its log and report the totals.
 
-Then `uv run python tools/campaign.py harvest --commit`, then `next` again. A round lasts at most
-about (Haiku agents ÷ 20) × median agent time + the Haiku hard limit; the DeepSeek hard limit is
-35 min.
+# The tiers (cheapest first; a function climbs only when the cheaper tier says it is worth it)
 
-# The mutator stage (free, before and between rounds)
+| tier | what it is | cost / time | who gets it |
+|---|---|---|---|
+| free | famclone, refine's flag variants, `mutate.py` on `OP=0`/order-only sources | CPU | everything, before and between rounds |
+| `screen` | ONE Haiku turn, no tools: the prompt inlines the brief's rules, `CONTEXT.md` and the start source; the agent writes 4 candidates to `logs/manual/<ADDR>/screen/`; `run_round` compiles them (default flags, then the flag sweep on the best two) and writes `REPORT.json` | ~$0.0075, ~25 s | every function ≤ 80 words no tier has tried |
+| `haiku` | the full agent (reads `docs/AGENT_BRIEF.md`, runs its own checks) starting from the screen's best candidate | ~$0.02-0.04, ~2 min | screened functions inside the gate `SCREEN_PASS`: best source at `OP ≤ 2` for ≤ 40 words, `OP ≤ 5` for 41-80 |
+| `deepseek` | one agent per target, hard cap 4 per round | ~$0.10-0.30, 4-8 min | off by default; Haiku misses and functions > 80 words whose start is ≤ 20 OPs away |
 
-`tools/mutate.py` hill-climbs the source of a function with rewrites that keep its meaning
-(statement moves, `if`/`else` flips, commutative operands, named locals for sub-expressions, single-use
-inlining, the library's `set`/`setCopy`, `exec`/`execute`, `PtrList` variants, integer types, flag
-variants), scoring each variant with the STRUCTURE line: ~3,400 variants a minute on 16 workers, one
-queued function per minute at the default 3,000-check budget.
+A clean screen match (bytes, `IDENTITY 0 MISMATCH`, no forbidden construct) is registered by harvest
+like any agent match. A screen's best candidate at `OP=0` goes to the mutator queue first and reaches
+the Haiku agent only after the mutator reports it EXHAUSTED.
+
+# Watching it
+
+- the cell's live log: per round the harvest and plan summaries, one line per compiled batch of
+  screens (`screens 53/120: +2 compiled (MATCH 1, MISS 1)`), one line per finished agent, a table of
+  the running agents every minute, the mutator's totals;
+- `uv run python tools/campaign.py status` from a shell (hit rate per tier, the live plan);
+- Agent Hub (`Alt+A`) for a transcript.
+
+Measured: a round of 120 screens + 13 agents ran 4 min, 6.5 min with its harvest and plan.
+
+# When it stops or dies
+
+- `STOP: N of M targets got no report` - the agents are failing: an Anthropic `429` (the weekly cap
+  answers with a retry-after of days) or an OpenRouter `402` (credits). Nothing is lost and nothing is
+  recorded as tried: run the same cell again later.
+- The cell or kernel dies mid-round: run the same cell again. The harvest takes what was reported,
+  screens whose candidates are on disk are compiled instead of re-run, and everything else is
+  planned again.
+- `docs/AGENT_BRIEF.md has no '## …' section` from `next`: the screen prompt inlines the sections
+  named in `BRIEF_SECTIONS`; a renamed heading must be renamed there too.
+
+# Tuning
+
+`campaign.run_loop(agent, log, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False)`
+
+Spend in this order (estimates from the pilot, `docs/LESSONS.md` "One-turn screen"; `status` has the
+live rates):
+
+| step | setting | functions | est. matches | $/match |
+|---|---|---|---|---|
+| screen + gated agent | the defaults | 3,358 screens, ~700 agents | ~365 | ~$0.13 |
+| the rest ≤ 40 words | `haiku_rest=True`, once the defaults leave nothing to plan | ~1,070 agents | ~140 | ~$0.28 |
+| the rest at 41-80 words | not offered: ~5% for the agent | ~1,590 | ~85 | ~$0.72 |
+
+- `rounds=N` stops after N rounds (a bounded session).
+- `deepseek=4` adds the DeepSeek tier. It costs about the same per match as Haiku at 41-80 words
+  ($0.23 against $0.30) and is several times slower, so it is for Haiku near-misses only.
+- One round by hand: `campaign.py next …`, then `campaign.run_round(agent, log)` in the cell, then
+  `campaign.py harvest --commit`. `next --queue-only` re-scores the search queue without a plan.
+- The gate: `SCREEN_PASS` in `campaign.py`. Each screen's ledger row carries `op` (its best
+  candidate's structural OP), so the gate can be re-measured by joining those rows with the later
+  `haiku` rows of the same address. Functions outside the gate only reach the agent under
+  `haiku_rest`, which is therefore also the way to test a wider gate.
+- Time limits are `TIME` in `campaign.py` (screen 4 min hard, Haiku 15/20, DeepSeek 25/35);
+  re-measure from `check_log.jsonl` before changing them.
+
+# The mutator stage (free)
+
+`tools/mutate.py` hill-climbs a source with rewrites that keep its meaning (statement moves,
+`if`/`else` flips, commutative operands, named locals, single-use inlining, the library's
+`set`/`setCopy`, `exec`/`execute`, `PtrList` variants, integer types, flag variants), scored by the
+STRUCTURE line. The loop runs it at 1,000 checks per function (42 of its 48 matches needed no more;
+~20 s each). By hand:
 
 ```
-uv run python tools/mutate.py queue --register     # logs/campaign/search_queue.jsonl (free, ~1 min each)
-uv run python tools/mutate.py barriers --register  # the __schedule_barrier hack backlog (one-off passes)
+uv run python tools/mutate.py queue --register             # logs/campaign/search_queue.jsonl, 3,000 checks each
+uv run python tools/mutate.py queue --register --again     # also the ones the loop gave up on at 1,000
 uv run python tools/mutate.py <addr> --src FILE --budget 20000   # a family anchor by hand
-uv run python tools/mutate.py tidy --register      # inline temps the search introduced but the bytes do not need
-uv run python tools/structscore.py census          # per-step impact: OP=0 buckets, queue size, mutator totals
+uv run python tools/mutate.py barriers --register          # the __schedule_barrier hack backlog
+uv run python tools/mutate.py tidy --register              # inline temps the search introduced but the bytes do not need
+uv run python tools/structscore.py census                  # OP=0 buckets, queue size, mutator totals
 ```
 
 A match registers itself through `worklist.py register` and the next `next` clones its shape family.
-Any source carrying a forbidden construct (weak, asm, volatile, `perm_t`, no-op masks, identical
-if/else arms) is refused, so a refusal is a miss to park, not a match. A target the search gives up on
-is marked EXHAUSTED and returns to the paid routing — that is the only way a queued function costs
-money, and it happens with the mutator's measured attempt attached.
+A source carrying a forbidden construct is refused: a refusal is a miss to park, not a match.
 
 # Why it is built this way (do not undo)
 
-- **Results live on disk.** Agents write `logs/manual/<ADDR>/REPORT.json`; harvest reads files, not
-  agent messages. A dead kernel, lost handle or rate-limited agent loses nothing; a target without a
-  report is simply retried next round. Never parse agent replies by hand.
-- **Free before paid.** famclone (one match → its whole shape family), refine (15 flag variants) and
-  the mutator (below) cost no tokens. 393 unmatched functions sit in 123 shape families; agents get
-  one representative per family and famclone clones the rest.
-- **Register/order differences are never paid for.** `next` scores every unmatched function's best
-  source with `fn.py`'s `STRUCTURE` line and sends the ones that differ only by registers or
-  instruction order to `logs/campaign/search_queue.jsonl` (one representative per shape family);
-  `tools/mutate.py` searches those for free. A queued function reaches a paid tier only after the
-  mutator reports it EXHAUSTED, and no member of a queued shape family is planned either.
-- **Cost routing** (in `campaign.py`, constants at the top):
-  - Haiku: first attempt on functions ≤ 80 words, **one target per agent**; ~$0.01-0.05/agent.
-    Measured over rounds 1–14:
-    - by size: 33–37% at ≤ 40 words, 18% at 41–80, 6% at 81–160;
-    - by targets per agent: 27% as an agent's only target, 15% with two, 7% with three.
-  - DeepSeek: **hard cap 4 per round**, one target each, only for Haiku misses or functions too big
-    for Haiku whose start is ≤ 20 structural OPs away (72% at OP 6–20, 22% above 20). Ranked by
-    family size × closeness. ~$0.10-0.30/agent.
-  - Every target gets `logs/manual/<ADDR>/CONTEXT.md` from `next` (`tools/context.py`). It holds
-    the disassembly, the target's references next to the start source's names, and related matched
-    sources. Agents batch variants through `fn.py checks` and sweep flags with `fn.py flags`, since
-    every round trip costs them time.
-  - **Ranking:** within each tier, EV = family size × the *measured* hit rate of that tier on past
-    targets of the same size and structural-OP bucket (`hit_model()`, re-learned from every round's
-    plan and ledger; `next` prints the table).
-  - **Reopen after a header fix:** when a shared header gains a byte-proven form, add its markers
-    to `shared/reopen.json` (vtable slot, literal words, call targets, instruction encodings).
-    Unmatched functions containing them ignore attempts made before `since`, take up to half of
-    the Haiku slots first and half of the DeepSeek ones (`REOPEN_SHARE`), and their prompt names the form. Remove the entry
-    once its functions are worked through.
-  - Nobody gets the same function twice at the same tier (`logs/campaign/ledger.jsonl`, plus the
-    pre-campaign `logs/manual` dirs); history and parking apply to the whole shape family.
-- **A rolling window of 20 Haiku agents, with time limits.**
-  - 80-100 agents at once hit the Anthropic rate limit (429) and the 100-background-job cap.
-  - The old fixed batches waited for their slowest member. Agents ran from under 1 min to over
-    70 min, so one slow agent held up 19 finished slots.
-  - The limits come from 630 measured targets. Haiku's first match comes at a median of 0.3 min
-    (max 20) after its first check; DeepSeek's at a median of 5 min (max 20). The 40-70 min tails
-    produced nothing.
-  - So: Haiku wraps up at 15 min and stops at 20; DeepSeek wraps up at 25 min and stops at 35.
-  - A stopped target is recorded as `TIMEOUT` and moves up a tier; it is not retried at the same
-    tier.
-- **One brief, not a pasted context.** Agents read `docs/AGENT_BRIEF.md`; the per-task prompt is a
-  few lines. Edit the brief (not prompts) when a new construct is learned.
-- **Dead ends are committed.** `shared/parked.json` lists functions no tier should be paid for
-  (documented open problems or steering-only matches). Add an entry with its reason when a function
-  is proven blocked; remove it when a new technique applies.
+- **Results live on disk.** Agents write `logs/manual/<ADDR>/REPORT.json` (a screen:
+  `screen/s1..s4.{c,cpp}`, and `run_round` writes the report); harvest reads files, not agent
+  messages. A dead kernel, lost handle or rate-limited agent loses nothing. Never parse agent replies.
+- **Free before paid.** famclone (one match → its whole shape family), refine and the mutator cost no
+  tokens. Agents get one representative per shape family.
+- **One cheap turn decides whether the agent is worth its price.** Measured on 80 past Haiku targets:
+  one tool-less turn matches ~3% outright, three such turns 11% against the agent's 18% at the same
+  cost - so the turn does not replace the agent. But where its best candidate is ≤ 2 OPs away the
+  agent matched 44-67%, and ~10% everywhere else. The gate keeps 65% of the agent's matches at ≤ 40
+  words for 29% of the agent runs.
+- **Screen candidates live in `screen/`.** `attempted()` reads a source directly under
+  `logs/manual/<ADDR>/` as a Haiku agent's attempt; a screen must not use up that turn.
+- **The screen prompt is self-contained and generated.** It inlines the brief's sections, so edit
+  the brief (not prompts) when a construct is learned; both tiers pick it up.
+- **No model in the loop.** Every step between rounds is a tool with a `NEXT` line; `run_loop` calls
+  them. A model turn there buys nothing and was the largest cost line.
+- **Size is the signal.** Haiku agent by planned size: 27% at ≤ 20 words, 33% at 21-40, 13% at 41-80,
+  5% above 80. Start-source quality barely predicts it; the screen's OP does.
+- **A rolling window of 20 Anthropic agents** (screens and Haiku agents share it), DeepSeek alongside.
+  80-100 at once hit the 429 and the 100-background-job cap. Haiku matches come within 2 min of the
+  first check; the limits only cut the tail.
+- **Nobody gets the same function twice at the same tier** (`logs/campaign/ledger.jsonl`, plus the
+  pre-campaign `logs/manual` dirs); history and parking apply to the whole shape family.
+- **Reopen after a header fix.** When a shared header gains a byte-proven form, add its markers to
+  `shared/reopen.json`. Unmatched functions containing them ignore attempts made before `since` -
+  they are screened again - and their prompt names the form. Reopened retries at 41-80 words convert
+  at 5%: `REOPEN_SHARE` caps them. Remove the entry once its functions are worked through.
+- **Dead ends are committed.** `shared/parked.json` lists functions no tier should be paid for. Add
+  an entry with its reason when a function is proven blocked; remove it when a new technique applies.
+- **Large functions are not this skill's job.** Above 80 words the agents have matched ~50 functions
+  from scratch; the other 1,000+ large matches are shape families and the `fam_sti` generator.
 
-# Tuning a round
-
-`next --haiku 60 --deepseek 4 --batch 20 --refine 0`. Lower `--haiku` when the last round's Haiku
-hit rate (`status`) drops below ~15%: below that, a refine batch (free) or a new family anchor is a
-better use of the round. DeepSeek cannot exceed 4 (cost and rate-limit cap); `--deepseek 0` for a
-Haiku-only round, e.g. when OpenRouter credits are low (a 402 error means out of credits). Time
-limits are `TIME` in `campaign.py`; re-measure them from `check_log.jsonl` before changing them.
-
-`next --queue-only` re-scores the search queue (rewriting `logs/campaign/search_queue.jsonl`) without
-famclone, a new plan or moving `REPORT.json`s: use it after a mutator pass to see what is left. When
-the queue is large, spend the round on `mutate.py queue` instead of agents — it is free and it
-removes the near-misses the paid tiers would otherwise be paid for.
-
-# After the round
+# After the session
 
 - harvest prints per-tier outcomes, REJECTED/REFUSED lines, and commits only if `audit.py` is clean.
-- A round that produced mutator matches: `mutate.py tidy --register` (drops the temps the search
-  introduced but the bytes do not need) and one more `next`, so famclone collects their families.
-- Record any new compiler physics a DeepSeek report explains in `docs/LESSONS.md` *and* the proven
-  constructs list in `docs/AGENT_BRIEF.md` — that is how later Haiku agents get cheaper wins. When a
-  mutator target fails for a structural reason (a construct choice, not an order), the same applies.
-- Honesty rules (AGENTS.md) are enforced twice: by the brief and by harvest's forbidden-construct scan
-  before registration. A match needing a forbidden construct is a miss; park it if documented.
+- Record any new compiler physics an agent report explains in `docs/LESSONS.md` *and* the proven
+  constructs list in `docs/AGENT_BRIEF.md` - the screen and the agents both read that list.
+- Honesty rules (AGENTS.md) are enforced three times: by the brief, by the screen's and harvest's
+  forbidden-construct scan, and by `worklist.py register`. A match needing a forbidden construct is
+  a miss; park it if documented.

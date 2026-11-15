@@ -11,10 +11,12 @@ The workflow lives in the tools, not in this file — every tool prints a
 `NEXT` line with the exact next command. Three skills hold the procedures:
 
 - **A session with subagents** (the default way to make progress): use the
-  `decomp-campaign` skill. `python tools/campaign.py next` does the free
-  work (family cloning, refine) and writes a cost-routed agent plan
-  (Haiku first, at most 4 DeepSeek per round); `harvest --commit` collects
-  it. Subagents read `docs/AGENT_BRIEF.md` and report through files.
+  `decomp-campaign` skill. One eval cell, `campaign.run_loop(agent, log)`,
+  chains rounds with no model turn between them: free work (family cloning,
+  the mutator), a one-turn Haiku screen of every untried function ≤ 80
+  words, the full Haiku agent only where the screen got close, and a
+  harvest that registers and commits. DeepSeek is off by default.
+  Subagents read `docs/AGENT_BRIEF.md` and report through files.
 - **Matching one function by hand or with the refiner**: the `decomp-loop`
   skill (`python tools/worklist.py next`).
 - **Deferred / near-miss functions** and **de-hack** work: the
