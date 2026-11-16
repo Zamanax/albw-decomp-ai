@@ -1,0 +1,70 @@
+typedef unsigned char u8;
+typedef unsigned int u32;
+
+extern char ro_006F047C[];
+
+struct S {
+    void* vt;
+    u8 p04[0x2c];
+    float m30, m34, m38, m3c, m40, m44, m48;
+    u32 m4c, m50, m54;
+    float m58, m5c, m60, m64, m68;
+    u32 m6c, m70;
+    float m74, m78;
+    u32 m7c, m80;
+    float m84, m88;
+    u32 m8c, m90;
+    u8 p94[0x7];
+    u8 m9b;
+    u8 p9c[0x18];
+    float mb4, mb8;
+    u32 mbc, mc0;
+    u8 pc4[0x24];
+    u32 me8, mec, mf0, mf4, mf8, mfc, m100, m104, m108, m10c, m110;
+};
+
+void func_0040E208(S* self) {
+    self->vt = (void*)ro_006F047C;
+    u32 z = 0;
+    self->m30 = 1.0f;
+    self->m34 = 1.0f;
+    self->m38 = 0.0f;
+    self->m3c = 0.0f;
+    self->m40 = 0.0f;
+    self->m44 = 0.0f;
+    self->m48 = 0.0f;
+    self->m4c = z;
+    self->m50 = z;
+    self->m54 = z;
+    self->m58 = 1.0f;
+    self->m5c = 1.0f;
+    self->m60 = 0.0f;
+    self->m64 = 0.0f;
+    self->m68 = 0.0f;
+    self->m6c = z;
+    self->m70 = z;
+    self->m74 = 0.0f;
+    self->m78 = 0.0f;
+    self->m7c = z;
+    self->m80 = z;
+    self->m84 = 0.0f;
+    self->m88 = 0.0f;
+    self->m8c = z;
+    self->m90 = z;
+    self->m9b = z;
+    self->mb4 = 0.0f;
+    self->mb8 = 0.0f;
+    self->mbc = z;
+    self->mc0 = z;
+    self->me8 = z;
+    self->mec = z;
+    self->mf0 = z;
+    self->mf4 = z;
+    self->mf8 = z;
+    self->mfc = z;
+    self->m100 = z;
+    self->m104 = z;
+    self->m108 = z;
+    self->m10c = z;
+    self->m110 = z;
+}
