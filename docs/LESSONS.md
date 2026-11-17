@@ -1310,8 +1310,8 @@ value got (stores separated by calls, so the STR offsets name the values). No ga
 ## Static initializers, second pass: forms the first generator missed (2026-11-17)
 
 `tools/stigen.py` reads a static initializer from its own code and emits the globals in store order
-(`uv run python tools/stigen.py 0xADDR [--out F] [--check]`). 15 of the 52 remaining matched, plus the
-10 from the first pass: 25 of 62. New forms:
+(`uv run python tools/stigen.py 0xADDR [--out F] [--check]`). 16 of the 52 remaining matched, plus the
+10 from the first pass: 26 of 62. New forms:
 
 - **A class with an `f32` constructor keeps the value in a register; a plain `u32` global does not.**
   `struct F2l { u32 v; F2l(f32 f) : v((u32)f2l(f)) {} }; F2l data_XX(0.0f);` — this is the
@@ -1319,11 +1319,16 @@ value got (stores separated by calls, so the STR offsets name the values). No ga
   rematerialised as `mov r0,#0`; through a constructor with a parameter the value stays where the call
   left it, which the game's `str r0,[r4]` at the tail needs.
 - **Float runs split into whole `Vec3(x, y, z)` globals**, one `vstmia` group each (005C1950, 005F07E4).
-- Misses (37): **a pole order armcc cannot produce from a source** — with 1-3 single SafeStrings the
-  target's literal pool puts the string before the vtable literal, armcc 4.1 puts the vtable first
-  below 4 singles; T_-struct object boundaries (8); forms outside the generator (11: CriticalSection-
-  like objects, vtable objects, `__aeabi_vec_ctor` arrays, wide strings over the `.rodata` L"", one
-  49040-byte non-fam_sti shape).
+- **A `u8` run splits into 4-byte colour structs** (one per colour) so the .data layout puts them
+  before the 8-byte Id64 (005CFE6C).
+- Misses (36). **14 of them are 2-3 single SafeStrings at OP=1 REG=0 MOVED=0**: the code is identical
+  and only a literal-pool pair is ordered differently (the string text before or after the vtable
+  word, target string-first, ours vtable-first; armcc 4.1 emits string-first from 4 singles on).
+  Tried: three singles vs an array of 3 (array goes through vec_ctor, OP=22), reversed declaration
+  order (OP=5), pointer-typed strings (OP=14). Left as a compiler limit with the evidence.
+  T_-struct object boundaries (8); forms outside the generator (10: CriticalSection-like objects,
+  vtable objects, `__aeabi_vec_ctor` arrays, wide strings over the `.rodata` L"", guarded local
+  statics, one 49040-byte non-fam_sti shape).
 - 005CFD54 and 005F7F84 stay at OP=0 REG=6: only the four colour bytes come out rotated (target
   ip/r1/r2/r3, ours r3/r1/r2). Member-init list, body assignment, a ctor with parameters and a packed
   u32 all tried; the u32 collapses the stores into one STR (OP=13).
