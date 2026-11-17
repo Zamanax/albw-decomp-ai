@@ -1280,6 +1280,33 @@ callee-saved register before the object test (similarity 72 %); what is left is 
 addresses (h, o, &sType) are allocated to registers — a step-4 problem, and small enough to be a
 step-4 test case.
 
+## Register allocation: what the probes say (2026-11-17)
+
+`tools/regalloc.py alloc` compiles a probe with armcc -S and reports which callee-saved register each
+value got (stores separated by calls, so the STR offsets name the values). No game binary needed.
+
+- **Callee-saved registers fill in live-range start order**: parameters first among equal values, then
+  locals in declaration order. Two locals declared before the parameters' first use take r4/r5
+  (`const void* k = &K::s; void* z = 0;` → k=r4, z=r5, parameters r6/r7); with no locals the
+  parameters are r4/r5 and the constant address is rematerialised at each use.
+- **Never in a register**: `u8`/`bool` zero (`mov r0,#0` at each store) and a constant whose live
+  range is one use.
+- **A parameter moves up when aliased by a local declared first.** 002327BC needs `o = r4, h = r5`,
+  the type address r6. Plain source gives `o = r4, type = r5, h = r6`; `Holder* hh = h;` first, then
+  `hh` everywhere, gives `o = r4, h = r5, type = r6` — the target's allocation — and the function
+  goes from OP=1 REG=6 to **OP=1 REG=1, 89 %** at -O2. The last difference is the `mC0 = 0` store
+  (`mov r0,#0` where the game reuses r7); `u8`/`bool`/helper spellings all rematerialise.
+- **It is not a general lever.** `regalloc.py alias` applied to 72 large functions with a best
+  source: identical structure on every one except noise (the alias is coalesced away when the
+  parameter already owns the target register). Genuine register deltas left after OP=0 are decided by
+  live ranges, not declaration order: 00672A28 (OP=0 REG=2 MOVED=1, 127/132) differs only in which of
+  two values is live across a call (`ldr r2,[r5,#0x8dc]` vs `r1`) and in two independent
+  instructions swapping (`mov r0,r7` / `add sp,sp,#0x10`). Argument spellings (local, cast, helper)
+  do not move it.
+- Consequence for the large tail: a **register-mapping search** (permute which local/value lands in
+  which callee-saved register, scored by fn.py's register diff) is the next thing to build; source
+  reordering alone does not reach these. 002327BC is the test case for it (one REG left, 79 %).
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
