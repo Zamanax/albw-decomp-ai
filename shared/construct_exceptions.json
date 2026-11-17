@@ -300,6 +300,10 @@
     "bl_calls": 15,
     "tail_calls": 0
    },
+   "0065B104": {
+    "bl_calls": 15,
+    "tail_calls": 0
+   },
    "0065B158": {
     "bl_calls": 31,
     "tail_calls": 0
@@ -487,9 +491,12 @@
    "00654460",
    "00654770",
    "00655414",
+   "00655724",
    "00671F04",
    "00672588",
-   "006730D4"
+   "006730D4",
+   "00673A84",
+   "00674C5C"
   ],
   "rule": "`__attribute__((notailcall))` on a callee prototype is honest only if that callee is never tail-called (`b callee` from another function) anywhere in the game, i.e. it describes the callee, not a call site. Callees must be named func_XXXXXXXX/FUN_XXXXXXXX. Replaces `weak` used to stop a tail call."
  }

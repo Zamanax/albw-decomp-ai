@@ -108,11 +108,11 @@ def substitute_constants(src, anchor_w, cand_w):
 
 
 def attempt_clone(anchor, cand, anchor_entry, verbose=False):
-    """Return (ok, message). On ok, the clone is already written and verified."""
+    """Return (ok, message, dest, flags). On ok, the clone is already written and verified."""
     ws_a, s_a = ct.words(anchor)
     ws_c, s_c = ct.words(cand)
     if len(ws_a) != len(ws_c):
-        return False, "size differs"
+        return False, "size differs", None, None
     src = open(anchor_entry["path"], encoding="utf-8").read()
     log = []
 
@@ -120,20 +120,20 @@ def attempt_clone(anchor, cand, anchor_entry, verbose=False):
     calls_a, _ = ct.calls(anchor)
     calls_c, _ = ct.calls(cand)
     if len(calls_a) != len(calls_c):
-        return False, "call count differs"
+        return False, "call count differs", None, None
     subs = {}
     for (i, ta_), (j, tc) in zip(calls_a, calls_c):
         if i != j:
-            return False, "call word indices differ"
+            return False, "call word indices differ", None, None
         if ta_ == tc:
             continue  # same callee: no substitution, spelling irrelevant
         name = f"func_{ta_:08X}"
         if name in subs and subs[name] != tc:
-            return False, "call sites split across targets"
+            return False, "call sites split across targets", None, None
         subs[name] = tc
     for name, t in sorted(subs.items(), key=lambda kv: -len(kv[0])):
         if name not in src:
-            return False, f"{name} not in source"
+            return False, f"{name} not in source", None, None
         src = src.replace(name, f"func_{t:08X}")
 
     # non-branch words: literal pool pointers by extern name, immediates by value
@@ -149,7 +149,7 @@ def attempt_clone(anchor, cand, anchor_entry, verbose=False):
                 subbed = True
                 break
         if not subbed:
-            return False, f"literal {w:08X}->{new:08X} has no extern name in source"
+            return False, f"literal {w:08X}->{new:08X} has no extern name in source", None, None
 
     sources = [src]
     ndiff = 0
@@ -159,33 +159,35 @@ def attempt_clone(anchor, cand, anchor_entry, verbose=False):
         if 0x100000 <= w < 0x800000 or 0x100000 <= wc < 0x800000:
             continue  # handled above
         if pc_relative(w) or pc_relative(wc):
-            return False, f"pool layout differs at word {i}"
+            return False, f"pool layout differs at word {i}", None, None
         ndiff += 1
         if ndiff > MAX_DIFF_WORDS:
-            return False, "too many differing words"
+            return False, "too many differing words", None, None
         next_sources = []
         for s in sources:
             variants, n = substitute_constants(s, w, wc)
             if not variants:
-                return False, f"word {i}: {n}"
+                return False, f"word {i}: {n}", None, None
             next_sources.extend(variants)
         sources = next_sources[:8]
         log.append(f"imm [{i}] {w:08X}->{wc:08X}")
 
     ext = ".cpp" if anchor_entry["path"].endswith((".cpp", ".cc", ".cxx")) else ".c"
-    dest = os.path.join(ROOT, "src", "work8", "twins", f"func_{cand:08X}{ext}")
+    dest = os.path.join(ROOT, "logs", "deep_twins", f"func_{cand:08X}{ext}")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     for k, s in enumerate(sources):
         s = s.replace(f"func_{anchor:08X}", f"func_{cand:08X}")
         s = s.replace(f"f_{anchor:08X}", f"f_{cand:08X}")
         open(dest, "w", encoding="utf-8").write(s)
-        if verify(dest, cand, anchor_entry):
-            return True, f"MATCH variant {k} ({'; '.join(log) or 'identical shape'})"
+        flags = verify(dest, cand, anchor_entry)
+        if flags:
+            return True, f"MATCH variant {k} ({'; '.join(log) or 'identical shape'})", dest, flags
     os.remove(dest)
-    return False, "check failed"
+    return False, "check failed", None, None
+
 
 def verify(dest, cand, anchor_entry):
-    """fn.py check with the anchor's flags, then --apcs=/fpic. True on MATCH."""
+    """fn.py check with the anchor's flags, then --apcs=/fpic. The matching flags, or None."""
     base_flags = anchor_entry.get("flags") or ""
     for flags in (base_flags, base_flags.replace("--apcs=/interwork", "--apcs=/fpic")):
         if not flags:
@@ -201,8 +203,16 @@ def verify(dest, cand, anchor_entry):
             kill_tree(proc)
             out = ""
         if "RESULT: MATCH" in (out or ""):
-            return True
-    return False
+            return flags
+    return None
+
+
+def register(cand, dest, flags):
+    """worklist.py register with the flags that matched (its default would be fn.py's)."""
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "worklist.py"), "register",
+                        hex(cand), "--src", dest, "--flags", flags],
+                       capture_output=True, text=True, cwd=ROOT)
+    return "-> honest" in r.stdout or "-> hack" in r.stdout
 
 
 def main():
@@ -251,9 +261,11 @@ def main():
             print(f"{anchor:08X} <- {cand:08X}")
             continue
         try:
-            good, msg = attempt_clone(anchor, cand, anchors[anchor])
+            good, msg, dest, flags = attempt_clone(anchor, cand, anchors[anchor])
         except Exception as e:  # noqa: BLE001 - log and continue the batch
-            good, msg = False, f"exception: {e}"
+            good, msg, dest, flags = False, f"exception: {e}", None, None
+        if good and not register(cand, dest, flags):
+            good, msg = False, msg + "; register refused"
         line = f"{cand:08X} anchor {anchor:08X}: {'OK ' if good else 'NO '}{msg}"
         print(line, flush=True)
         out.write(line + "\n")
