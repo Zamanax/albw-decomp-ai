@@ -527,8 +527,9 @@ def screen_prompt(t, brief):
         "sead headers do not provide them.",
     ]
     lines += ["- This function %s" % forms[f]["hint"] for f in t.get("forms", [])]
-    lines += ["", brief, "", "# Target context", "", read("logs/manual/%s/CONTEXT.md" % addr), "",
-              "# Start source (%s)" % ext, "", "```", read(start), "```", ""]
+    lines += ["", brief, "", "# Target context", "", read("logs/manual/%s/CONTEXT.md" % addr), ""]
+    if os.path.exists(os.path.join(ROOT, start)):   # a start lost with its directory: CONTEXT.md is enough
+        lines += ["# Start source (%s)" % ext, "", "```", read(start), "```", ""]
     return "\n".join(lines)
 
 
@@ -756,8 +757,15 @@ def cmd_next(a):
             start = start_of.get(addr) or ("logs/refine/%s/best.c" % addr)
             context.build(int(addr, 16), start=start if os.path.exists(os.path.join(ROOT, start)) else None, index=index)
             if t["tier"] == "screen":
-                for old in screen_candidates(addr):   # a reopened function is screened again
-                    os.remove(old)
+                # a reopened function is screened again: its old candidates move to screen/prev/ (outside
+                # screen_candidates() and attempted()), and a start source among them follows them there
+                prev = os.path.join(screen_dir(addr), "prev")
+                for old in screen_candidates(addr):
+                    os.makedirs(prev, exist_ok=True)
+                    shutil.move(old, os.path.join(prev, os.path.basename(old)))
+                    rel = os.path.relpath(old, ROOT).replace("\\", "/")
+                    if (by_addr[addr].get("start") or "").replace("\\", "/") == rel:
+                        by_addr[addr]["start"] = os.path.relpath(os.path.join(prev, os.path.basename(old)), ROOT)
                 os.makedirs(screen_dir(addr), exist_ok=True)
                 with open(os.path.join(ROOT, t["prompt_file"]), "w", encoding="utf-8", newline="\n") as fh:
                     fh.write(screen_prompt(by_addr[addr], brief))
