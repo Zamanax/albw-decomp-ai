@@ -1307,6 +1307,36 @@ value got (stores separated by calls, so the STR offsets name the values). No ga
   which callee-saved register, scored by fn.py's register diff) is the next thing to build; source
   reordering alone does not reach these. 002327BC is the test case for it (one REG left, 79 %).
 
+## Compiling with the rest of the translation unit (2026-11-17)
+
+How much the matched code says about the large tail, measured over the 3,634 unmatched functions
+above 80 words: a matched function's whole body appears inside one of them in only 24; 6-instruction
+windows (offsets masked) that matched code also contains cover 37 % of their instructions, 11 % at
+12; 55 % of their calls go to matched functions; 74 % have a matched neighbour in the binary. So the
+corpus gives types, prototypes and class context, not reusable code.
+
+What it can give beyond context is the **unit**. `tools/tu.py group` infers translation units from
+private references (a string literal, constant table or static referenced only within 32 KB of
+code); `tools/tu.py build` compiles a source inside its unit (each matched member's source in its
+own namespace, shared includes hoisted, the target pinned with `--sym`). The combined file is
+neutral: 12/12 matched members of the 0x672xxx unit re-verify inside it.
+
+- **0x412F58 matched only inside its unit.** Its function-local static's guard is loaded as
+  `[data_0071649C, #4]`: the anchor is 0x412BB4's guard, the first static of the file. Alone it
+  addresses its own guard (OP=2); beside 0x412BB4 it is 23/23. Registered from a unit file holding
+  the three real functions of 0x412BB4-0x412F58 (`src/work8/auto/func_00412F58.cpp`).
+- **Everything else compiled identically.** 310 unmatched functions with a best source and ≥ 3
+  matched unit members: 308 unchanged, 1 matched, 1 worse (a bogus 200-function unit at 0x10xxxx).
+  Register and order differences are decided inside a function; the unit does not reach them.
+- **Unit-level anchors are real but rarely buildable.** Functions whose code reads one object through
+  another object's address match at 22 % against 68 % overall (116 functions; this count also catches
+  plain struct members). The clean subclass, guards at a non-zero anchor offset (`tu.py guards`), is
+  40 functions, and none of the remaining ones has its anchor's owner matched: chains of unmatched
+  statics (0x709D28: 0x4A8030, 0x4AA9FC, 0x4AAD4C, 0x4AAF44; 0x70A570: seven functions). They need a
+  unit written whole. Namespaces cannot help when the anchor is a *global*: two sources must then name
+  the same definition, which needs a hand-written unit (the anchored-Id64 static initializers are
+  probably this, untested).
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
