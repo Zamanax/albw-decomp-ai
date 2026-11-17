@@ -47,14 +47,15 @@ typedef ::NoThrow nothrow_t;
 extern const nothrow_t nothrow;
 }  // namespace std
 
-// Engine allocators.
-void* operator new(u32 size, sead::Heap* heap = 0, s32 align = 4) throw();    // 0x0010BAB4
-void* operator new[](u32 size, sead::Heap* heap = 0, s32 align = 4) throw();  // 0x0010CEE0
+// Engine allocators. The heap has no default: with one, `new T[n]` would be ambiguous against the
+// size-only forms below (0x0066D8D0 allocates its state tables through both).
+void* operator new(u32 size, sead::Heap* heap, s32 align = 4) throw();    // 0x0010BAB4
+void* operator new[](u32 size, sead::Heap* heap, s32 align = 4) throw();  // 0x0010CEE0
 
 // Plain, non-throwing allocations. Matched sources declare these size-only forms themselves; the
 // declarations here let new headers be self-contained.
 void* operator new(u32 size) throw();
-void* operator new[](u32 size) throw();
+void* operator new[](u32 size) throw();                                   // 0x0010BA78
 void* operator new(u32 size, NoThrow) throw();
 
 #endif

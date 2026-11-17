@@ -18,6 +18,7 @@
 #define STATEMGR_H
 
 #include "albw_types.h"
+#include "sead_heap.h"
 #include "sead_string.h"
 
 struct StateTimeline {
@@ -29,6 +30,18 @@ struct StateMgrBase {
     StateMgrBase();                                        // 0x10A794
     void setStateName(s32 idx, const sead::SafeString& name);  // 0x10BEC4
 
+    // sead::Buffer::allocBuffer on the flattened name buffer. heap/align are parameters, so the
+    // inline is expanded late and their registers are set before the size test (0x66D9C4).
+    void allocNames(s32 size, sead::Heap* heap, s32 align = 4) {
+        if (size > 0) {
+            sead::FixedSafeString<24>* names = new (heap, align) sead::FixedSafeString<24>[size];
+            if (names) {
+                mNameCount = size;
+                mNames = names;
+            }
+        }
+    }
+
     u32 mCounter;                          // +0x00 frames in the current state
     s8 mCur;                               // +0x04
     s8 mNext;                              // +0x05
@@ -39,24 +52,39 @@ struct StateMgrBase {
     StateTimeline* mTimeline;              // +0x10
 };
 
-// The state-table construction recipe, as the game's actor constructors do it (0x2CCA44..0x2CCF0C
-// for TurtleMother, the same shape in every npc/enemy constructor):
-//
-//   mNum   = <n>;                       // number of states
-//   mOwner = this;
-//   mEnter = new Func[n * 2];           // enter and exec share one allocation
-//   mExec  = mEnter + n;
-//   <fill the 2n enter/exec slots with the null member pointer, then overwrite per state>
-//   mExit  = new Func[n];               // and fill with the null member pointer
-//   mNames = new (0, 4) sead::FixedSafeString<24>[n];   // 0x10CEE0, cookie {0x24, n}
-//   setStateName(i, "cState_...") for every named state
-//
+// The state-table construction recipe: init() below. The game has it out of line once per owner
+// type (0x0066D8D0, 0x0066739C: `init(this, n)` with n a byte temporary, so `const u8&`) and inlined
+// into most npc/enemy constructors (~295 unmatched functions contain the name-table half).
+// Proven on 0x0066D8D0 up to the null member-pointer constants: those are loaded from the owner
+// TU's member-pointer constant table (ro_006A5E3C + 0xB8 / + 0x10), whose offsets depend on every
+// other function of that TU, so the out-of-line copy only matches compiled with its owner's TU.
 template <class T>
 struct StateMgrT : StateMgrBase {
     typedef void (T::*Func)();
 
     // Derived part of the constructor: 0x18FC10-0x18FC24 zeroes exactly these four words.
     StateMgrT() : mOwner(0), mEnter(0), mExec(0), mExit(0) {}
+
+    // A helper with parameters, so it is inlined late: the loop does not know that the enter/exec
+    // count (2n) is even and keeps the odd-element step (`tst rN, #1`), as the game does.
+    static void clearTable(Func* table, s32 n) {
+        for (s32 i = 0; i < n; i++) table[i] = 0;
+    }
+
+    void init(T* owner, const u8& n) {
+        mNum = n;
+        mOwner = owner;
+        s32 n2 = mNum * 2;
+        Func* enter = new Func[n2];        // enter and exec share one allocation
+        mEnter = enter;
+        mExec = enter + mNum;
+        clearTable(enter, n2);
+        s32 n1 = mNum;
+        Func* exit = new Func[n1];
+        mExit = exit;
+        clearTable(exit, n1);
+        allocNames(n, 0);                  // 0x10CEE0 + cookie {0x24, n} + vec_ctor(0x10BDF0)
+    }
 
     T* mOwner;                             // +0x14
     Func* mEnter;                          // +0x18

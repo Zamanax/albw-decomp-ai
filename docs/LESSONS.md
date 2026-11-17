@@ -1249,6 +1249,37 @@ had refine or agent attempts, and the 51-member 0060BE24 family is parked.
   best 5/23). Untested: the lower global inside a struct with the Id64, or defined in a header after
   the table.
 
+## Inline idioms of unmatched large functions (2026-11-17)
+
+`formmine.py` ranks out-of-line markers; an inline helper leaves none. `tools/idioms.py` tokenizes
+every function register-blind (call targets and ro/text literal values kept), counts k-instruction
+windows over unmatched large functions and over matched ones, and clusters the windows that the
+first group shares and the second lacks. k=8, > 80 words, ≥ 12 users: 186 clusters. The top one
+reaches 376 functions:
+
+| # | users (large, unmatched) | what it is |
+|---|---|---|
+| 1 | 376 | `new (0,4) FixedSafeString<24>[n]` + `__aeabi_vec_ctor_nocookie_nodtor(0x100118)`: the StateMgr name table |
+| 2 | 272 | `calcLength`/`comparen` loop cap `cmp rN, #0x40000` (reopened: `sead-*` forms) |
+| 3 | 181 | the enter/exec/exit fill loop (`ldm {r1,r2} / stm / subs`) |
+| 10 | 71 | `bl 4FB344` + `bl 4FACA4` with a `*9` stride: unidentified helper pair |
+
+**StateMgr init is now a header form.** `StateMgrT::init(owner, const u8& n)` in `statemgr.h`
+(alloc, fill through a parameterised `clearTable`, `allocNames`). Proven on both out-of-line copies
+(0x0066D8D0, 0x0066739C): OP=10 REG=0 MOVED=7, 85.7 %, and every remaining difference is the null
+member-pointer constant, which is a UTF-encoded offset into the owner TU's member-pointer table
+(ro+0xB8/+0x10 vs ro+0x6C/+0x14). Substituting a table entry moves ours to +0x20, so the offset is a
+property of the TU, not of the source: these two copies only match compiled with their owner TU.
+Two physics facts fell out: a helper with parameters is inlined late, so the 2n fill keeps the
+odd-element step (`tst rN,#1`) the game has; and `operator new/[]` must not default its heap
+argument, or `new T[n]` is ambiguous against the size-only form (it was, in `sead_heap.h`).
+
+**Open lead: the type-node dynamic cast** (0x002327BC, 49 functions, 0 matched). `dynCast<T>` spelled
+`dynCastImpl(o, &T::sType, 0)` inlined reaches OP=1 REG=6 at -O2 with the game's NULL hoisted into a
+callee-saved register before the object test (similarity 72 %); what is left is the order the three
+addresses (h, o, &sType) are allocated to registers — a step-4 problem, and small enough to be a
+step-4 test case.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
