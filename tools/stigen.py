@@ -51,6 +51,10 @@ DSO_HANDLE = 0x100000
 F2LZ = 0x114608
 ATEXIT = 0x5902C0
 VEC_DTOR = 0x100948  # __aeabi_vec_dtor (in the Thumb runtime block at 0x100110)
+# Emission variant for constant structs (u8/u16/u32 runs): values passed as constructor parameters
+# (`T data(c0, c1, ...);`) instead of the default member-init list. armcc allocates the argument
+# values differently, which is what a few colour-struct targets need.
+PARAM_CTOR = False
 STACK = 0xF0000000  # the emulated sp: a fake range no global lives in
 
 
@@ -548,12 +552,17 @@ def group_loose(loose, f2l):
         g.vals = [g.mem[a] for a in ks]
         if g.kind == "ldro":
             g.srcs = g.vals
-    # A float run of whole triples is a row of Vec3(x, y, z) objects (one vstm group each).
+    # A float run of whole triples is a row of Vec3(x, y, z) objects (one vstm group each); a
+    # byte run of whole quads is a row of 4-byte colour structs (each sorted as its own .data
+    # object, e.g. 0x005CFE6C where four of them precede the Id64).
     split = []
     for g in out:
         if g.kind == "f32" and len(g.vals) % 3 == 0:
             for i in range(0, len(g.vals), 3):
                 split.append(Glob(g.addr + 4 * i, 12, "vec3", 0, vals=g.vals[i:i + 3]))
+        elif g.kind == "u8" and len(g.vals) % 4 == 0:
+            for i in range(0, len(g.vals), 4):
+                split.append(Glob(g.addr + i, 4, "u8", 0, vals=g.vals[i:i + 4]))
         else:
             split.append(g)
     return split
@@ -687,6 +696,8 @@ def emit(globs):
                 rows.append("    { %s }" % ", ".join(
                     c_literal(v) if kind == "s" else "0x%x" % v for v, (off, kind) in zip(row, g.fields)))
             return " = {\n" + ",\n".join(rows) + "\n}"
+        if PARAM_CTOR and g.kind in ("u8", "u16", "u32"):
+            return "(%s)" % ", ".join("0x%x" % v for v in g.vals)
         return ""
 
     for g in globs:
@@ -713,9 +724,16 @@ def emit(globs):
             ty = {"f32": "f32", "u8": "u8", "u16": "u16", "u32": "u32"}[g.kind]
             names = ["m%d" % i for i in range(len(g.vals))]
             vals = [f32_lit(v) if g.kind == "f32" else "0x%x" % v for v in g.vals]
-            types.append("struct T_%08X { %s; T_%08X() : %s {} };" % (
-                g.addr, "; ".join("%s %s" % (ty, m) for m in names), g.addr,
-                ", ".join("%s(%s)" % (m, v) for m, v in zip(names, vals))))
+            if PARAM_CTOR and g.kind in ("u8", "u16", "u32"):
+                args = ["a%d" % i for i in range(len(g.vals))]
+                types.append("struct T_%08X { %s; T_%08X(%s) : %s {} };" % (
+                    g.addr, "; ".join("%s %s" % (ty, m) for m in names), g.addr,
+                    ", ".join("%s %s" % (ty, a) for a in args),
+                    ", ".join("%s(%s)" % (m, a) for m, a in zip(names, args))))
+            else:
+                types.append("struct T_%08X { %s; T_%08X() : %s {} };" % (
+                    g.addr, "; ".join("%s %s" % (ty, m) for m in names), g.addr,
+                    ", ".join("%s(%s)" % (m, v) for m, v in zip(names, vals))))
     unit = [g for g in sorted(globs, key=lambda g: g.addr) if id(g) in members]
     if unit:
         body = "".join("    static %s %s;\n" % decl(g) for g in unit)
