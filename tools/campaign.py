@@ -28,13 +28,14 @@ A round is: free work first, then a paid plan, then a harvest. run_loop chains r
      tried) ignore attempts made before the form's `since`, take up to REOPEN_SHARE[tier] of each tier's
      slots first, and their prompt names the form.
      Routing (the cost rule; measurements in docs/LESSONS.md "One-turn screen"):
-       screen   - every function <= HAIKU_MAX_WORDS words that no tier has tried: ONE Haiku turn without
+       screen   - every function <= SCREEN_MAX_WORDS words that no tier has tried: ONE Haiku turn without
                   tools writes SCREEN_K candidate sources (~$0.007, ~25 s). run_round compiles them
-                  (default flags, then the flag sweep on the best SCREEN_SWEEP), a clean match is
-                  registered by harvest, and the best candidate becomes the function's start source;
+                  (default flags, a candidate that does not compile again with albw_types.h prepended,
+                  then the flag sweep on the best SCREEN_SWEEP), a clean match is registered by harvest,
+                  and the best candidate becomes the function's start source;
        haiku    - the full agent (~$0.02-0.04, ~2 min), only for screened functions whose best source
-                  is within SCREEN_PASS structural OPs (the agent matches 44-67% of those and ~10% of
-                  the rest); --haiku-rest adds the <= 40-word functions that failed the gate;
+                  is within SCREEN_PASS structural OPs (the agent matches ~20% of those, ~8% at OP 3-5);
+                  --haiku-rest adds the <= 40-word functions that failed the gate;
        deepseek - off by default (--deepseek N, hard cap MAX_DEEPSEEK per round), one target per agent,
                   only for functions Haiku already missed or that are too large for Haiku, with a start
                   at most DEEPSEEK_MAX_OP structural OPs away (~$0.10-0.30/agent).
@@ -114,12 +115,18 @@ DEEPSEEK_MAX_OP = 20
 # of the 167 it missed; docs/LESSONS.md "One-turn screen"). One Haiku turn without tools, writing 4 candidates,
 # costs $0.0075 and 24 s and matches ~3% of the pool outright; three such turns with feedback reach 11%
 # against the agent's 18% at the same price, so the turn does not replace the agent. Its best candidate's
-# structural OP predicts the agent instead: at OP <= 2 the agent matched 44-67%, elsewhere ~10%.
-# SCREEN_PASS is that gate per size band, (max words, max OP of the best source):
-#     <= 40 words, OP <= 2: 29% of the pool, 65% of the agent's matches;
-#     41-80 words, OP <= 5: 14% of the pool, 55% of the agent's matches.
+# structural OP predicts the agent instead. SCREEN_PASS is that gate per size band, (max words, max OP of
+# the best source). Re-measured on rounds 26-39 (623 gated agents after a screen): OP 0-2 matched 18% at
+# <= 40 words and 20% at 41-80, OP 3-5 at 41-80 only 7.8% (11/141), so 41-80 now gates at OP <= 2 too.
 SCREEN_K = 4
-SCREEN_PASS = ((40, 2), (80, 5))
+SCREEN_PASS = ((40, 2), (80, 2))
+# Screens above 60 words: rounds 26-39 gave 4 direct matches in 638 screens at 61-80 words (0.6%), $0.75 per
+# match with their agents against $0.14-0.32 below; they are not screened (and so never reach the agent).
+SCREEN_MAX_WORDS = 60
+# Integer/float typedefs live in albw_types.h, which vec3.h and the sead headers do not include: of the 219
+# screens of rounds 26-39 whose candidates all failed to compile, 82 compiled with it. A candidate that fails
+# to compile without the include is retried with it prepended (kept only if that compiles).
+TYPES_INCLUDE = '#include "albw_types.h"\n'
 SCREEN_SWEEP = 2          # candidates (best first at the default flags) that also get the flag sweep
 SCREEN_HEALTHY = 0.75     # share of a round's screens that must leave candidates before a blank one is a MISS
 BRIEF_SECTIONS = ("Shared library", "Done means", "Honesty", "Proven constructs")   # inlined in the screen prompt
@@ -515,7 +522,9 @@ def screen_prompt(t, brief):
         "- The %d candidates must differ in ways that change codegen (named locals vs direct expressions, "
         "statement order, if/else polarity, early return vs nested if, pointer local vs member access, C vs "
         "C++ with a header type, signed vs unsigned, return type), not in comments or names." % SCREEN_K,
-        "- Self-contained: declare every type and extern you use, or include a shared header named below.",
+        "- Self-contained: declare every type and extern you use, or include a shared header named below. "
+        "The typedefs u8/s8/u16/s16/u32/s32/u64/f32 come only from `#include \"albw_types.h\"`: vec3.h and the "
+        "sead headers do not provide them.",
     ]
     lines += ["- This function %s" % forms[f]["hint"] for f in t.get("forms", [])]
     lines += ["", brief, "", "# Target context", "", read("logs/manual/%s/CONTEXT.md" % addr), "",
@@ -549,6 +558,19 @@ def screen_reports(addrs):
         return sorted(scores[a], key=lambda k: (not clean(a, k), dirty[k[0]], structscore.rank(scores[a][k])))
 
     score([(a, p, DEFAULT_FLAGS) for a in addrs for p in cands[a]])
+    # a candidate that does not compile is most often only missing the typedefs: retry it with albw_types.h
+    retry = {}
+    for a in addrs:
+        for p in cands[a]:
+            text = open(p, "rb").read()
+            if not any(k[0] == p for k in scores[a]) and b"albw_types.h" not in text:
+                retry[(a, p)] = text
+                open(p, "wb").write(TYPES_INCLUDE.encode() + text)
+    if retry:
+        score([(a, p, DEFAULT_FLAGS) for a, p in retry])
+        for (a, p), text in retry.items():
+            if not any(k[0] == p for k in scores[a]):
+                open(p, "wb").write(text)   # still does not compile: leave the agent's text as written
     sweep = []
     for a in addrs:
         ks = ranked(a)
@@ -651,6 +673,8 @@ def cmd_next(a):
                 continue
             tier = "deepseek"
         elif "screen" not in tiers:
+            if t["total"] > SCREEN_MAX_WORDS:
+                continue
             tier = "screen"   # one cheap turn first: its best candidate decides whether the agent is worth it
         elif screen_pass(t) or (a.haiku_rest and t["total"] <= SCREEN_PASS[0][0]):
             tier = "haiku"

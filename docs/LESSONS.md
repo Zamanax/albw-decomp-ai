@@ -1171,6 +1171,25 @@ it includes documented walls such as 001150B8 and 001512B4). 17 registrations fo
 (200 screens $1.15, 22 agents $0.25); a round of 120 screens + 13 agents ran 4 min, 6.5 min with its
 harvest and plan.
 
+Rounds 26-39 (3,203 screens, 623 gated agents after a screen; re-measured 2026-11-17), at $0.0075 per
+screen and $0.033 per agent:
+
+| words | screens | direct | agents | agent matches | $/match |
+|---|---|---|---|---|---|
+| ≤ 20 | 261 | 21 (8.5 %) | 115 | 21 | 0.14 |
+| 21-40 | 1,122 | 34 (3.0 %) | 250 | 45 | 0.21 |
+| 41-60 | 908 | 14 (1.5 %) | 220 | 30 | 0.32 |
+| 61-80 | 638 | 4 (0.6 %) | 38 | 4 | 0.75 |
+
+- **The gate predicts less than the pilot said.** Behind it the agent matched 18 % at ≤ 40 words (OP 0,
+  1 and 2 alike: 17, 20, 19 %) and 20 % at 41-80 with OP ≤ 2, but 7.8 % (11/141) at OP 3-5. The 41-80
+  gate is now OP ≤ 2 too, and screens stop at 60 words (`SCREEN_MAX_WORDS`).
+- **267 screens (8 %) compiled nothing**, so they had no OP and could never pass the gate. The most
+  common cause: candidates used `s32`/`u32`/`f32`/`u8` with `vec3.h` or a sead header but without
+  `albw_types.h`, which those headers do not include. `screen_reports` now retries a non-compiling
+  candidate with the include prepended, and the prompt names the header. Rescoring the 219 that had
+  candidates on disk recovered 82 (one MATCH, 0048B2A8; 14 now inside the gate) at no token cost.
+
 Large functions (> 80 words) are outside this: the agents have matched ~45 of them from scratch at
 81-160 words and 4 above; the other 1,000+ large matches are shape families and the `fam_sti`
 generator. Lifted pseudocode as a start is the dead end recorded at the top of this file.

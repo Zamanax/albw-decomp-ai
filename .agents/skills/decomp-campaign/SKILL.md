@@ -37,8 +37,8 @@ cell returns, read its log and report the totals.
 | tier | what it is | cost / time | who gets it |
 |---|---|---|---|
 | free | famclone, refine's flag variants, `mutate.py` on `OP=0`/order-only sources | CPU | everything, before and between rounds |
-| `screen` | ONE Haiku turn, no tools: the prompt inlines the brief's rules, `CONTEXT.md` and the start source; the agent writes 4 candidates to `logs/manual/<ADDR>/screen/`; `run_round` compiles them (default flags, then the flag sweep on the best two) and writes `REPORT.json` | ~$0.0075, ~25 s | every function ≤ 80 words no tier has tried |
-| `haiku` | the full agent (reads `docs/AGENT_BRIEF.md`, runs its own checks) starting from the screen's best candidate | ~$0.02-0.04, ~2 min | screened functions inside the gate `SCREEN_PASS`: best source at `OP ≤ 2` for ≤ 40 words, `OP ≤ 5` for 41-80 |
+| `screen` | ONE Haiku turn, no tools: the prompt inlines the brief's rules, `CONTEXT.md` and the start source; the agent writes 4 candidates to `logs/manual/<ADDR>/screen/`; `run_round` compiles them (default flags, a non-compiling one again with `albw_types.h` prepended, then the flag sweep on the best two) and writes `REPORT.json` | ~$0.0075, ~25 s | every function ≤ 60 words (`SCREEN_MAX_WORDS`) no tier has tried |
+| `haiku` | the full agent (reads `docs/AGENT_BRIEF.md`, runs its own checks) starting from the screen's best candidate | ~$0.02-0.04, ~2 min | screened functions inside the gate `SCREEN_PASS`: best source at `OP ≤ 2` (≤ 80 words) |
 | `deepseek` | one agent per target, hard cap 4 per round | ~$0.10-0.30, 4-8 min | off by default; Haiku misses and functions > 80 words whose start is ≤ 20 OPs away |
 
 A clean screen match (bytes, `IDENTITY 0 MISMATCH`, no forbidden construct) is registered by harvest
