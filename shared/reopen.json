@@ -31,5 +31,11 @@
   "header": "sead_string.h",
   "hint": "constructs a FixedSafeString<N> FROM a string (SafeString or FixedSafeString): that constructor does NOT clear() first. sead_string.h has FixedSafeString(const SafeString&) / (const FixedSafeString&) now; use them instead of a default ctor plus copy().",
   "words": ["0x006F6C44", "0x006F5C98"]
+ },
+ "vec3-value-operators": {
+  "since": "2026-11-17 13:00",
+  "header": "vec3.h",
+  "hint": "does vector math through Vec3::setAdd/setSub/setMul (0x115C54/0x115C70/0x115D70): vec3.h now has the value operators `a + b`, `a - b`, `a * s` and `v *= s`. Write the math with them (`Vec3 d = a - s; d *= t; return s + d;`), not named result locals plus setSub/setAdd calls: the operator temporaries share stack slots, which gives the game's frame size. Do not redefine the operators locally.",
+  "calls": ["0x00115C54", "0x00115C70", "0x00115D70"]
  }
 }

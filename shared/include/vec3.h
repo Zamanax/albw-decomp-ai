@@ -67,7 +67,16 @@ struct Vec3 {
     void sub(const Vec3& o);
 
     Vec3& operator+=(const Vec3& o) { setAdd(*this, o); return *this; }
+    Vec3& operator*=(float s) { setMul(*this, s); return *this; }
     float dot(const Vec3& o) const { return x * o.x + y * o.y + z * o.z; }
 };
+
+// Value-returning arithmetic over the out-of-line helpers. Each result is a temporary the compiler
+// reuses once it is dead, so `s + (a - s) * t` style code keeps the game's small frame: 004997A0
+// (lerp: `Vec3 d = a - s; d *= t; return s + d;`) needs 2 stack vectors, where named locals plus
+// setSub/setAdd calls need 3 (sub sp,#0x28 instead of #0x18).
+inline Vec3 operator+(const Vec3& a, const Vec3& b) { Vec3 r; r.setAdd(a, b); return r; }
+inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; r.setSub(a, b); return r; }
+inline Vec3 operator*(const Vec3& a, float s) { Vec3 r; r.setMul(a, s); return r; }
 
 #endif

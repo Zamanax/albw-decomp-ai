@@ -15,10 +15,6 @@ namespace sead {
 
 #include "vec3.h"
 
-inline Vec3 operator+(const Vec3& a,const Vec3& b){Vec3 v;v.setAdd(a,b);return v;}
-inline Vec3 operator-(const Vec3& a,const Vec3& b){Vec3 v;v.setSub(a,b);return v;}
-inline Vec3 operator*(const Vec3& a,f32 b){Vec3 v;v.setMul(a,b);return v;}
-
 #include "flags.h"
 
 

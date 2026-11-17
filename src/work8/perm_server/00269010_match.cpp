@@ -11,14 +11,12 @@ void func_0053A440(Obj* o, Vec3* out, u32* h, s32 k, Vec3* pos);
 Actor* func_0052FBA0(void* mgr, u32 h);
 s32 func_00588BE4(Actor* a);
 Vec3* func_00520FC0(Obj* o);
-void func_00115C70(Vec3* out, const Vec3* a, const Vec3* b);
 s32 func_0068C690(const Vec3& v);
 void func_001882B0(Actor* a, s32 ang, f32 r);
 void func_004F7E8C(Obj* o, Msg* m);
 extern "C" char* data_00706E20;
 extern "C" const s32 ro_00693218;
 s32 angleValue(Vec3 v) { return func_0068C690(v); }
-inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; func_00115C70(&r, &a, &b); return r; }
 struct Obj {
     u8 pad[0x3d0]; Vec3 m3d0; u8 pad3dc[0x430 - 0x3dc]; void* m430; void* m434; u8 pad438[0x4b5 - 0x438]; u8 m4b5;
     void f(Msg* m);

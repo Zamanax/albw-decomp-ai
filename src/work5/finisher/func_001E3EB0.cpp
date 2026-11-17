@@ -9,8 +9,6 @@ void* operator new(unsigned int size, NoThrowTag) throw();
 
 #include "vec3.h"
 
-inline Vec3 operator*(const Vec3& a, f32 s) { Vec3 r; r.setMul(a, s); return r; }
-
 struct Id16 {
     u16 v;
     Id16(u16 x) : v(x) {}

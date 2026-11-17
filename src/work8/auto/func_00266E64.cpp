@@ -23,8 +23,6 @@ struct En {
 f32 func_004F898C();
 void func_004F8964(f32* vy, bool clamp, f32 g);
 Vec3* func_00520FC0(En* e);
-void func_00115C70(Vec3* out, const Vec3& a, const Vec3& b);
-inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; func_00115C70(&r, a, b); return r; }
 s32 func_0068C690(const Vec3& v);
 f32 func_0058AC38(En* e);
 f32 func_0058AA40(En* e);

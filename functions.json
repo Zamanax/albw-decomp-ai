@@ -72089,6 +72089,13 @@
 "path": "src/work8/sol1/00499738_dh.cpp",
 "status": "honest"
 },
+"004997A0": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_004997A0.cpp",
+"status": "honest"
+},
 "004998AC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",

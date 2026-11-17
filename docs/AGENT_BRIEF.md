@@ -127,6 +127,11 @@ Prefer an honest miss. Never claim a match you did not see printed.
 - Lists keep their node helpers out of line: `list.pushBack(o)` / `list.erase(o)` are thin wrappers
   over `ListNode::insertFront_` (0x0010F1DC) and `erase_` (0x0010F1F8). Reach the list through a
   pointer local (`OffsetList<T>* l = &m; l->pushBack(o);`) for the game's register order (0029757C).
+- Vector math through `Vec3::setAdd/setSub/setMul` (`bl 0x115C54/0x115C70/0x115D70`): write it with
+  `vec3.h`'s value operators, `Vec3 d = a - s; d *= t; return s + d;`, never named result locals
+  plus explicit `setSub`/`setAdd` calls. Operator temporaries share a stack slot once dead, which is
+  the game's frame size (`sub sp,#0x18`, not `#0x28`); never redefine the operators locally. 004997A0
+  also needed `-O3` without `-Otime`.
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`

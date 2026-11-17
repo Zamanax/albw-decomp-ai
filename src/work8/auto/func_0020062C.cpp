@@ -23,8 +23,6 @@ namespace sead {
 
 struct StateMgr { void changeState(int s); };
 
-void func_00115C70(Vec3* out, const Vec3& a, const Vec3& b);  // Vec3::setSub (out-of-line)
-inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; func_00115C70(&r, a, b); return r; }
 s32 func_0068C690(const Vec3& v);   // angleFromVec
 struct Obj70FB60 { char pad[0x1c]; Vec3* m1c; };
 extern Obj70FB60* data_0070FB60;

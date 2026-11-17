@@ -1194,6 +1194,35 @@ Large functions (> 80 words) are outside this: the agents have matched ~45 of th
 81-160 words and 4 above; the other 1,000+ large matches are shape families and the `fam_sti`
 generator. Lifted pseudocode as a start is the dead end recorded at the top of this file.
 
+## Vec3 value operators, and what the form census over-reads (2026-11-17)
+
+`forms.md` ranked the Vec3 helper callers as the largest header gap (setAdd 0x115C54: 8% matched
+against 27% expected for their size; setSub 14/28; setMul 5/22). Most of that gap is **float code,
+not a missing form**: the census's expectation controls for size only. Matched share by size and
+kind (all functions, VFP = 4+ VFP instructions):
+
+| words | integer | float, no helper | Vec3 helper caller |
+|---|---|---|---|
+| ≤ 40 | 90.0 % | 67.6 % | 49.6 % |
+| 41-80 | 55.1 % | 19.1 % | 28.8 % |
+| 81-160 | 51.1 % | 13.1 % | 4.2 % |
+
+At 41-80 words the helper callers match *better* than other float code; 73-87 % of them are above
+80 words. Compare against the float baseline before calling a marker a header gap.
+
+The real form underneath: **value-returning operators**. 004997A0 (lerp, 24 words) plateaued at
+12/24 with named locals and explicit `setSub`/`setMul`/`setAdd` calls (frame `sub sp,#0x28`, three
+stack vectors); `Vec3 d = a - s; d *= t; return s + d;` gives the game's two-slot frame (`#0x18`, the
+`a - s` temporary's slot reused for the `s + d` result) at OP=0, and an exact match at `-O3` without
+`-Otime`. ~20 matched sources had defined `operator-` etc. locally; `vec3.h` now carries
+`operator+`/`operator-`/`operator*` (free) and `operator*=` (member), the local copies were removed,
+and `headercheck vec3.h` passes (709 entries, 0 failing). Reopened as `vec3-value-operators`
+(179 unmatched callers ≤ 60 words, the screen cap).
+
+MemUtil::copy (0x10E3C4) callers are a real gap (integer code: 21 % matched at 41-80 words against
+55 %), but they are wide/narrow string copies that the `sead-*` reopen forms already cover (e.g.
+00320DB0 reaches OP=2 with a local `WSafe` instead of the header's `WSafeString`).
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),

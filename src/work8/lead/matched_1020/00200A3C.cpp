@@ -29,12 +29,6 @@ struct StateMgr {
 void changeState(int s) ;
 };
 
-void func_00115C70(Vec3* out, const Vec3& a, const Vec3& b);  
-inline Vec3 operator-(const Vec3& a, const Vec3& b) {
-Vec3 r;
-func_00115C70(&r, a, b);
-return r;
-}
 s32 func_0068C690(const Vec3& v);   
 void func_0051D27C(s32* ang, s32 target, s32 step);
 struct Obj70FB60 {
