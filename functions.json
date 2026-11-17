@@ -104475,6 +104475,27 @@
 "path": "src/work8/fam_sti/func_005F3794.cpp",
 "status": "honest"
 },
+"005F3AD8": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005F3AD8.cpp",
+"status": "honest"
+},
+"005F3E5C": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005F3E5C.cpp",
+"status": "honest"
+},
+"005F41E0": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005F41E0.cpp",
+"status": "honest"
+},
 "005F4564": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -104664,11 +104685,25 @@
 "path": "src/work7/ds7/hid/_bulk_00593500.cpp",
 "status": "honest"
 },
+"005F6B00": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005F6B00.cpp",
+"status": "honest"
+},
 "005F6E84": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/fam_sti/func_005F6E84.cpp",
+"status": "honest"
+},
+"005F71C8": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005F71C8.cpp",
 "status": "honest"
 },
 "005F7740": {
@@ -104825,6 +104860,13 @@
 "path": "src/work7/ds7/hid/_bulk_00593500.cpp",
 "status": "honest"
 },
+"005F8F9C": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005F8F9C.cpp",
+"status": "honest"
+},
 "005F967C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -104921,6 +104963,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/fam_sti/func_005FB11C.cpp",
+"status": "honest"
+},
+"005FB460": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_005FB460.cpp",
 "status": "honest"
 },
 "005FB7E4": {
