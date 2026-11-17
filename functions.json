@@ -14536,6 +14536,13 @@
 "path": "src/work7/ds2/v157964_a.cpp",
 "status": "honest"
 },
+"00157AF0": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00157AF0.c",
+"status": "honest"
+},
 "00157B50": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -31705,6 +31712,13 @@
 "path": "src/work5/templater/gen/func_00259CBC.cpp",
 "status": "honest"
 },
+"00259CC4": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00259CC4.c",
+"status": "honest"
+},
 "0025A460": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -38469,6 +38483,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work7/gpt17/func_002B840C.cpp",
+"status": "honest"
+},
+"002B86E4": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_002B86E4.c",
 "status": "honest"
 },
 "002B8AFC": {
@@ -63569,6 +63590,13 @@
 "path": "src/work8/opus_tiny/f43283C.cpp",
 "status": "honest"
 },
+"00432DF0": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_00432DF0.cpp",
+"status": "honest"
+},
 "00432E58": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -64376,6 +64404,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work7/ds7/hid_empty.cpp",
+"status": "honest"
+},
+"0043DA74": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0043DA74.c",
 "status": "honest"
 },
 "0043DAD0": {
