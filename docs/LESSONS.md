@@ -1223,6 +1223,32 @@ MemUtil::copy (0x10E3C4) callers are a real gap (integer code: 21 % matched at 4
 55 %), but they are wide/narrow string copies that the `sead-*` reopen forms already cover (e.g.
 00320DB0 reaches OP=2 with a local `WSafe` instead of the header's `WSafeString`).
 
+## Large-function families: what was still free (2026-11-17)
+
+Remaining work by size, measured: 81 % of the unmatched bytes sit in functions above 80 words
+(3,830 functions), where every paid tier is near zero. Shape groups among those unmatched functions
+(masked as in famclone, and with deep_twins' constant mask) gave 22 groups, 99 members; all but two
+had refine or agent attempts, and the 51-member 0060BE24 family is parked.
+
+- **The two untried groups were fam_sti static initializers** that `gen2.py` (no longer in the repo)
+  never generated: 005F3AD8 (7 + 1 more found by structure, 900 B) and 005DE4E8/005E50C0 (972 B).
+  All ten matched on the first compile with a generator that reads the target instead of a template:
+  emulate the literal loads, `add rX, pc, #` and `stm`/`str` stores, take each 8-byte `SafeString`
+  slot (vtable 0x6F5988 + string pointer) and read the literal back from the function's own pool.
+  Forms: `s64 Id64; Pair; SafeString strs[N] = {...};` then, after the atexit registration (an ARM NOP
+  where armlink inlined the leaf), `Vec3 a(x, y, z); Vec3 b(...);` for a `vstmia` tail; two string
+  tables are simply two arrays declared in store order.
+- **deep_twins.py `--attempt` never registered anything**, despite its docstring: 12 verified
+  clones (88-476 B) sat in `src/work8/twins/`. It now registers through `worklist.py register` with
+  the flags that matched, and stages clones under `logs/deep_twins/`.
+- **Open sub-family: the anchored Id64** (005F9320, 005F07E4, 005F7F84, 005CFD54). The first literal
+  is a *lower* global and the Id64 is stored at `[r2, #8]`; that lower global (an `f2l` u32 or four
+  colour bytes) is initialised last, addressed from the separately loaded `Pair` literal (`sub r0,
+  r0, #0x10`). Our compiles keep one anchor in r4 for the whole function and store `Pair` through it.
+  Not the lever: declaration order of the four globals × `static` on each (384 variants on 005CFD54,
+  best 5/23). Untested: the lower global inside a struct with the Id64, or defined in a header after
+  the table.
+
 ## sead audit: the string family was the missing form (2026-11-05)
 
 Read of two reference decompilations of sead ([aboood40091/sead](https://github.com/aboood40091/sead),
