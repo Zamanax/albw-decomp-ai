@@ -1267,7 +1267,7 @@ reaches 376 functions:
 **StateMgr init is now a header form.** `StateMgrT::init(owner, const u8& n)` in `statemgr.h`
 (alloc, fill through a parameterised `clearTable`, `allocNames`). Proven on both out-of-line copies
 (0x0066D8D0, 0x0066739C): OP=10 REG=0 MOVED=7, 85.7 %, and every remaining difference is the null
-member-pointer constant, which is a UTF-encoded offset into the owner TU's member-pointer table
+member-pointer constant, which loads from an offset into the owner TU's member-pointer table
 (ro+0xB8/+0x10 vs ro+0x6C/+0x14). Substituting a table entry moves ours to +0x20, so the offset is a
 property of the TU, not of the source: these two copies only match compiled with their owner TU.
 Two physics facts fell out: a helper with parameters is inlined late, so the 2n fill keeps the
