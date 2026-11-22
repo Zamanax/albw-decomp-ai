@@ -1,0 +1,41 @@
+#include "albw_types.h"
+extern u8 data_00714A40[];
+extern u8 data_007A06A0[];
+extern u8 data_007A06F0[];
+extern u8 data_007A1CF0[];
+extern u8 ro_1FF81000[];
+extern "C" u32 func_00104800(void);
+extern "C" u32 func_003DE544(void*,s32);
+extern "C" void func_003DCBF8(void*,s8);
+extern "C" void func_0010DE90(void*);
+extern "C" void func_003DC8F0(void*);
+extern "C" void func_003DC2E4(void);
+extern "C" void func_003DD78C(void);
+extern "C" void func_003D2C00(void*,void*,void*);
+extern "C" void func_003DE294(void);
+extern "C" void func_003DFCC8(void);
+extern "C" void func_003DE2E0(void);
+s32 f() {
+  u8* g = data_00714A40;
+  if (g[0] != 0) return 0x820abf9;
+  u32 r = func_00104800();
+  u32 s1 = r >> 31;
+  if (s1) return (s32)r;
+  r = func_003DE544(data_007A06F0, 0);
+  u32 s2 = r >> 31;
+  if (s2) return (s32)r;
+  s8 v = *(s8*)(ro_1FF81000 + 0xc0);
+  g[4] = (u8)v;
+  func_003DCBF8(data_007A06A0, v);
+  func_0010DE90(data_007A1CF0);
+  func_003DC8F0(data_007A06A0);
+  func_003DC2E4();
+  func_003DD78C();
+  func_003D2C00((void*)func_003DE2E0, (void*)func_003DFCC8, (void*)func_003DE294);
+  g[1] = 0;
+  g[2] = 0;
+  g[3] = 0;
+  g[5] = 1;
+  g[0] = 1;
+  return 0;
+}
