@@ -14,6 +14,7 @@ import collections
 import datetime
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -145,22 +146,44 @@ def campaign_data():
             if e["outcome"] == "MATCH":
                 r[e["tier"]] += 1
     rounds = [dict(round=n, **rounds[n]) for n in sorted(rounds)[-80:]]
-    recent = [dict(addr=e["addr"], tier=e["tier"], round=e.get("round"), outcome=e["outcome"],
-                   words=e.get("words", ""), t=e.get("t", "")) for e in led[-12:]][::-1]
-    plan = None
-    if os.path.exists(campaign.PLAN):
-        p = json.load(open(campaign.PLAN))
-        targets = []
-        for task in p.get("tasks", []):
-            for a in task["addrs"]:
-                rep = campaign.reported(a)    # None, or MATCH / MISS / TIMEOUT / BAD ...
-                n, b = campaign.progress(a, task.get("log_base", {}).get(a))
-                targets.append(dict(addr=a, tier=task.get("tier"), checks=n,
-                                    best=None if not b else ("MATCH" if b.get("match") else "%.1f%%" % b.get("pct", 0)),
-                                    reported=rep))
-        plan = dict(round=p.get("round"), created=p.get("created"), agents=len(p.get("tasks", [])),
-                    harvested=bool(p.get("harvested")), targets=targets)
-    return tiers, rounds, recent, plan
+    return tiers, rounds, plan_data(led)
+
+
+def plan_data(led):
+    """The current plan (logs/campaign/plan.json): every target with its live progress (fn.py check logs
+    since the plan's baseline), its REPORT.json and, once harvested, its ledger outcome. `task` is the
+    subagent's name, which is also its omp session file name (the dashboard joins its cost and state)."""
+    if not os.path.exists(campaign.PLAN):
+        return None
+    p = json.load(open(campaign.PLAN))
+    outcome = {e["addr"]: e["outcome"] for e in led if e.get("round") == p.get("round")}
+    targets = []
+    for task in p.get("tasks", []):
+        for a in task["addrs"]:
+            n, b = campaign.progress(a, task.get("log_base", {}).get(a))
+            rp = os.path.join(campaign.MANUAL, a, "REPORT.json")
+            try:
+                rep = json.load(open(rp)) if os.path.exists(rp) else None
+            except ValueError:
+                rep = {"status": "BAD"}
+            size = (task.get("sizes") or {}).get(a) or [None, None]
+            targets.append(dict(
+                addr=a, task=task.get("name"), tier=task.get("tier"), model=task.get("model"),
+                words=size[0], op=size[1], checks=n,
+                best_pct=None if not b else (100.0 if b.get("match") else round(b.get("pct", 0), 1)),
+                best_match=bool(b and b.get("match")),
+                report=campaign.reported(a), report_words=(rep or {}).get("words"),
+                report_checks=(rep or {}).get("checks_used", (rep or {}).get("checks")),
+                identity=(rep or {}).get("identity"), note=((rep or {}).get("note") or "")[:400],
+                outcome=outcome.get(a)))
+    first = (p.get("tasks") or [{}])[0]
+    budget = re.search(r"at most (\d+) oracle checks", first.get("prompt") or "")
+    return dict(round=p.get("round"), created=p.get("created"), started=p.get("started"),
+                harvested=bool(p.get("harvested")),
+                harvested_at=int(os.path.getmtime(campaign.PLAN)) if p.get("harvested") else None,
+                batch=p.get("batch"), soft_s=first.get("soft_s"), hard_s=first.get("hard_s"),
+                budget=int(budget.group(1)) if budget else None,
+                agents=len(p.get("tasks", [])), targets=targets)
 
 
 def count_doc(rel):
@@ -175,7 +198,7 @@ def main():
     funcs, bytes_, remaining = coverage(status)
     reasons = collections.Counter(r for v in status.values() if v.get("status") == "hack"
                                   for r in v.get("hack_reasons", []))
-    tiers, rounds, recent, plan = campaign_data()
+    tiers, rounds, plan = campaign_data()
     commits = [dict(zip(("hash", "time", "subject"), l.split("\x1f", 2)))
                for l in git("log", "-12", "--format=%h\x1f%ct\x1f%s").splitlines() if l]
     for c in commits:
@@ -187,7 +210,7 @@ def main():
         functions=funcs, bytes=bytes_, remaining=remaining,
         hack_reasons=[dict(reason=r, n=n) for r, n in reasons.most_common(6)],
         parked=count_doc("shared/parked.json"), reopen_forms=count_doc("shared/reopen.json"),
-        tiers=tiers, rounds=rounds, recent=recent, plan=plan,
+        tiers=tiers, rounds=rounds, plan=plan,
         daily=daily(history()), commits=commits, dirty=len(dirty),
     )
     json.dump(doc, sys.stdout, indent=1 if "--pretty" in sys.argv else None)   # ASCII: safe on a cp1252 pipe
