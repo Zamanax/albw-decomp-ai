@@ -6,6 +6,9 @@
 "path": "src/work8/lead/matched_1020/00100024.c",
 "status": "honest"
 },
+"00100110": {
+"status": "excluded_library"
+},
 "00100B84": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -2158,6 +2161,12 @@
 "path": "src/work7/gpt15/func_0010E3B0.cpp",
 "status": "honest"
 },
+"0010E3C4": {
+"status": "excluded_library"
+},
+"0010E74C": {
+"status": "excluded_library"
+},
 "0010EDBC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -2227,6 +2236,9 @@
 "hack_reasons": [],
 "path": "src/work7/gpt15/variants/0010F970/v0.cpp",
 "status": "honest"
+},
+"0010FBAC": {
+"status": "excluded_library"
 },
 "0010FC68": {
 "cc": "4.1/b1049",
@@ -2312,6 +2324,15 @@
 "path": "src/work7/gpt15/variants/00110470/v1.cpp",
 "status": "honest"
 },
+"00110490": {
+"status": "excluded_library"
+},
+"001104E4": {
+"status": "excluded_library"
+},
+"00110710": {
+"status": "excluded_library"
+},
 "00110740": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections -I src/work7/gpt15/variants/00110740",
@@ -2332,6 +2353,9 @@
 "hack_reasons": [],
 "path": "src/work7/ds1/func_00110AEC.cpp",
 "status": "honest"
+},
+"00110D44": {
+"status": "excluded_library"
 },
 "00110DB8": {
 "cc": "4.1/b1049",
@@ -2494,6 +2518,9 @@
 "path": "src/work7/gpt15/func_001132CC.cpp",
 "status": "honest"
 },
+"001138B4": {
+"status": "excluded_library"
+},
 "001139F8": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -2522,12 +2549,24 @@
 "path": "src/work4/agent5/b6/func_001E6948.cpp",
 "status": "honest"
 },
+"00114608": {
+"status": "excluded_library"
+},
 "00114684": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work8/opus_tiny/f114684.cpp",
 "status": "honest"
+},
+"001146F8": {
+"status": "excluded_library"
+},
+"00114B1C": {
+"status": "excluded_library"
+},
+"00114D80": {
+"status": "excluded_library"
 },
 "001150B0": {
 "cc": "4.1/b1049",
@@ -2578,12 +2617,33 @@
 "path": "src/work8/lead/matched_1020/00115AC8.c",
 "status": "honest"
 },
+"00115F34": {
+"status": "excluded_library"
+},
+"00116224": {
+"status": "excluded_library"
+},
+"0011624C": {
+"status": "excluded_library"
+},
+"0011629C": {
+"status": "excluded_library"
+},
 "0011638C": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work7/gpt15/func_0011638C.cpp",
 "status": "honest"
+},
+"001163A0": {
+"status": "excluded_library"
+},
+"00116428": {
+"status": "excluded_library"
+},
+"001164A8": {
+"status": "excluded_library"
 },
 "001164C4": {
 "cc": "4.1/b1049",
@@ -2598,6 +2658,9 @@
 "hack_reasons": [],
 "path": "src/work8/opus_tiny/f1164D4.cpp",
 "status": "honest"
+},
+"001164F4": {
+"status": "excluded_library"
 },
 "00116534": {
 "cc": "4.1/b1049",
@@ -43277,6 +43340,18 @@
 "path": "src/work8/audit_reloc/fix/src/002FFFC0.cpp",
 "status": "honest"
 },
+"00300028": {
+"status": "excluded_library"
+},
+"003000A4": {
+"status": "excluded_library"
+},
+"003000D0": {
+"status": "excluded_library"
+},
+"00300180": {
+"status": "excluded_library"
+},
 "00300218": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -43284,12 +43359,24 @@
 "path": "src/work5/templater/gen/func_00300218.cpp",
 "status": "honest"
 },
+"0030036C": {
+"status": "excluded_library"
+},
 "00300598": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work7/ds7/hid/tail4.cpp",
 "status": "honest"
+},
+"003007D0": {
+"status": "excluded_library"
+},
+"00300E3C": {
+"status": "excluded_library"
+},
+"00301084": {
+"status": "excluded_library"
 },
 "00301778": {
 "cc": "4.1/b1049",

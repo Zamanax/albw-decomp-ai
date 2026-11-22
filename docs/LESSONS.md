@@ -1466,3 +1466,32 @@ is ours.
 
 14 functions matched straight from the audit (13 string, 1 list); `headercheck` after the merges:
 `sead_string.h (+ 3 including headers): 684 entries, 0 failing`.
+
+## albw-native import: boundaries, armlib, names (2026-11-22)
+
+[spacestate1/albw-native](https://github.com/spacestate1/albw-native) (MIT tools/data; a native
+port built on this repo's sources) was mined at commit 5a6ce33. What came over:
+
+- **32 function starts** (`shared/extra_starts.txt`, notes say `albw-native` / `Thumb island`).
+  Their Ghidra start list had 304 addresses missing from our table; each was kept only if the host is
+  unmatched, the previous word is a return/unconditional branch/pool word, no branch crosses the new
+  boundary, the host has no jump table, and the entry does not read r4-r11 or `[sp,#]` before its own
+  prologue (19 passed). Example: 0049940C was four sead format functions (two varargs `push {r0-r3}`
+  after `ldr pc,[sp],#0x14`). The other 13 come from **Thumb islands at 0x300028-0x3010C4**: armlib
+  printf internals (`_printf_*`, `__printf`, `__rt_udiv10` 3000A4, `_ll_udiv10` 300180) that the
+  linker interleaved with game ARM code. Our table merged them into the surrounding ARM functions, and
+  `fn.py`'s fall-through rule even dropped the BL target 00300E80 (the previous word is a Thumb
+  `bx lr`). Game functions freed: 002FFFC4, 0030022C, 00300548, 00300780, 00300BE4, 00300E80, 003010C4.
+  After the rebuild no `functions.json` entry's range changed.
+- **29 `excluded_library`**: the armlib runtime (memcpy/memmove/memcpy4 with `pld` and flag-driven
+  `ldmhs/ldmmi`, strcmp with `rrx`, memcmp with `uqsub8`, idiv/uidiv/ldiv/uldiv/lasr, f2lz, soft-float
+  double, the `[lr],#4` inline-table compare 00114D80, the 1163A0/110710 bodies that branch into
+  *other* functions), the Thumb runtime block 00100110, and the 0x300 Thumb islands. 00110490,
+  001164A8 and 001164F4 had been excluded on 2026-10-27 and were lost in the 2026-10-28 ledger merge.
+- **379 names** in `shared/symbols.jsonl` (agent `web/albw-native`): their `names.txt`, hand-verified
+  aliases, the hot-path profile list, and high/medium-confidence roles from `sdk_areas.json` /
+  `graphics_functions.json` (SDK IPC services identified from command headers).
+
+Not taken: their `returns_this` table (r0 preserved on return; true for many `void` functions, so it
+says nothing about the prototype), `boolret.txt` (Ghidra's types seen through x86), the EU/USA map,
+and Ghidra fallback sources.
