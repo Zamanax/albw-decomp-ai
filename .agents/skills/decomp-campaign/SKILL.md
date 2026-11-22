@@ -68,7 +68,7 @@ Measured: a round of 120 screens + 13 agents ran 4 min, 6.5 min with its harvest
 
 # Tuning
 
-`campaign.run_loop(agent, log, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False)`
+`campaign.run_loop(agent, log, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False, haiku_rest_max=40)`
 
 Spend in this order (estimates from the pilot, `docs/LESSONS.md` "One-turn screen"; `status` has the
 live rates):
@@ -77,7 +77,7 @@ live rates):
 |---|---|---|---|---|
 | screen + gated agent | the defaults | 3,358 screens, ~700 agents | ~365 | ~$0.13 |
 | the rest ≤ 40 words | `haiku_rest=True`, once the defaults leave nothing to plan | ~1,070 agents | ~140 | ~$0.28 |
-| the rest at 41-80 words | not offered: ~5% for the agent | ~1,590 | ~85 | ~$0.72 |
+| the rest at 41-80 words | `haiku_rest=True, haiku_rest_max=80`; pilot rounds 65-67: 14/240 (5.8%, falling 7.5% → 3.8% as EV ranking drains the best) | ~1,180 left | ~50 | ~$0.50-0.80 |
 
 - `rounds=N` stops after N rounds (a bounded session).
 - `deepseek=4` adds the DeepSeek tier. It costs about the same per match as Haiku at 41-80 words

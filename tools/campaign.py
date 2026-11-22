@@ -35,7 +35,8 @@ A round is: free work first, then a paid plan, then a harvest. run_loop chains r
                   and the best candidate becomes the function's start source;
        haiku    - the full agent (~$0.02-0.04, ~2 min), only for screened functions whose best source
                   is within SCREEN_PASS structural OPs (the agent matches ~20% of those, ~8% at OP 3-5);
-                  --haiku-rest adds the <= 40-word functions that failed the gate;
+                  --haiku-rest adds the functions that failed the gate, up to --haiku-rest-max words
+                  (default 40; ~13% for the agent at <= 40, ~5% estimated at 41-80);
        deepseek - off by default (--deepseek N, hard cap MAX_DEEPSEEK per round), one target per agent,
                   only for functions Haiku already missed or that are too large for Haiku, with a start
                   at most DEEPSEEK_MAX_OP structural OPs away (~$0.10-0.30/agent).
@@ -54,7 +55,7 @@ candidates. Results therefore survive lost agent handles, crashed kernels and ra
   stopped agent's unreported targets get a timeout REPORT.json from their best logged check. Logs events
   live and a progress table of the running agents every minute (fn.py check_log.jsonl).
 
-`run_loop(agent, log, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False)` (eval kernel only)
+`run_loop(agent, log, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False, haiku_rest_max=40)` (eval kernel only)
   harvest --commit -> next -> run_round with `mutate.py queue --register` alongside, until the plan is
   empty (or `rounds` rounds), then `mutate.py tidy --register` and a last harvest. No model turn is spent
   between rounds. Stops when most targets of a round got no report (rate limit, credits).
@@ -683,7 +684,7 @@ def cmd_next(a):
             if t["total"] > SCREEN_MAX_WORDS:
                 continue
             tier = "screen"   # one cheap turn first: its best candidate decides whether the agent is worth it
-        elif screen_pass(t) or (a.haiku_rest and t["total"] <= SCREEN_PASS[0][0]):
+        elif screen_pass(t) or (a.haiku_rest and t["total"] <= a.haiku_rest_max):
             tier = "haiku"
         else:
             continue
@@ -936,7 +937,8 @@ def run_round(spawn, log=print, poll=10, table_every=60):
         % (plan["round"], mmss(time.time() - t_start), ", ".join("%s %d" % kv for kv in sorted(rep.items()))))
 
 
-def run_loop(spawn, log=print, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False, mutate_budget=1000):
+def run_loop(spawn, log=print, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False, haiku_rest_max=40,
+             mutate_budget=1000):
     """Rounds with no model turn between them, from one omp Python eval cell (cell timeout 0):
     `campaign.run_loop(agent, log)`.
 
@@ -951,7 +953,8 @@ def run_loop(spawn, log=print, rounds=0, screen=300, haiku=80, deepseek=0, haiku
     n = 0
     while True:
         log("harvest:\n" + tail(tool("campaign.py", "harvest", "--commit"), 14))
-        args = ["--screen", screen, "--haiku", haiku, "--deepseek", deepseek] + (["--haiku-rest"] if haiku_rest else [])
+        args = ["--screen", screen, "--haiku", haiku, "--deepseek", deepseek] + (
+            ["--haiku-rest", "--haiku-rest-max", haiku_rest_max] if haiku_rest else [])
         log("next:\n" + tail(tool("campaign.py", "next", *args), 8))
         plan = json.load(open(PLAN))
         if plan.get("harvested") or not plan["tasks"]:
@@ -1126,8 +1129,9 @@ def main():
                    help="one-turn Haiku screens of never-tried functions <= %d words" % HAIKU_MAX_WORDS)
     n.add_argument("--haiku", type=int, default=80, help="full Haiku agents (screened functions inside the gate)")
     n.add_argument("--haiku-rest", action="store_true",
-                   help="also plan the screened <= %d-word functions outside the gate (~13%% for the agent)"
-                        % SCREEN_PASS[0][0])
+                   help="also plan the screened functions outside the gate, up to --haiku-rest-max words")
+    n.add_argument("--haiku-rest-max", type=int, default=SCREEN_PASS[0][0],
+                   help="word cap for --haiku-rest (default %(default)s: ~13%% for the agent; 41-80 ~5%%)")
     n.add_argument("--deepseek", type=int, default=0, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)
     n.add_argument("--batch", type=int, default=20, help="agents spawned concurrently")
     n.add_argument("--no-haiku-regular", dest="haiku_regular", action="store_false",
