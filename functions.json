@@ -64772,6 +64772,13 @@
 "path": "src/work8/translator/runs/harvest150/lift2c/0043BC3C.goto.c",
 "status": "honest"
 },
+"0043BD0C": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime -Ono_tailcall --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0043BD0C.c",
+"status": "honest"
+},
 "0043BDAC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections --apcs=/fpic",
