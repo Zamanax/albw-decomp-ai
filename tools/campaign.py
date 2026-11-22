@@ -25,8 +25,8 @@ A round is: free work first, then a paid plan, then a harvest. run_loop chains r
      plan_round*.json joined with the ledger, smoothed toward coarser buckets). One representative
      per shape family is sent; famclone harvests the rest once it matches.
      Reopened functions (shared/reopen.json: they contain a shared-header form proven after they were
-     tried) ignore attempts made before the form's `since`, take up to REOPEN_SHARE[tier] of each tier's
-     slots first, and their prompt names the form.
+     tried) ignore attempts made before the form's `since` (the newest form's, when several apply), take
+     up to REOPEN_SHARE[tier] of each tier's slots first, and their prompt names the form.
      Routing (the cost rule; measurements in docs/LESSONS.md "One-turn screen"):
        screen   - every function <= SCREEN_MAX_WORDS words that no tier has tried: ONE Haiku turn without
                   tools writes SCREEN_K candidate sources (~$0.007, ~25 s). run_round compiles them
@@ -624,7 +624,8 @@ def cmd_next(a):
     pool = near_misses(status)
     forms = reopen_forms()
     hits = form_hits([t["addr"] for t in pool], forms)
-    reopened = {x: min(forms[f]["since"] for f in fs) for x, fs in hits.items()}
+    # the newest form decides: an attempt made after an older form but before a newer one still lacked it
+    reopened = {x: max(forms[f]["since"] for f in fs) for x, fs in hits.items()}
     tried, skip = attempted(reopened), parked()
     best = structscore.best_structures(status, progress=True)
     fan = shape_fanout(sorted({t["addr"] for t in pool} | set(best)))

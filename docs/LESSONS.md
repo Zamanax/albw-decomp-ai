@@ -1244,6 +1244,16 @@ OP=6 (it hoists `&m10` into r5 before the `setMul`; no spelling found). Reopened
 `sead-vec3-copy-temp` (131 addresses, explicit list). The unary `-v` builds a temp and copies it
 memberwise (`vstr s0` + `ldr/str`), which is the operator= again.
 
+First retry of the reopened set: 18 one-turn screens (≤ 60 words, best OP 3-30) and 8 Haiku agents,
+0 matches. The agents used `SeadVec3`, but each target kept its own slot-layout or register-order
+difference: 0014D7F4 still wants a 0x40 frame with *no* slot reused (003879AC reuses its first `o`
+slot), 004E635C/0052E334 have larger frames than any spelling gave, 001DA348's sin/cos pair layout
+is open. So the operator= form is necessary but not sufficient; the next step is the slot-reuse rule
+(when an operator's `o` slot is reused and when every temporary keeps its own), proven on 0014D7F4.
+(That round also exposed a planner bug: `next` used the *oldest* `since` among a function's forms,
+so functions hitting both `vec3-value-operators` and this form were never reopened; it now uses
+the newest.)
+
 ## Large-function families: what was still free (2026-11-17)
 
 Remaining work by size, measured: 81 % of the unmatched bytes sit in functions above 80 words
