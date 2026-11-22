@@ -132,6 +132,13 @@ Prefer an honest miss. Never claim a match you did not see printed.
   plus explicit `setSub`/`setAdd` calls. Operator temporaries share a stack slot once dead, which is
   the game's frame size (`sub sp,#0x18`, not `#0x28`); never redefine the operators locally. 004997A0
   also needed `-O3` without `-Otime`.
+- **When a helper's result is copied (`ldm`/`stm`) from its output slot into another stack slot**
+  before the next `setAdd`/`setSub`/`setMul` reads it, the vectors are `SeadVec3` (`vec3.h`):
+  sead::Vector3f's user-provided `operator=` stops armcc building the operator result in place.
+  Declare the fields/locals as `SeadVec3` and write the plain expression: `m58 = m94 * m7c + *pos;`
+  is 003879AC exactly (`setMul` → sp+0xc, copy to sp, `setAdd` back into sp+0xc). It also has
+  unary `-v` (temp built, then copied memberwise: `vstr` + `ldr/str`). A destination copied with a
+  plain `ldm/stm` (`*out = *in`) stays `Vec3`. Never add `operator=` to `Vec3` (50 matched users break).
 - Families with matched examples in `src/work8/auto/`: static-TypeInfo dynamic_cast
   (`func_0022FA4C.c`, `func_00125FE4.c` — `dynCast(a) = isDerived(a) ? a : 0`), sead RTTI root
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`

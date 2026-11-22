@@ -50886,6 +50886,13 @@
 "path": "src/work7/ds7/hid_empty.cpp",
 "status": "honest"
 },
+"003879AC": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003879AC.cpp",
+"status": "honest"
+},
 "00387FEC": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",

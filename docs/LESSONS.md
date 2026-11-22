@@ -1223,6 +1223,27 @@ MemUtil::copy (0x10E3C4) callers are a real gap (integer code: 21 % matched at 4
 55 %), but they are wide/narrow string copies that the `sead-*` reopen forms already cover (e.g.
 00320DB0 reaches OP=2 with a local `WSafe` instead of the header's `WSafeString`).
 
+## Vec3 operators that copy their result: sead's user-provided operator= (2026-11-22)
+
+Haiku misses at 41-80 words (rounds 65-67) kept reporting a *larger* frame than their operator
+spellings gave (0014D7F4 0x40 vs 0x24, 0014D8A4 0x40 vs 0x30, 001BE128 0x5c vs 0x50). The signature
+in the bytes: a helper's result is copied with `ldm`/`stm` from its output slot into a second stack
+slot, and the next helper reads that copy. Scan of functions ≤ 200 words: **7 matched against 132
+unmatched** (5 %); the broader "result copied anywhere" pattern is mostly plain `d = t` and is no gap.
+
+3DS sead ([3dsdecomp/sead](https://github.com/3dsdecomp/sead) `seadVector.h`/`.hpp`, read as
+documentation only) gives `Vector3` a user-declared `operator=` (memberwise via
+`Vector3CalcCtr::set`), and its friend operators build `Vector3 o; ...; return o;`. In armcc 4.1 a
+user-provided copy assignment alone switches off building the result in place; a base class or the
+`Vector3CalcCtr` indirection changes nothing (003879AC: plain struct 15/21, any variant with
+`operator=` 20/20). Giving `Vec3` itself that operator breaks 50 of its 745 matched users (`setCopy`'s
+split copy and plain struct copies change), so both forms exist: `vec3.h` gained `SeadVec3 : Vec3`
+(operator=, `+ - *`, unary `-`, `+= -= *=`). Proven on 003879AC (`m58 = m94 * m7c + *pos;`);
+001DA348's copy-temp tail reproduces exactly (its sin/cos local layout is still off), 004363B4 is at
+OP=6 (it hoists `&m10` into r5 before the `setMul`; no spelling found). Reopened as
+`sead-vec3-copy-temp` (131 addresses, explicit list). The unary `-v` builds a temp and copies it
+memberwise (`vstr s0` + `ldr/str`), which is the operator= again.
+
 ## Large-function families: what was still free (2026-11-17)
 
 Remaining work by size, measured: 81 % of the unmatched bytes sit in functions above 80 words

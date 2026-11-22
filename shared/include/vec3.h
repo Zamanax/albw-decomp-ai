@@ -79,4 +79,27 @@ inline Vec3 operator+(const Vec3& a, const Vec3& b) { Vec3 r; r.setAdd(a, b); re
 inline Vec3 operator-(const Vec3& a, const Vec3& b) { Vec3 r; r.setSub(a, b); return r; }
 inline Vec3 operator*(const Vec3& a, float s) { Vec3 r; r.setMul(a, s); return r; }
 
+
+// sead::Vector3f's own form: the same vector with a user-provided copy assignment (sead's
+// `Vector3& operator=(const Vector3&)`, memberwise through Vector3CalcCtr::set). That operator is
+// what stops armcc from building an operator's result in place: each `a + b` / `a - b` / `a * s`
+// constructs its local `o` in one stack slot and then copies it (ldm/stm) into the caller's
+// temporary, and every link of a chain keeps its own slot. Proven on 003879AC
+// (`m58 = m94 * m7c + *pos`: setMul into sp+0xc, copied to sp, setAdd back into sp+0xc). Vec3
+// itself must keep the trivial assignment: giving it this operator= breaks 50 of its 745 matched
+// users (plain copies and setCopy change shape), so the game has both forms. Fields and locals the
+// chained math runs on are declared SeadVec3; mixed SeadVec3/Vec3 operands pick the Vec3 operators.
+struct SeadVec3 : Vec3 {
+    SeadVec3() {}
+    SeadVec3(float a, float b, float c) : Vec3(a, b, c) {}
+    SeadVec3& operator=(const SeadVec3& o) { x = o.x; y = o.y; z = o.z; return *this; }
+    SeadVec3& operator+=(const Vec3& o) { setAdd(*this, o); return *this; }
+    SeadVec3& operator-=(const Vec3& o) { setSub(*this, o); return *this; }
+    SeadVec3& operator*=(float s) { setMul(*this, s); return *this; }
+    SeadVec3 operator-() const { return SeadVec3(-x, -y, -z); }
+};
+
+inline SeadVec3 operator+(const SeadVec3& a, const SeadVec3& b) { SeadVec3 o; o.setAdd(a, b); return o; }
+inline SeadVec3 operator-(const SeadVec3& a, const SeadVec3& b) { SeadVec3 o; o.setSub(a, b); return o; }
+inline SeadVec3 operator*(const SeadVec3& a, float s) { SeadVec3 o; o.setMul(a, s); return o; }
 #endif
