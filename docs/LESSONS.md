@@ -1307,6 +1307,28 @@ value got (stores separated by calls, so the STR offsets name the values). No ga
   which callee-saved register, scored by fn.py's register diff) is the next thing to build; source
   reordering alone does not reach these. 002327BC is the test case for it (one REG left, 79 %).
 
+## The type-node dynamic cast is a header form (2026-11-22)
+
+50 functions inline a dynamic cast over a 4-byte type node: call the virtual `getTypeNode` (vtable slot
++8), then walk the parent chain (`ldr rA,[rA]`) comparing against the target's static node, returning
+the object itself or null. `shared/include/typenode.h` now has `TypeNodeObject`, `TYPENODE(node)` and
+`typeNodeCast<T*>(obj)`; proven on 002327BC, 002326C0, 00368300, 00367E18, 003693A0 (all 100 %, 0
+MISMATCH). Two rules from the register study are what make it match:
+
+- the cast's null path passes through a **local initialised to 0**, so NULL is hoisted into a
+  callee-saved register before the object test (`mov rZ,#0` sits before `beq null_path`);
+- **aliasing the caller's address argument to a local declared first** moves it up a register
+  (`Holder* hh = h;` puts h in r5, not r6).
+
+The remaining 45 users are reopened in `shared/reopen.json` under `typenode-cast`, with a new marker
+kind **`addrs`** (an explicit address list) because the walk's instructions are too generic for a
+`insn` mask — campaign.py's `form_hits` now honours it.
+
+Same day, the 0x70A570 unit was finished by a subagent before it hit a rate limit: 7 of its 8 members
+match in `logs/tu/chains/chain_70A570_v2.cpp` (004FA000, 0058A7F4, 0058A378, 0058ADE0, 004F790C,
+004F6F14, 004F95A0). 004FC994 is at 142/164, OP=0 REG=17 MOVED=3 — a per-function register/order problem
+now that the layout is right.
+
 ## Static initializers, second pass: forms the first generator missed (2026-11-17)
 
 `tools/stigen.py` reads a static initializer from its own code and emits the globals in store order

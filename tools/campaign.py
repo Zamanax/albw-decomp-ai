@@ -199,9 +199,13 @@ def reopen_forms():
 
 
 def form_hits(addrs, forms):
-    """addr -> sorted names of the reopen forms whose markers occur in the function's words."""
+    """addr -> sorted names of the reopen forms whose markers occur in the function's words.
+
+    Marker kinds: `words`, `calls`, `vtable_slot`, `insn` and `addrs` (an explicit address list, for a
+    form whose inlined code has no distinguishing word, call or instruction — e.g. the type-node walk)."""
     num = lambda x: int(x, 16) if isinstance(x, str) else x
     by_word, by_call, insn = collections.defaultdict(set), collections.defaultdict(set), []
+    explicit = collections.defaultdict(set)
     slots = [(name, num(o), num(v)) for name, f in forms.items() for o, v in f.get("vtable_slot", [])]
     if slots:   # a literal pointing at an ro vtable with that slot value
         end = fn.RA + fn.RS
@@ -214,11 +218,13 @@ def form_hits(addrs, forms):
             by_word[num(w)].add(name)
         for c in f.get("calls", []):
             by_call[num(c)].add(name)
+        for x in f.get("addrs", []):
+            explicit[num(x)].add(name)
         insn += [(name, num(m), num(v)) for m, v in f.get("insn", [])]
     out = {}
     for a in addrs:
         s, e = fn.func_range(int(a, 16))
-        got = set()
+        got = set(explicit.get(num(a), set()))
         for x in range(s, e, 4):
             w = fn.rd32(x)
             got |= by_word.get(w, set())

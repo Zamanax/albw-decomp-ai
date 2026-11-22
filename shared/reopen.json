@@ -1,5 +1,5 @@
 {
- "_doc": "Shared-header forms that became byte-proven after functions containing them were already tried. campaign.py next reads this: an unmatched function containing a form's markers ignores every attempt made before `since`, ranks ahead of the regular pool (capped at REOPEN_SHARE of each tier's slots), and its prompt names the form. Marker kinds: `vtable_slot` [offset, value] (a literal pointing at an ro vtable whose word at that offset is value), `words` (literal-pool values), `calls` (bl/b targets), `insn` [mask, value] (instruction encodings). Add an entry whenever a header gains a proven form; remove it once its functions are worked through.",
+ "_doc": "Shared-header forms that became byte-proven after functions containing them were already tried. campaign.py next reads this: an unmatched function containing a form's markers ignores every attempt made before `since`, ranks ahead of the regular pool (capped at REOPEN_SHARE of each tier's slots), and its prompt names the form. Marker kinds: `vtable_slot` [offset, value] (a literal pointing at an ro vtable whose word at that offset is value), `words` (literal-pool values), `calls` (bl/b targets), `insn` [mask, value] (instruction encodings), `addrs` (an explicit address list, for a form whose inlined code has no distinguishing word, call or instruction). Add an entry whenever a header gains a proven form; remove it once its functions are worked through.",
  "sead-string-tree": {
   "since": "2026-11-05 23:52",
   "header": "sead_string.h",
@@ -37,5 +37,11 @@
   "header": "vec3.h",
   "hint": "does vector math through Vec3::setAdd/setSub/setMul (0x115C54/0x115C70/0x115D70): vec3.h now has the value operators `a + b`, `a - b`, `a * s` and `v *= s`. Write the math with them (`Vec3 d = a - s; d *= t; return s + d;`), not named result locals plus setSub/setAdd calls: the operator temporaries share stack slots, which gives the game's frame size. Do not redefine the operators locally.",
   "calls": ["0x00115C54", "0x00115C70", "0x00115D70"]
+ },
+ "typenode-cast": {
+  "since": "2026-11-22 12:30",
+  "header": "typenode.h",
+  "hint": "inlines the type-node dynamic cast: calls the virtual getTypeNode (vtable slot +8) and walks the parent chain comparing against a static TypeNode. typenode.h has TypeNodeObject, TYPENODE(node) and typeNodeCast<T*>(obj); the cast returns the object itself and its null result passes through a local initialised to 0, which is what keeps NULL in a callee-saved register. Also aliasing an address parameter to a local declared first keeps the earlier register. Proven on 002327BC, 002326C0, 00368300, 00367E18, 003693A0.",
+  "addrs": ["00199554", "0034BA3C", "003A0D7C", "004217C0", "00425D24", "004382D4", "0043BA8C", "0043E278", "00441330", "00441934", "00442EAC", "00443A4C", "004445BC", "0044BB94", "004512A8", "004530E4", "0045B450", "0045BB5C", "0045E644", "00461310", "00462CB0", "004647C8", "00468DB8", "0046A86C", "0046C0FC", "0046CEB4", "0046D150", "0046E07C", "0046E814", "0046F3BC", "00472E68", "00473AD4", "00474334", "00475CC4", "004764BC", "0047D690", "0047DA54", "00481858", "00483908", "004847A0", "004864E8", "00486984", "00487F34", "00488DC8", "004A3CC8"]
  }
 }
