@@ -153,11 +153,11 @@ def campaign_data():
         targets = []
         for task in p.get("tasks", []):
             for a in task["addrs"]:
-                rep = campaign.reported(a)
+                rep = campaign.reported(a)    # None, or MATCH / MISS / TIMEOUT / BAD ...
                 n, b = campaign.progress(a, task.get("log_base", {}).get(a))
                 targets.append(dict(addr=a, tier=task.get("tier"), checks=n,
                                     best=None if not b else ("MATCH" if b.get("match") else "%.1f%%" % b.get("pct", 0)),
-                                    reported=(rep or {}).get("status") if isinstance(rep, dict) else (bool(rep) or None)))
+                                    reported=rep))
         plan = dict(round=p.get("round"), created=p.get("created"), agents=len(p.get("tasks", [])),
                     harvested=bool(p.get("harvested")), targets=targets)
     return tiers, rounds, recent, plan
