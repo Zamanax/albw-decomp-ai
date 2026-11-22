@@ -44,10 +44,10 @@ differ in register allocation or store order.
 |---|---|
 | `sead_string.h`, `sead_heap.h` | `SafeString` (global, `sead::` alias; default ctor = cNullChar, plus `cstr`/`calcLength`/`compare`), `BufferedSafeString` (ctor/copy/`formatV`), `FixedSafeStringBase<N>` → `FixedSafeString<N>` (three-level tree, byte-proven), `FormatFixedSafeString<N>`, `NoThrow`/`nothrow_t`, engine `operator new`/`new[]` (Heap-like tag, 0x10BAB4/0x10CEE0) |
 | `vec3.h`, `sead_math.h` | `Vec3` (both copy helpers: `set` memberwise, `setCopy` = `*this = o`), `Vec2`, `Vec4`, `Mtx33/34`, `Angle`, `SinCosSample`, `sinCos` |
-| `statemgr.h`, `actor.h`, `model.h` | `StateMgrT<Owner>` (`exec` vs `execute` forms, `StateMgrBase`), `ActorBase`/`ActorBaseExt`/`ActorBaseA/B`, `Npc`, `EnemyBase`, `Delegate<T>`, `ActorParam`, `Model` |
+| `statemgr.h`, `actor.h`, `model.h` | `StateMgrT<Owner>` (`exec` vs `execute` forms, `init(owner, n)` state-table build, `StateMgrBase`), `ActorBase`/`ActorBaseExt`/`ActorBaseA/B`, `Npc`, `EnemyBase`, `Delegate<T>`, `ActorParam`, `Model` |
 | `static_init.h`, `sead_container.h` | `PtrCnt`/`PtrList*`/`Factory` (+ `…Named`, `…Assign` forms), `Id64`, `ListNode`/`ListImpl`, `PtrArray`, `Buffer<T>` |
 | `flags.h`, `timer.h` | `Flag32`/`Flag16`/`Flag8` (`BitFlag*` aliases), `Timer` |
-| `sead_rtti.h` | `TypeInfo`, `ObjVt<T>`, `RttiRoot`, `SEAD_RTTI_BASE` |
+| `sead_rtti.h`, `typenode.h` | `TypeInfo`, `ObjVt<T>`, `RttiRoot`, `SEAD_RTTI_BASE`; type-node cast: `TypeNodeObject`, `TYPENODE(node)`, `typeNodeCast<T*>(obj)` |
 | `cp15.h`, `stdarg.h`, `albw_types.h` | system registers, varargs for `...` functions, integer/float typedefs |
 
 If the interaction is different from the library form (the same helper exists in two shapes in the
@@ -137,6 +137,16 @@ Prefer an honest miss. Never claim a match you did not see printed.
   (`func_0051E33C.cpp`), singleton getters (`func_0010D5C8.cpp`), state-machine `execute()`
   (`func_0017A6D8.cpp`, `func_00311DE0.cpp`), static initializers (`func_005B8944.cpp`), destructor
   chains (`func_0024673C.cpp`, `func_00373A60.cpp`).
+- Type-node dynamic cast (virtual `getTypeNode` at vtable +8, then a `ldr rA,[rA]; cmp #0; bne` walk
+  of the parent chain against a static node): `#include "typenode.h"`, give the class
+  `TYPENODE(data_XXXXXXXX)` and write `T* t = typeNodeCast<T*>(obj);`, then use `t`. Examples:
+  `src/work8/auto/func_002327BC.cpp`, `func_002326C0.cpp`, `func_003693A0.cpp`. Store the cast's
+  result fields through a member helper taking the values as parameters (`t->attach(this, true)`).
+- A caller's pointer argument one callee-saved register too late (r6 where the game has r5): alias it
+  to a local declared first in the body (`Holder* hh = h;`) and use the local everywhere.
+- A constant global initialised through `f2l`/a cast that the game keeps in a register: give it a
+  class with a parameter constructor (`struct F2l { u32 v; F2l(f32 f) : v((u32)f2l(f)) {} };`) —
+  a parameter keeps the value where the call left it; a plain global rematerialises it.
 
 ## Boundaries
 
