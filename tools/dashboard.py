@@ -110,8 +110,9 @@ def history():
     return points
 
 
-def daily(points, days=30):
-    """Honest + hack totals at the end of each of the last `days` days (local time)."""
+def daily(points, days=120):
+    """Honest + hack totals at the end of each of the last `days` days (local time), starting no earlier
+    than the first commit (the initial import is a total, not a day's gain)."""
     by_day = collections.OrderedDict()
     h = k = 0
     for t, dh, dk in points:
@@ -120,11 +121,11 @@ def daily(points, days=30):
         by_day[datetime.date.fromtimestamp(t)] = (h, k)
     today = datetime.date.today()
     out, last = [], (0, 0)
-    first = today - datetime.timedelta(days=days - 1)
+    first = max(today - datetime.timedelta(days=days - 1), min(by_day, default=today))
     for d, v in by_day.items():
         if d < first:
             last = v
-    for i in range(days):
+    for i in range((today - first).days + 1):
         d = first + datetime.timedelta(days=i)
         last = by_day.get(d, last)
         out.append(dict(day=d.isoformat(), honest=last[0], hack=last[1]))
@@ -143,7 +144,7 @@ def campaign_data():
             r["attempts"] += 1
             if e["outcome"] == "MATCH":
                 r[e["tier"]] += 1
-    rounds = [dict(round=n, **rounds[n]) for n in sorted(rounds)[-24:]]
+    rounds = [dict(round=n, **rounds[n]) for n in sorted(rounds)[-80:]]
     recent = [dict(addr=e["addr"], tier=e["tier"], round=e.get("round"), outcome=e["outcome"],
                    words=e.get("words", ""), t=e.get("t", "")) for e in led[-12:]][::-1]
     plan = None
