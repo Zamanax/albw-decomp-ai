@@ -163,18 +163,19 @@ def plan_data(led):
             n, b = campaign.progress(a, task.get("log_base", {}).get(a))
             rp = os.path.join(campaign.MANUAL, a, "REPORT.json")
             try:
-                rep = json.load(open(rp)) if os.path.exists(rp) else None
+                rep = json.load(open(rp)) if os.path.exists(rp) else {}
             except ValueError:
-                rep = {"status": "BAD"}
+                rep = {}
+            rep = rep if isinstance(rep, dict) else {}
             size = (task.get("sizes") or {}).get(a) or [None, None]
             targets.append(dict(
                 addr=a, task=task.get("name"), tier=task.get("tier"), model=task.get("model"),
                 words=size[0], op=size[1], checks=n,
                 best_pct=None if not b else (100.0 if b.get("match") else round(b.get("pct", 0), 1)),
                 best_match=bool(b and b.get("match")),
-                report=campaign.reported(a), report_words=(rep or {}).get("words"),
-                report_checks=(rep or {}).get("checks_used", (rep or {}).get("checks")),
-                identity=(rep or {}).get("identity"), note=((rep or {}).get("note") or "")[:400],
+                report=campaign.reported(a), report_words=report_words(rep.get("words")),
+                report_checks=text(rep.get("checks_used", rep.get("checks"))),
+                identity=text(rep.get("identity")), note=(text(rep.get("note")) or "")[:400],
                 outcome=outcome.get(a)))
     first = (p.get("tasks") or [{}])[0]
     budget = re.search(r"at most (\d+) oracle checks", first.get("prompt") or "")
@@ -184,6 +185,20 @@ def plan_data(led):
                 batch=p.get("batch"), soft_s=first.get("soft_s"), hard_s=first.get("hard_s"),
                 budget=int(budget.group(1)) if budget else None,
                 agents=len(p.get("tasks", [])), targets=targets)
+
+
+def text(v):
+    """A REPORT.json field as display text: agents write free-form values (numbers, lists, objects)."""
+    if v is None or v == "":
+        return None
+    return v if isinstance(v, str) else json.dumps(v)
+
+
+def report_words(v):
+    """`words` is usually "best/total"; some agents write a number or {"best": n, "total": m, ...}."""
+    if isinstance(v, dict) and "best" in v and "total" in v:
+        return "%s/%s" % (v["best"], v["total"])
+    return text(v)
 
 
 def count_doc(rel):
