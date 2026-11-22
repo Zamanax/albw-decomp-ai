@@ -1362,6 +1362,15 @@ neutral: 12/12 matched members of the 0x672xxx unit re-verify inside it.
   unit written whole. Namespaces cannot help when the anchor is a *global*: two sources must then name
   the same definition, which needs a hand-written unit (the anchored-Id64 static initializers are
   probably this, untested).
+- **armcc's `.data` order for one unit** (worked out on the 0x70A570 chain, 4 of 8 members matched
+  in one file, `src/work8/auto/func_004FA000.cpp`): explicitly initialised variables first, then the
+  function-local statics of file-scope functions in definition order (guard, then the object when it
+  is ≤ 8 bytes; larger objects go to `.bss`), then those of member functions (by class, declaration
+  order), then zero- or dynamically-initialised globals. armlink orders *code* by section name, so a
+  unit's functions need not be adjacent in the binary; the `.data` order is the source order. The
+  non-matching members stay in the file as real reconstructions, because their statics set the
+  offsets of the matching ones. The 0x709D28 chain (4 members) stayed at < 5 %: its functions are
+  large and their bodies, not the layout, are the problem.
 
 ## sead audit: the string family was the missing form (2026-11-05)
 
