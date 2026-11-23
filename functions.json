@@ -54989,6 +54989,13 @@
 "path": "src/work7/gpt26/func_003BA210.cpp",
 "status": "honest"
 },
+"003BA244": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_003BA244.cpp",
+"status": "honest"
+},
 "003BA330": {
 "cc": "4.1/b1049",
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
@@ -70991,6 +70998,13 @@
 "flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O3 -Otime --split_sections",
 "hack_reasons": [],
 "path": "src/work5/templater/gen/func_0048BD2C.cpp",
+"status": "honest"
+},
+"0048BDDC": {
+"cc": "4.1/b1049",
+"flags": "--cpu=MPCore --fpmode=fast --apcs=/interwork -O2 -Ono_tailcall --split_sections",
+"hack_reasons": [],
+"path": "src/work8/auto/func_0048BDDC.c",
 "status": "honest"
 },
 "0048BFBC": {
