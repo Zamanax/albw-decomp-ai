@@ -37,6 +37,9 @@ A round is: free work first, then a paid plan, then a harvest. run_loop chains r
                   is within SCREEN_PASS structural OPs (the agent matches ~20% of those, ~8% at OP 3-5);
                   --haiku-rest adds the functions that failed the gate, up to --haiku-rest-max words
                   (default 40; ~13% for the agent at <= 40, ~5% estimated at 41-80);
+       haiku2   - off by default (--haiku2 N): ONE second Haiku agent for a function the Haiku agent
+                  missed (<= HAIKU_MAX_WORDS words), starting from the best source so far, with the
+                  previous attempt's files named in the prompt; ranked by the Haiku hit model (OP first);
        deepseek - off by default (--deepseek N, hard cap MAX_DEEPSEEK per round), one target per agent,
                   only for functions Haiku already missed or that are too large for Haiku, with a start
                   at most DEEPSEEK_MAX_OP structural OPs away (~$0.10-0.30/agent).
@@ -102,9 +105,10 @@ CAND_FILE = os.path.join(ROOT, "logs", "triage", "unindexed_candidate.txt")
 
 MODELS = {"screen": "anthropic/claude-haiku-5-5",
           "haiku": "anthropic/claude-haiku-5-5",
+          "haiku2": "anthropic/claude-haiku-5-5",
           "deepseek": "openrouter/deepseek/deepseek-v4.1-flash-1017"}
-TIERS = ("screen", "haiku", "deepseek")   # cheapest first
-POOL = {"screen": "anthropic", "haiku": "anthropic", "deepseek": "openrouter"}   # run_round's concurrency windows
+TIERS = ("screen", "haiku", "haiku2", "deepseek")   # cheapest first
+POOL = {"screen": "anthropic", "haiku": "anthropic", "haiku2": "anthropic", "deepseek": "openrouter"}   # run_round's concurrency windows
 MAX_DEEPSEEK = 4          # hard cap per round (cost + rate limits)
 # Measured on rounds 1-14 (505 Haiku, 42 DeepSeek targets): Haiku matched 33-37% of functions <= 40 words,
 # 18% at 41-80 and 6% (4/70) at 81-160; 27% as an agent's only target but 15% with 2 and 7% with 3
@@ -140,15 +144,15 @@ BRIEF_SECTIONS = ("Shared library", "Done means", "Honesty", "Proven constructs"
 # Size is the signal; reopened status only matters at 41-80 (a retry is harder than a first try).
 # The previous 100%-reopened share was calibrated on rounds 17-18, when the reopened pool happened to
 # be the <=40 band; the round-22 forms reopened 41-80/81-160 targets, which the table says are 0-5%.
-REOPEN_SHARE = {"screen": 0.0, "haiku": 0.25, "deepseek": 0.5}
+REOPEN_SHARE = {"screen": 0.0, "haiku": 0.25, "haiku2": 0.25, "deepseek": 0.5}
 REOPEN_MAX_WORDS = 80    # 81-160 reopened: 0/36 measured; the regular Haiku cap is the same
-BUDGET = {"haiku": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
+BUDGET = {"haiku": (40, 12), "haiku2": (40, 12), "deepseek": (60, 15)}   # (max checks per target, stop after N stale)
 # (wrap-up message, hard stop) in seconds of agent wall clock. Measured over 630 targets of rounds 1-13
 # (check_log.jsonl): Haiku's first match comes at p50 0.3 / p90 1.5 / max 20 min after its first check,
 # DeepSeek's at p50 5 / max 20 min, while the slowest agents ran 40-70 min - a tail that held up whole
 # rounds and produced nothing.
 # A screen is one turn: p50 24 s, p90 48 s over 211 turns. It has no wrap-up (soft = hard).
-TIME = {"screen": (240, 240), "haiku": (900, 1200), "deepseek": (1500, 2100)}
+TIME = {"screen": (240, 240), "haiku": (900, 1200), "haiku2": (900, 1200), "deepseek": (1500, 2100)}
 WRAP_UP = ("WRAP UP: your time budget is used. Stop exploring now. Write logs/manual/<ADDR>/REPORT.json for "
            "every target (MATCH only if fn.py check printed RESULT: MATCH and IDENTITY ... 0 MISMATCH for that "
            "file and flags, otherwise MISS with your best words), then reply DONE. You will be stopped in %d minutes.")
@@ -463,7 +467,8 @@ def task_prompt(rnd, tier, targets, retry):
         for f in t.get("forms", []):
             lines.append("  This function %s" % forms[f]["hint"])
     if retry:
-        lines += ["", "A smaller model already tried these and missed: read logs/manual/<ADDR>/ first "
+        who = "A previous Haiku agent" if tier == "haiku2" else "A smaller model"
+        lines += ["", who + " already tried these and missed: read logs/manual/<ADDR>/ first "
                   "(REPORT.prev.json, best.*, *.txt check logs) and do not repeat its variants; question "
                   "the twin and the signature, re-derive from `fn.py show`."]
     return "\n".join(lines)
@@ -678,9 +683,12 @@ def cmd_next(a):
         # a reopened target's best source predates the header form, so its structural OP says nothing
         # about how close it is now: the size cap is raised and the DeepSeek OP gate does not apply
         if "haiku" in tiers or t["total"] > (REOPEN_MAX_WORDS if t["forms"] else HAIKU_MAX_WORDS):
-            if not t["forms"] and t["n_op"] > DEEPSEEK_MAX_OP:
+            if a.haiku2 and "haiku" in tiers and "haiku2" not in tiers and t["total"] <= HAIKU_MAX_WORDS:
+                tier = "haiku2"
+            elif not t["forms"] and t["n_op"] > DEEPSEEK_MAX_OP:
                 continue
-            tier = "deepseek"
+            else:
+                tier = "deepseek"
         elif "screen" not in tiers:
             if t["total"] > SCREEN_MAX_WORDS:
                 continue
@@ -689,7 +697,8 @@ def cmd_next(a):
             tier = "haiku"
         else:
             continue
-        t["p"] = p_hit(tier, t["total"], t["n_op"])
+        # haiku2 has no history of its own yet: rank it with the first agent's model (size x OP)
+        t["p"] = p_hit("haiku" if tier == "haiku2" else tier, t["total"], t["n_op"])
         t["ev"] = t["fanout"] * t["p"]
         cands[tier].append(t)
 
@@ -714,8 +723,9 @@ def cmd_next(a):
     # Haiku: screened functions inside the SCREEN_PASS gate (--haiku-rest: also the <= 40-word ones outside
     # it, ~13% for the agent); REOPEN_SHARE caps the reopened retries at a quarter of the slots
     hk = pick(cands["haiku"], a.haiku, "haiku", a.haiku_regular)
+    h2 = pick(cands["haiku2"], a.haiku2, "haiku2", True)
     scr = pick(cands["screen"], a.screen, "screen", True)
-    planned = scr + hk + ds
+    planned = scr + hk + h2 + ds
     print("hit model (tier, words <= 20/40/80/160/more: matches/attempts): " + "  ".join(
         "%s %s %d/%d" % (k[0][:2], ("<=20", "<=40", "<=80", "<=160", ">160")[k[1]], m, n)
         for k, (m, n) in sorted(rates.items())))
@@ -742,6 +752,9 @@ def cmd_next(a):
             tasks.append(dict(name="c%s_hk_%s" % (tag, ch[0]["addr"]), tier="haiku", model=MODELS["haiku"],
                               addrs=[x["addr"] for x in ch], sizes=sizes(ch),
                               prompt=task_prompt(rnd, "haiku", ch, retry=False)))
+    for t in h2:
+        tasks.append(dict(name="c%s_h2_%s" % (tag, t["addr"]), tier="haiku2", model=MODELS["haiku2"],
+                          addrs=[t["addr"]], sizes=sizes([t]), prompt=task_prompt(rnd, "haiku2", [t], retry=True)))
     for t in scr:   # the prompt inlines CONTEXT.md, so it is written below, once that exists
         tasks.append(dict(name="c%s_sc_%s" % (tag, t["addr"]), tier="screen", model=MODELS["screen"],
                           addrs=[t["addr"]], sizes=sizes([t]),
@@ -780,8 +793,9 @@ def cmd_next(a):
     plan = dict(round=rnd, created=time.strftime("%Y-%m-%d %H:%M:%S"), batch=a.batch, tasks=tasks)
     json.dump(plan, open(PLAN, "w"), indent=1)
     json.dump(plan, open(os.path.join(CAMP, "plan_round%03d.json" % rnd), "w"), indent=1)
-    print("round %d plan: %d screens, %d haiku agents (%d functions), %d deepseek agents; family reach %d functions"
-          % (rnd, len(scr), sum(t["tier"] == "haiku" for t in tasks), len(hk), len(ds),
+    print("round %d plan: %d screens, %d haiku agents (%d functions), %d haiku2 agents, %d deepseek agents; "
+          "family reach %d functions"
+          % (rnd, len(scr), sum(t["tier"] == "haiku" for t in tasks), len(hk), len(h2), len(ds),
              sum(t["fanout"] for t in planned)))
     for t in ds:
         print("  deepseek 0x%s  %d/%d words  OP %d  p %.2f  family %d%s" % (
@@ -831,10 +845,10 @@ def run_round(spawn, log=print, poll=10, table_every=60):
     if late:   # their agents finished before an earlier run of this cell died: only the compile is left
         screen_reports(late)
     todo = [t for t in plan["tasks"] if not all(reported(x) for x in t["addrs"])]
-    queue = {tier: [t for t in todo if t["tier"] == tier] for tier in ("deepseek", "haiku", "screen")}
+    queue = {tier: [t for t in todo if t["tier"] == tier] for tier in ("deepseek", "haiku", "haiku2", "screen")}
     slots = {"openrouter": MAX_DEEPSEEK, "anthropic": plan.get("batch", 20)}
     total = {tier: len(q) for tier, q in queue.items()}
-    short = {"deepseek": "ds", "haiku": "hk", "screen": "sc"}
+    short = {"deepseek": "ds", "haiku": "hk", "haiku2": "h2", "screen": "sc"}
     done = collections.Counter()
     running, t_start, t_table = {}, time.time(), 0.0
     if screens:
@@ -939,7 +953,7 @@ def run_round(spawn, log=print, poll=10, table_every=60):
 
 
 def run_loop(spawn, log=print, rounds=0, screen=300, haiku=80, deepseek=0, haiku_rest=False, haiku_rest_max=40,
-             mutate_budget=1000):
+             mutate_budget=1000, haiku2=0):
     """Rounds with no model turn between them, from one omp Python eval cell (cell timeout 0):
     `campaign.run_loop(agent, log)`.
 
@@ -954,7 +968,7 @@ def run_loop(spawn, log=print, rounds=0, screen=300, haiku=80, deepseek=0, haiku
     n = 0
     while True:
         log("harvest:\n" + tail(tool("campaign.py", "harvest", "--commit"), 14))
-        args = ["--screen", screen, "--haiku", haiku, "--deepseek", deepseek] + (
+        args = ["--screen", screen, "--haiku", haiku, "--haiku2", haiku2, "--deepseek", deepseek] + (
             ["--haiku-rest", "--haiku-rest-max", haiku_rest_max] if haiku_rest else [])
         log("next:\n" + tail(tool("campaign.py", "next", *args), 8))
         plan = json.load(open(PLAN))
@@ -1080,8 +1094,8 @@ def cmd_harvest(a):
     pending = run(["git", "status", "--porcelain", "functions.json", "src/work8/auto"]).strip()
     if a.commit and (total or pending) and clean:
         run(["git", "add", "functions.json", "src/work8/auto", "shared/construct_exceptions.json"])
-        msg = "Campaign round %d: %d matches (screen %d, haiku %d, deepseek %d, famclone %d)%s" % (
-            rnd, total, got["screen"], got["haiku"], got["deepseek"], cloned,
+        msg = "Campaign round %d: %d matches (screen %d, haiku %d, haiku2 %d, deepseek %d, famclone %d)%s" % (
+            rnd, total, got["screen"], got["haiku"], got["haiku2"], got["deepseek"], cloned,
             " + pending registrations (mutator)" if pending and not total else "")
         body = "Registered via tools/campaign.py harvest (worklist.py register re-verifies each: " \
                "RESULT: MATCH, IDENTITY 0 MISMATCH, forbidden-construct scan)."
@@ -1133,6 +1147,8 @@ def main():
                    help="also plan the screened functions outside the gate, up to --haiku-rest-max words")
     n.add_argument("--haiku-rest-max", type=int, default=SCREEN_PASS[0][0],
                    help="word cap for --haiku-rest (default %(default)s: ~13%% for the agent; 41-80 ~5%%)")
+    n.add_argument("--haiku2", type=int, default=0,
+                   help="second Haiku agents for functions <= %d words the Haiku agent missed" % HAIKU_MAX_WORDS)
     n.add_argument("--deepseek", type=int, default=0, help="DeepSeek agents (capped at %d)" % MAX_DEEPSEEK)
     n.add_argument("--batch", type=int, default=20, help="agents spawned concurrently")
     n.add_argument("--no-haiku-regular", dest="haiku_regular", action="store_false",
